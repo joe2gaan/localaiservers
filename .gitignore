@@ -1,0 +1,29 @@
+# Generated deploy outputs
+**/.deploy.defaults.env
+**/.deploy.docker-host.env
+**/.deploy.runtime.env
+**/.dockerignore
+**/Dockerfile
+**/docker-compose.deploy.yml
+**/docker-entrypoint.sh
+
+# Model, runtime, Docker, and build artifacts
+**/hf_cache/
+**/runtime/
+**/.d/
+**/.docker-data-root/
+**/.repro-docker-archives/
+**/.logs/
+**/build-test-dir/
+**/*.docker.tar
+**/*.docker.tar.sha256
+**/*.image.tar
+
+# Videos and large proof artifacts
+**/videos/
+**/*.mp4
+
+# Python/editor noise
+**/__pycache__/
+**/*.py[cod]
+.DS_Store
