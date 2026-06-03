@@ -37,6 +37,27 @@ AUTO_STAGE_MODEL=1 \
 ./deploy.sh
 ```
 
+The image entrypoint launches vLLM with the tested TP4/O3/Tree-LL command. The command inside the container is:
+
+```bash
+vllm serve Qwen/Qwen3.6-35B-A3B \
+  --served-model-name Qwen/Qwen3.6-35B-A3B \
+  --enable-auto-tool-choice \
+  --tool-call-parser hermes \
+  --dtype half \
+  --host 0.0.0.0 \
+  --port 8001 \
+  --tensor-parallel-size 4 \
+  --max-model-len 131072 \
+  --gpu-memory-utilization 0.95 \
+  --trust-remote-code \
+  --generation-config vllm \
+  -O=3 \
+  --async-scheduling \
+  --reasoning-parser qwen3 \
+  --language-model-only
+```
+
 The currently published Docker Hub image is the 29-layer runtime produced by clean source rebuilds on `.20` and `.30`. Both rebuilds produced the same source archive SHA-256: `aa34cb675f83ff6cade31cbbb357b1c31d793bee18da491f501d7c39fda3612a`. The public Docker Hub manifest digest is `sha256:f5e69ee127b766960e386e0e4eda8e26c399bd02f57c494847cb9a92ce04d8ac`, and the registry config digest matches the tested local image ID: `sha256:e45309183e6f35cae6fb8f9d8d6f016253f281a5e7187e1f11a57e5e28ef5e86`.
 
 After the vLLM service is ready:
