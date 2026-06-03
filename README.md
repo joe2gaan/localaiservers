@@ -16,11 +16,9 @@ Docker Hub digest: sha256:f5e69ee127b766960e386e0e4eda8e26c399bd02f57c494847cb9a
 
 ## Live TPS Video
 
-<video controls preload="metadata" width="100%" src="https://joe2gaan.github.io/localaiservers/qwen36-gfx906/media/qwen36_ref20_machiavelli_100_to_1000_tps_720p.mp4">
-  <a href="https://joe2gaan.github.io/localaiservers/qwen36-gfx906/media/">Watch the Qwen3.6-35B-A3B gfx906 live TPS video.</a>
-</video>
+[![Qwen3.6-35B-A3B gfx906 live TPS video preview](qwen36-gfx906/media/qwen36_ref20_machiavelli_100_to_1000_tps_preview.jpg)](https://joe2gaan.github.io/localaiservers/qwen36-gfx906/media/)
 
-Watch the playable GitHub Pages version: https://joe2gaan.github.io/localaiservers/qwen36-gfx906/media/
+Click the preview image to watch the playable GitHub Pages video: https://joe2gaan.github.io/localaiservers/qwen36-gfx906/media/
 
 Start here:
 
