@@ -3,6 +3,14 @@
 This bundle is a deploy package for the Qwen3.6-35B-A3B async TP4 C1 topk8 winner contract on `4x AMD Instinct MI50 32GB` hosts (`gfx906`).
 It is designed to run without host-specific paths and can be rebuilt from public sources plus the patch/config heredocs embedded in `deploy.sh`.
 
+## Live TPS Video
+
+<video controls preload="metadata" width="100%" src="https://joe2gaan.github.io/localaiservers/qwen36-gfx906/media/qwen36_ref20_machiavelli_100_to_1000_tps_720p.mp4">
+  <a href="https://joe2gaan.github.io/localaiservers/qwen36-gfx906/media/">Watch the Qwen3.6-35B-A3B gfx906 live TPS video.</a>
+</video>
+
+Watch the playable GitHub Pages version: https://joe2gaan.github.io/localaiservers/qwen36-gfx906/media/
+
 ## What this bundle contains
 
 - `deploy.sh` (single entrypoint script)
