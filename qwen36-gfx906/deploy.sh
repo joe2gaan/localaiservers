@@ -1008,6 +1008,45 @@ WORKDIR /tmp
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
+FROM vllm-gfx906-repro-build AS vllm-gfx906-repro-smallroot
+RUN rm -rf \
+    /opt/rocm-6.3.4/lib \
+    /opt/venv/lib/python3.12/site-packages/torch/lib \
+    /opt/venv/lib/python3.12/site-packages/nvidia \
+    /root/.triton
+
+FROM vllm-gfx906-repro-build AS vllm-gfx906-repro-rocm-lib-rest
+RUN rm -rf \
+    /opt/rocm-6.3.4/lib/hipblaslt \
+    /opt/rocm-6.3.4/lib/rocblas \
+    /opt/rocm-6.3.4/lib/rocfft \
+    /opt/rocm-6.3.4/lib/llvm \
+    /opt/rocm-6.3.4/lib/hipsparselt \
+    /opt/rocm-6.3.4/lib/librocsolver.so.0.3.60304 \
+    /opt/rocm-6.3.4/lib/librocsparse.so.1.0.60304 \
+    /opt/rocm-6.3.4/lib/librccl.so.1.0.60304 \
+    /opt/rocm-6.3.4/lib/libMIOpen.so.1.0.60304 \
+    /opt/rocm-6.3.4/lib/libdevice_gemm_operations.a \
+    /opt/rocm-6.3.4/lib/libdevice_conv_operations.a
+
+FROM vllm-gfx906-repro-build AS vllm-gfx906-repro-torch-lib-rest
+RUN rm -rf \
+    /opt/venv/lib/python3.12/site-packages/torch/lib/hipblaslt \
+    /opt/venv/lib/python3.12/site-packages/torch/lib/rocblas \
+    /opt/venv/lib/python3.12/site-packages/torch/lib/librocsolver.so \
+    /opt/venv/lib/python3.12/site-packages/torch/lib/librocsparse.so \
+    /opt/venv/lib/python3.12/site-packages/torch/lib/libmagma.so \
+    /opt/venv/lib/python3.12/site-packages/torch/lib/librccl.so \
+    /opt/venv/lib/python3.12/site-packages/torch/lib/aotriton.images \
+    /opt/venv/lib/python3.12/site-packages/torch/lib/libMIOpen.so \
+    /opt/venv/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so \
+    /opt/venv/lib/python3.12/site-packages/torch/lib/libtorch_hip.so
+
+FROM vllm-gfx906-repro-build AS vllm-gfx906-repro-triton-rest
+RUN rm -rf \
+    /root/.triton/llvm \
+    /root/.triton/nvidia
+
 FROM scratch AS vllm-gfx906-repro-runtime
 ARG SOURCE_DATE_EPOCH=1764000000
 ENV ROCM_VERSION=6.3.4
@@ -1041,7 +1080,39 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV LANG=C.UTF-8
 ENV LC_ALL=C.UTF-8
 ENV TZ=Etc/UTC
-COPY --from=vllm-gfx906-repro-build / /
+
+COPY --from=vllm-gfx906-repro-smallroot / /
+
+COPY --from=vllm-gfx906-repro-build /opt/rocm-6.3.4/lib/hipblaslt /opt/rocm-6.3.4/lib/hipblaslt
+COPY --from=vllm-gfx906-repro-build /opt/rocm-6.3.4/lib/rocblas /opt/rocm-6.3.4/lib/rocblas
+COPY --from=vllm-gfx906-repro-build /opt/rocm-6.3.4/lib/rocfft /opt/rocm-6.3.4/lib/rocfft
+COPY --from=vllm-gfx906-repro-build /opt/rocm-6.3.4/lib/llvm /opt/rocm-6.3.4/lib/llvm
+COPY --from=vllm-gfx906-repro-build /opt/rocm-6.3.4/lib/hipsparselt /opt/rocm-6.3.4/lib/hipsparselt
+COPY --from=vllm-gfx906-repro-build /opt/rocm-6.3.4/lib/librocsolver.so.0.3.60304 /opt/rocm-6.3.4/lib/librocsolver.so.0.3.60304
+COPY --from=vllm-gfx906-repro-build /opt/rocm-6.3.4/lib/librocsparse.so.1.0.60304 /opt/rocm-6.3.4/lib/librocsparse.so.1.0.60304
+COPY --from=vllm-gfx906-repro-build /opt/rocm-6.3.4/lib/librccl.so.1.0.60304 /opt/rocm-6.3.4/lib/librccl.so.1.0.60304
+COPY --from=vllm-gfx906-repro-build /opt/rocm-6.3.4/lib/libMIOpen.so.1.0.60304 /opt/rocm-6.3.4/lib/libMIOpen.so.1.0.60304
+COPY --from=vllm-gfx906-repro-build /opt/rocm-6.3.4/lib/libdevice_gemm_operations.a /opt/rocm-6.3.4/lib/libdevice_gemm_operations.a
+COPY --from=vllm-gfx906-repro-build /opt/rocm-6.3.4/lib/libdevice_conv_operations.a /opt/rocm-6.3.4/lib/libdevice_conv_operations.a
+COPY --from=vllm-gfx906-repro-rocm-lib-rest /opt/rocm-6.3.4/lib /opt/rocm-6.3.4/lib
+
+COPY --from=vllm-gfx906-repro-build /opt/venv/lib/python3.12/site-packages/torch/lib/hipblaslt /opt/venv/lib/python3.12/site-packages/torch/lib/hipblaslt
+COPY --from=vllm-gfx906-repro-build /opt/venv/lib/python3.12/site-packages/torch/lib/rocblas /opt/venv/lib/python3.12/site-packages/torch/lib/rocblas
+COPY --from=vllm-gfx906-repro-build /opt/venv/lib/python3.12/site-packages/torch/lib/librocsolver.so /opt/venv/lib/python3.12/site-packages/torch/lib/librocsolver.so
+COPY --from=vllm-gfx906-repro-build /opt/venv/lib/python3.12/site-packages/torch/lib/librocsparse.so /opt/venv/lib/python3.12/site-packages/torch/lib/librocsparse.so
+COPY --from=vllm-gfx906-repro-build /opt/venv/lib/python3.12/site-packages/torch/lib/libmagma.so /opt/venv/lib/python3.12/site-packages/torch/lib/libmagma.so
+COPY --from=vllm-gfx906-repro-build /opt/venv/lib/python3.12/site-packages/torch/lib/librccl.so /opt/venv/lib/python3.12/site-packages/torch/lib/librccl.so
+COPY --from=vllm-gfx906-repro-build /opt/venv/lib/python3.12/site-packages/torch/lib/aotriton.images /opt/venv/lib/python3.12/site-packages/torch/lib/aotriton.images
+COPY --from=vllm-gfx906-repro-build /opt/venv/lib/python3.12/site-packages/torch/lib/libMIOpen.so /opt/venv/lib/python3.12/site-packages/torch/lib/libMIOpen.so
+COPY --from=vllm-gfx906-repro-build /opt/venv/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so /opt/venv/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so
+COPY --from=vllm-gfx906-repro-build /opt/venv/lib/python3.12/site-packages/torch/lib/libtorch_hip.so /opt/venv/lib/python3.12/site-packages/torch/lib/libtorch_hip.so
+COPY --from=vllm-gfx906-repro-torch-lib-rest /opt/venv/lib/python3.12/site-packages/torch/lib /opt/venv/lib/python3.12/site-packages/torch/lib
+COPY --from=vllm-gfx906-repro-build /opt/venv/lib/python3.12/site-packages/nvidia /opt/venv/lib/python3.12/site-packages/nvidia
+
+COPY --from=vllm-gfx906-repro-build /root/.triton/llvm /root/.triton/llvm
+COPY --from=vllm-gfx906-repro-build /root/.triton/nvidia /root/.triton/nvidia
+COPY --from=vllm-gfx906-repro-triton-rest /root/.triton /root/.triton
+
 WORKDIR /tmp
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 DOCKERFILE
