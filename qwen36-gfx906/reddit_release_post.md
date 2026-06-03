@@ -76,16 +76,16 @@ The Docker Hub tag is runtime-only, not weight-bundled. That keeps the pull prac
 Currently published runtime tag:
 
 ```text
-joe2gaan/localaiservers:qwen36-gfx906-c1-topk8-runtime-archive-235f4780cbe1
+joe2gaan/localaiservers:qwen36-gfx906-c1-topk8-runtime-archive-aa34cb675f83
 ```
 
 Currently published Docker Hub manifest digest:
 
 ```text
-sha256:9e129d462e5d9efad9979e1e9eefc879319ba367107ba0c48ec4955bfe3079c7
+sha256:f5e69ee127b766960e386e0e4eda8e26c399bd02f57c494847cb9a92ce04d8ac
 ```
 
-The source runtime archive used for that published tag was verified at `235f4780cbe12b1168c42c11ae9368bee41de7fd9e4eb5ec7f4c3c1c3f7e59a5`; the Docker Hub image is the same runtime repacked into a 29-layer manifest so the registry can accept the large ROCm/PyTorch payload reliably. Current `deploy.sh` builds the split-layer runtime archive directly; clean rebuilds on `.20` and `.30` both produced `aa34cb675f83ff6cade31cbbb357b1c31d793bee18da491f501d7c39fda3612a`.
+The source runtime archive used for that published tag was verified at `aa34cb675f83ff6cade31cbbb357b1c31d793bee18da491f501d7c39fda3612a`; clean rebuilds on `.20` and `.30` produced the same archive hash. The Docker Hub registry config digest matches the tested local image ID: `sha256:e45309183e6f35cae6fb8f9d8d6f016253f281a5e7187e1f11a57e5e28ef5e86`.
 
 Source-build path:
 
@@ -105,7 +105,7 @@ curl -fsSL https://raw.githubusercontent.com/joe2gaan/localaiservers/main/qwen36
 curl -fsSL https://raw.githubusercontent.com/joe2gaan/localaiservers/main/qwen36-gfx906/run_qwen36_live_tps.py -o run_qwen36_live_tps.py
 chmod +x deploy.sh
 
-DEPLOY_IMAGE=joe2gaan/localaiservers:qwen36-gfx906-c1-topk8-runtime-archive-235f4780cbe1 \
+DEPLOY_IMAGE=joe2gaan/localaiservers:qwen36-gfx906-c1-topk8-runtime-archive-aa34cb675f83 \
 USE_PREBUILT_IMAGE=1 \
 PREBUILT_IMAGE_PULL=1 \
 AUTO_STAGE_MODEL=1 \
@@ -140,18 +140,16 @@ That matters because large Docker image exports can otherwise fill `/var/lib/doc
 The reproducibility contract is the SHA256 of the exported Docker archive, not the Docker Engine image ID after load. The archive-hash tag cited here was produced by a clean rebuild started from a directory containing only `deploy.sh`:
 
 ```text
-20505364439f46cac2c5748a008ed457c3d405a53b1f0fe19c4e34e4b41878c8  deploy.sh
+0392affe7194f35d5e596c7e0f6b29f65f84c4e38f6e281952332f298a9c1991  deploy.sh
 ```
 
-One validated clean rebuild produced this Docker archive:
+Two validated clean rebuilds, on `.20` and `.30`, produced this Docker archive:
 
 ```text
-235f4780cbe12b1168c42c11ae9368bee41de7fd9e4eb5ec7f4c3c1c3f7e59a5  ./.repro-docker-archives/qwen36-gfx906-c1-topk8-fastpath-reproducible.docker.tar
+aa34cb675f83ff6cade31cbbb357b1c31d793bee18da491f501d7c39fda3612a  ./.repro-docker-archives/qwen36-gfx906-c1-topk8-fastpath-reproducible.docker.tar
 ```
 
 The final loaded image is about 66 GB. The exported archive observed in testing was about 16 GB, and the full build/deploy working directory is much larger because it contains the model cache, runtime cache, private Docker root, and archive.
-
-Before I call the release final, I want one more clean rebuild on a second host with this exact `deploy.sh` hash so the Reddit thread can compare archive hashes directly.
 
 ## Minimum Target Host
 

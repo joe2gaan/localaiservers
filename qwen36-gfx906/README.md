@@ -174,22 +174,22 @@ The Docker Hub image is intended to publish the built gfx906 runtime, not model 
 Currently published runtime tag:
 
 ```text
-joe2gaan/localaiservers:qwen36-gfx906-c1-topk8-runtime-archive-235f4780cbe1
+joe2gaan/localaiservers:qwen36-gfx906-c1-topk8-runtime-archive-aa34cb675f83
 ```
 
 Currently published Docker Hub manifest digest:
 
 ```text
-sha256:9e129d462e5d9efad9979e1e9eefc879319ba367107ba0c48ec4955bfe3079c7
+sha256:f5e69ee127b766960e386e0e4eda8e26c399bd02f57c494847cb9a92ce04d8ac
 ```
 
 The source runtime archive used for the currently published Docker Hub tag was verified at:
 
 ```text
-235f4780cbe12b1168c42c11ae9368bee41de7fd9e4eb5ec7f4c3c1c3f7e59a5
+aa34cb675f83ff6cade31cbbb357b1c31d793bee18da491f501d7c39fda3612a
 ```
 
-For Docker Hub, that runtime was repacked into a 29-layer manifest so the registry can accept the large ROCm/PyTorch runtime reliably. Current `deploy.sh` builds the split-layer runtime archive directly; clean rebuilds on `.20` and `.30` both produced `aa34cb675f83ff6cade31cbbb357b1c31d793bee18da491f501d7c39fda3612a`. The manifest digest above is the exact Docker Hub identity for the currently published tag.
+Current `deploy.sh` builds the split-layer runtime archive directly. Clean rebuilds on `.20` and `.30` both produced `aa34cb675f83ff6cade31cbbb357b1c31d793bee18da491f501d7c39fda3612a`; the Docker Hub tag above was pushed from that verified image. The manifest digest above is the exact Docker Hub identity for the currently published tag, and the registry config digest matches the tested local image ID: `sha256:e45309183e6f35cae6fb8f9d8d6f016253f281a5e7187e1f11a57e5e28ef5e86`.
 
 After a successful archive build, publish from the build directory:
 
@@ -239,7 +239,7 @@ curl -fsSL https://raw.githubusercontent.com/joe2gaan/localaiservers/main/qwen36
 curl -fsSL https://raw.githubusercontent.com/joe2gaan/localaiservers/main/qwen36-gfx906/run_qwen36_live_tps.py -o run_qwen36_live_tps.py
 chmod +x deploy.sh
 
-DEPLOY_IMAGE=joe2gaan/localaiservers:qwen36-gfx906-c1-topk8-runtime-archive-235f4780cbe1 \
+DEPLOY_IMAGE=joe2gaan/localaiservers:qwen36-gfx906-c1-topk8-runtime-archive-aa34cb675f83 \
 USE_PREBUILT_IMAGE=1 \
 PREBUILT_IMAGE_PULL=1 \
 AUTO_STAGE_MODEL=1 \
