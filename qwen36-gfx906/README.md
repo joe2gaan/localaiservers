@@ -76,6 +76,24 @@ Current split-layer `deploy.sh` SHA256:
 
 Run the same `BUILD_ONLY=1 FORCE_REBUILD=1 REPRO_DOCKER_LOAD_ARCHIVE=0` build on two separate gfx906 servers from clean per-run isolated Docker roots, then compare the generated `.docker.tar.sha256` files.
 
+The current split-layer final runtime build was validated on:
+
+- `.20`: `ai@10.0.0.20:/usr/share/ollama/qwen36_split_repro_host20_20260602_213019`
+- `.30`: `ai@10.0.0.30:/usr/share/ollama/qwen36_split_repro_host30_20260602_213019`
+
+Both hosts produced this canonical split-layer archive hash:
+
+```text
+aa34cb675f83ff6cade31cbbb357b1c31d793bee18da491f501d7c39fda3612a  ./.repro-docker-archives/qwen36-gfx906-c1-topk8-fastpath-reproducible.docker.tar
+```
+
+Both hosts also reported the same exported image metadata during BuildKit export:
+
+```text
+manifest sha256:81e8641d50393b647e9c8078c81fbfdbab8ab1cc99c50b0b4a2439634bec0774
+config   sha256:e45309183e6f35cae6fb8f9d8d6f016253f281a5e7187e1f11a57e5e28ef5e86
+```
+
 The previous monolithic final-copy build was validated on:
 
 - `.30`: `ai@10.0.0.30:/usr/share/ollama/q36b`
@@ -94,7 +112,7 @@ manifest sha256:c850cc4edadb5a33314c6c8e3d4b01df83be0453230e9db59dd12c484b7f905e
 config   sha256:a43fb58523579aeb8d50a963a88cf0535d326ac5c2b713d5ec1b60e705dd8001
 ```
 
-The `.40` build was slower but still valid: its timestamp rewrite took `5187.2s` and tarball send took `235.8s`, while `.30` took `2477.5s` and `67.5s` respectively. This difference did not change the final bytes. The split-layer build is expected to produce a different archive hash from this pre-split value; the reproducibility check is that independent split-layer builds produce the same new hash.
+The `.40` build was slower but still valid: its timestamp rewrite took `5187.2s` and tarball send took `235.8s`, while `.30` took `2477.5s` and `67.5s` respectively. This difference did not change the final bytes. The split-layer build intentionally produces a different archive hash from this pre-split value; the reproducibility check is that independent split-layer builds produce the same new hash.
 
 To verify that Docker/containerd state is contained in the execution directory, run:
 
@@ -171,7 +189,7 @@ The source runtime archive used for the currently published Docker Hub tag was v
 235f4780cbe12b1168c42c11ae9368bee41de7fd9e4eb5ec7f4c3c1c3f7e59a5
 ```
 
-For Docker Hub, that runtime was repacked into a 29-layer manifest so the registry can accept the large ROCm/PyTorch runtime reliably. Current `deploy.sh` builds the split-layer runtime archive directly, so a fresh source-build publication should use the new archive hash emitted by the script. The manifest digest above is the exact Docker Hub identity for the currently published tag.
+For Docker Hub, that runtime was repacked into a 29-layer manifest so the registry can accept the large ROCm/PyTorch runtime reliably. Current `deploy.sh` builds the split-layer runtime archive directly; clean rebuilds on `.20` and `.30` both produced `aa34cb675f83ff6cade31cbbb357b1c31d793bee18da491f501d7c39fda3612a`. The manifest digest above is the exact Docker Hub identity for the currently published tag.
 
 After a successful archive build, publish from the build directory:
 
