@@ -10,8 +10,8 @@ The first release target is a reproducible `gfx906` runtime for:
 Model: Qwen/Qwen3.6-35B-A3B
 Hardware target: 4x AMD Instinct MI50 32GB
 Parallelism: TP4
-Runtime image: joe2gaan/localaiservers:qwen36-gfx906-c1-topk8-runtime-archive-235f4780cbe1
-Docker Hub digest: sha256:9e129d462e5d9efad9979e1e9eefc879319ba367107ba0c48ec4955bfe3079c7
+Runtime image: joe2gaan/localaiservers:qwen36-gfx906-c1-topk8-runtime-archive-aa34cb675f83
+Docker Hub digest: sha256:f5e69ee127b766960e386e0e4eda8e26c399bd02f57c494847cb9a92ce04d8ac
 ```
 
 Start here:
@@ -30,14 +30,14 @@ curl -fsSL https://raw.githubusercontent.com/joe2gaan/localaiservers/main/qwen36
 curl -fsSL https://raw.githubusercontent.com/joe2gaan/localaiservers/main/qwen36-gfx906/run_qwen36_live_tps.py -o run_qwen36_live_tps.py
 chmod +x deploy.sh
 
-DEPLOY_IMAGE=joe2gaan/localaiservers:qwen36-gfx906-c1-topk8-runtime-archive-235f4780cbe1 \
+DEPLOY_IMAGE=joe2gaan/localaiservers:qwen36-gfx906-c1-topk8-runtime-archive-aa34cb675f83 \
 USE_PREBUILT_IMAGE=1 \
 PREBUILT_IMAGE_PULL=1 \
 AUTO_STAGE_MODEL=1 \
 ./deploy.sh
 ```
 
-The currently published Docker Hub image is a 29-layer registry-friendly publication of the earlier verified runtime archive whose SHA-256 starts with `235f4780cbe1`. The public manifest digest is `sha256:9e129d462e5d9efad9979e1e9eefc879319ba367107ba0c48ec4955bfe3079c7`. Current source builds generate the split-layer archive directly from `deploy.sh`; the fresh `.20` and `.30` clean rebuilds both produced `aa34cb675f83ff6cade31cbbb357b1c31d793bee18da491f501d7c39fda3612a`.
+The currently published Docker Hub image is the 29-layer runtime produced by clean source rebuilds on `.20` and `.30`. Both rebuilds produced the same source archive SHA-256: `aa34cb675f83ff6cade31cbbb357b1c31d793bee18da491f501d7c39fda3612a`. The public Docker Hub manifest digest is `sha256:f5e69ee127b766960e386e0e4eda8e26c399bd02f57c494847cb9a92ce04d8ac`, and the registry config digest matches the tested local image ID: `sha256:e45309183e6f35cae6fb8f9d8d6f016253f281a5e7187e1f11a57e5e28ef5e86`.
 
 After the vLLM service is ready:
 
