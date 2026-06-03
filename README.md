@@ -11,6 +11,7 @@ Model: Qwen/Qwen3.6-35B-A3B
 Hardware target: 4x AMD Instinct MI50 32GB
 Parallelism: TP4
 Runtime image: joe2gaan/localaiservers:qwen36-gfx906-c1-topk8-runtime-archive-235f4780cbe1
+Docker Hub digest: sha256:9e129d462e5d9efad9979e1e9eefc879319ba367107ba0c48ec4955bfe3079c7
 ```
 
 Start here:
@@ -35,6 +36,8 @@ PREBUILT_IMAGE_PULL=1 \
 AUTO_STAGE_MODEL=1 \
 ./deploy.sh
 ```
+
+The Docker Hub image is a 29-layer registry-friendly publication of the verified runtime archive whose SHA-256 starts with `235f4780cbe1`. The public manifest digest is `sha256:9e129d462e5d9efad9979e1e9eefc879319ba367107ba0c48ec4955bfe3079c7`.
 
 After the vLLM service is ready:
 

@@ -149,6 +149,26 @@ joe2gaan/localaiservers
 
 The Docker Hub image is intended to publish the built gfx906 runtime, not model weights. The model cache remains a mounted directory (`./hf_cache`) so pulls stay practical and users can reuse, update, or pre-stage weights independently.
 
+Published runtime tag:
+
+```text
+joe2gaan/localaiservers:qwen36-gfx906-c1-topk8-runtime-archive-235f4780cbe1
+```
+
+Published Docker Hub manifest digest:
+
+```text
+sha256:9e129d462e5d9efad9979e1e9eefc879319ba367107ba0c48ec4955bfe3079c7
+```
+
+The source runtime archive was verified at:
+
+```text
+235f4780cbe12b1168c42c11ae9368bee41de7fd9e4eb5ec7f4c3c1c3f7e59a5
+```
+
+For Docker Hub, that runtime was repacked into a 29-layer manifest so the registry can accept the large ROCm/PyTorch runtime reliably. The tag keeps the verified archive hash prefix; the manifest digest above is the exact Docker Hub publication identity.
+
 After a successful archive build, publish from the build directory:
 
 ```bash
@@ -204,7 +224,7 @@ AUTO_STAGE_MODEL=1 \
 ./deploy.sh
 ```
 
-Use `qwen36-gfx906-c1-topk8-runtime-<deploy_sha8>` for package-version tagging and `qwen36-gfx906-c1-topk8-runtime-archive-<archive_sha12>` when the image bytes themselves are the thing being cited. `qwen36-gfx906-c1-topk8-runtime-latest` is convenient for testing, but it is not the tag to cite for reproduced results.
+Use `qwen36-gfx906-c1-topk8-runtime-<deploy_sha8>` for package-version tagging and `qwen36-gfx906-c1-topk8-runtime-archive-<archive_sha12>` when the verified source archive is the thing being cited. For an exact Docker Hub image identity, cite the manifest digest. `qwen36-gfx906-c1-topk8-runtime-latest` is convenient for testing, but it is not the tag to cite for reproduced results.
 
 The prebuilt-image path still writes the runtime patch bundle, MoE config, compose file, entrypoint, and runtime env into the directory where `deploy.sh` is executed. It keeps Docker/containerd state under `./.d` by default, mounts model weights from `./hf_cache`, and preserves the same TP4/O3/NCCL/MoE fastpath launch contract as the source-built image.
 
