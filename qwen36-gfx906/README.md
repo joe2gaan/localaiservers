@@ -246,6 +246,99 @@ AUTO_STAGE_MODEL=1 \
 ./deploy.sh
 ```
 
+### Manual vLLM launch after the image is built
+
+`deploy.sh` writes the runtime patch bundle, tuned MoE config, compose file, and cache directories before launching. If you want to launch the already-built image manually, source the isolated Docker env if it exists, then run the image with the same mounts and runtime settings:
+
+```bash
+source ./.deploy.docker-host.env 2>/dev/null || true
+
+mkdir -p ./hf_cache ./runtime/root/.triton ./runtime/root/.cache/vllm ./runtime/tmp/torchinductor_root
+
+docker run --rm -it \
+  --name vllm_qwen36_gfx906_c1_topk8_fastpath_m8n32_rpb2 \
+  --network host \
+  --ipc host \
+  --privileged \
+  --group-add video \
+  --cap-add IPC_LOCK \
+  --device /dev/kfd:/dev/kfd \
+  --device /dev/dri:/dev/dri \
+  --security-opt seccomp=unconfined \
+  --security-opt label=disable \
+  --ulimit memlock=-1:-1 \
+  -v "$(pwd)/hf_cache:/root/.cache/huggingface" \
+  -v "$(pwd)/runtime/root/.triton:/root/.triton" \
+  -v "$(pwd)/runtime/root/.cache/vllm:/root/.cache/vllm" \
+  -v "$(pwd)/runtime/tmp/torchinductor_root:/tmp/torchinductor_root" \
+  -v "$(pwd)/runtime/vllm_tuned_moe_configs/native_gfx906_qwen36_tp4_n128_c1_parallel_variants_20260525/m8_n32_k32_w2_wave1_k1_llmm1_rpb2_naivec1_nccl_tree_ll_10k_host30:/opt/vllm_tuned_moe_configs:ro" \
+  -v "$(pwd)/runtime/patches:/opt/vllm_patch_bundle:ro" \
+  -e HIP_VISIBLE_DEVICES=0,1,2,3 \
+  -e MODEL=Qwen/Qwen3.6-35B-A3B \
+  -e SERVED_MODEL_NAME=Qwen/Qwen3.6-35B-A3B \
+  -e HOST=0.0.0.0 \
+  -e PORT=8001 \
+  -e TP_SIZE=4 \
+  -e MAX_MODEL_LEN=131072 \
+  -e GPU_MEMORY_UTILIZATION=0.95 \
+  -e TOOL_CALL_PARSER=hermes \
+  -e REASONING_PARSER=qwen3 \
+  -e VLLM_DTYPE=half \
+  -e OPT_LEVEL=3 \
+  -e EXTRA_VLLM_ARGS=--language-model-only \
+  -e DISABLE_ASYNC_SCHEDULING=0 \
+  -e VLLM_ENABLE_C1_TOPK8_MOE_FASTPATH=1 \
+  -e VLLM_TUNED_CONFIG_FOLDER=/opt/vllm_tuned_moe_configs \
+  -e VLLM_PATCH_BUNDLE=/opt/vllm_patch_bundle \
+  -e FLASH_ATTENTION_TRITON_AMD_ENABLE=TRUE \
+  -e FLASH_ATTENTION_TRITON_AMD_REF=TRUE \
+  -e NCCL_ALGO=Tree \
+  -e NCCL_PROTO=LL \
+  -e NCCL_P2P_DISABLE=1 \
+  -e NCCL_MAX_NCHANNELS=1 \
+  -e OMP_NUM_THREADS=4 \
+  -e VLLM_WORKER_MULTIPROC_METHOD=spawn \
+  -e VLLM_ALLOW_LONG_MAX_MODEL_LEN=1 \
+  -e VLLM_TARGET_DEVICE=rocm \
+  -e VLLM_VERSION_OVERRIDE=0.0.0+gfx906 \
+  -e PYTORCH_ROCM_ARCH=gfx906 \
+  -e GPU_ARCHS=gfx906 \
+  -e TMPDIR=/tmp/torchinductor_root \
+  -e TMP=/tmp/torchinductor_root \
+  -e TEMP=/tmp/torchinductor_root \
+  -e TRITON_CACHE_DIR=/root/.triton \
+  -e TORCHINDUCTOR_CACHE_DIR=/tmp/torchinductor_root \
+  -e VLLM_CACHE_ROOT=/root/.cache/vllm \
+  qwen36-gfx906-c1-topk8-fastpath-reproducible
+```
+
+The entrypoint turns those environment variables into the tested vLLM launch command:
+
+```bash
+vllm serve Qwen/Qwen3.6-35B-A3B \
+  --served-model-name Qwen/Qwen3.6-35B-A3B \
+  --enable-auto-tool-choice \
+  --tool-call-parser hermes \
+  --dtype half \
+  --host 0.0.0.0 \
+  --port 8001 \
+  --tensor-parallel-size 4 \
+  --max-model-len 131072 \
+  --gpu-memory-utilization 0.95 \
+  --trust-remote-code \
+  --generation-config vllm \
+  -O=3 \
+  --async-scheduling \
+  --reasoning-parser qwen3 \
+  --language-model-only
+```
+
+For the Docker Hub image, replace the final image name with:
+
+```text
+joe2gaan/localaiservers:qwen36-gfx906-c1-topk8-runtime-archive-aa34cb675f83
+```
+
 Use `qwen36-gfx906-c1-topk8-runtime-<deploy_sha8>` for package-version tagging and `qwen36-gfx906-c1-topk8-runtime-archive-<archive_sha12>` when the verified source archive is the thing being cited. For an exact Docker Hub image identity, cite the manifest digest. `qwen36-gfx906-c1-topk8-runtime-latest` is convenient for testing, but it is not the tag to cite for reproduced results.
 
 The prebuilt-image path still writes the runtime patch bundle, MoE config, compose file, entrypoint, and runtime env into the directory where `deploy.sh` is executed. It keeps Docker/containerd state under `./.d` by default, mounts model weights from `./hf_cache`, and preserves the same TP4/O3/NCCL/MoE fastpath launch contract as the source-built image.
