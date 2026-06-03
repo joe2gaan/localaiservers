@@ -62,22 +62,26 @@ The Docker build is long and resource intensive (native ROCm extension build), b
 
 The runtime image is emitted from a final `FROM scratch` stage that copies only the cleaned builder filesystem. This is deliberate: the ROCm/apt/git/native-build layers are useful during construction but contain transient layer bytes that can vary by host even when the final installed files and canonical wheel hashes match. Keeping those build-history layers out of the exported runtime image is required for reliable byte-for-byte archive reproduction.
 
+The final runtime stage is split into deterministic copy layers around the large ROCm, PyTorch, and Triton-cache payloads. This preserves the cleaned runtime filesystem while avoiding a single 60+ GB registry layer; the same pinned BuildKit `type=docker,dest=...,rewrite-timestamp=true` exporter still writes the canonical archive.
+
 The reproducibility contract is the SHA256 of the exported Docker archive written under `./.repro-docker-archives/`. Docker Engine can report different local image IDs on different storage backends after loading the same archive, so compare the `.docker.tar.sha256` file for byte-for-byte reproduction.
 
 ### Byte-for-byte validation
 
-Validation run used `deploy.sh` SHA256:
+Current split-layer `deploy.sh` SHA256:
 
 ```text
-d713495672a633915d6517f353c095b32810f2fbba715e2c46cb9d31f9803274  deploy.sh
+0392affe7194f35d5e596c7e0f6b29f65f84c4e38f6e281952332f298a9c1991  deploy.sh
 ```
 
-The same `BUILD_ONLY=1 FORCE_REBUILD=1 REPRO_DOCKER_LOAD_ARCHIVE=0` build was run on two separate gfx906 servers from clean per-run isolated Docker roots:
+Run the same `BUILD_ONLY=1 FORCE_REBUILD=1 REPRO_DOCKER_LOAD_ARCHIVE=0` build on two separate gfx906 servers from clean per-run isolated Docker roots, then compare the generated `.docker.tar.sha256` files.
+
+The previous monolithic final-copy build was validated on:
 
 - `.30`: `ai@<redacted-host>:<redacted-path>
 - `.40`: `ai@<redacted-host>:<redacted-path>
 
-Both hosts produced this exact canonical archive hash:
+Both hosts produced this pre-split canonical archive hash:
 
 ```text
 92b4df372f4631270adc8e6c92d5634be9a792266c7110b8e03ffddc9038e223  ./.repro-docker-archives/qwen36-gfx906-c1-topk8-fastpath-reproducible.docker.tar
@@ -90,7 +94,7 @@ manifest sha256:c850cc4edadb5a33314c6c8e3d4b01df83be0453230e9db59dd12c484b7f905e
 config   sha256:a43fb58523579aeb8d50a963a88cf0535d326ac5c2b713d5ec1b60e705dd8001
 ```
 
-The `.40` build was slower but still valid: its timestamp rewrite took `5187.2s` and tarball send took `235.8s`, while `.30` took `2477.5s` and `67.5s` respectively. This difference did not change the final bytes.
+The `.40` build was slower but still valid: its timestamp rewrite took `5187.2s` and tarball send took `235.8s`, while `.30` took `2477.5s` and `67.5s` respectively. This difference did not change the final bytes. The split-layer build is expected to produce a different archive hash from this pre-split value; the reproducibility check is that independent split-layer builds produce the same new hash.
 
 To verify that Docker/containerd state is contained in the execution directory, run:
 
@@ -149,25 +153,25 @@ joe2gaan/localaiservers
 
 The Docker Hub image is intended to publish the built gfx906 runtime, not model weights. The model cache remains a mounted directory (`./hf_cache`) so pulls stay practical and users can reuse, update, or pre-stage weights independently.
 
-Published runtime tag:
+Currently published runtime tag:
 
 ```text
 joe2gaan/localaiservers:qwen36-gfx906-c1-topk8-runtime-archive-235f4780cbe1
 ```
 
-Published Docker Hub manifest digest:
+Currently published Docker Hub manifest digest:
 
 ```text
 sha256:9e129d462e5d9efad9979e1e9eefc879319ba367107ba0c48ec4955bfe3079c7
 ```
 
-The source runtime archive was verified at:
+The source runtime archive used for the currently published Docker Hub tag was verified at:
 
 ```text
 235f4780cbe12b1168c42c11ae9368bee41de7fd9e4eb5ec7f4c3c1c3f7e59a5
 ```
 
-For Docker Hub, that runtime was repacked into a 29-layer manifest so the registry can accept the large ROCm/PyTorch runtime reliably. The tag keeps the verified archive hash prefix; the manifest digest above is the exact Docker Hub publication identity.
+For Docker Hub, that runtime was repacked into a 29-layer manifest so the registry can accept the large ROCm/PyTorch runtime reliably. Current `deploy.sh` builds the split-layer runtime archive directly, so a fresh source-build publication should use the new archive hash emitted by the script. The manifest digest above is the exact Docker Hub identity for the currently published tag.
 
 After a successful archive build, publish from the build directory:
 
