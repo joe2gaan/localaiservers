@@ -85,7 +85,7 @@ Currently published Docker Hub manifest digest:
 sha256:9e129d462e5d9efad9979e1e9eefc879319ba367107ba0c48ec4955bfe3079c7
 ```
 
-The source runtime archive used for that published tag was verified at `235f4780cbe12b1168c42c11ae9368bee41de7fd9e4eb5ec7f4c3c1c3f7e59a5`; the Docker Hub image is the same runtime repacked into a 29-layer manifest so the registry can accept the large ROCm/PyTorch payload reliably. Current `deploy.sh` builds the split-layer runtime archive directly, so the final release citation should use the new archive hash from the next clean two-host rebuild.
+The source runtime archive used for that published tag was verified at `235f4780cbe12b1168c42c11ae9368bee41de7fd9e4eb5ec7f4c3c1c3f7e59a5`; the Docker Hub image is the same runtime repacked into a 29-layer manifest so the registry can accept the large ROCm/PyTorch payload reliably. Current `deploy.sh` builds the split-layer runtime archive directly; clean rebuilds on `.20` and `.30` both produced `aa34cb675f83ff6cade31cbbb357b1c31d793bee18da491f501d7c39fda3612a`.
 
 Source-build path:
 

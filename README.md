@@ -37,7 +37,7 @@ AUTO_STAGE_MODEL=1 \
 ./deploy.sh
 ```
 
-The currently published Docker Hub image is a 29-layer registry-friendly publication of the verified runtime archive whose SHA-256 starts with `235f4780cbe1`. The public manifest digest is `sha256:9e129d462e5d9efad9979e1e9eefc879319ba367107ba0c48ec4955bfe3079c7`. Current source builds generate the split-layer archive directly from `deploy.sh`; after a fresh two-host rebuild, cite the new generated archive hash for source-build reproduction.
+The currently published Docker Hub image is a 29-layer registry-friendly publication of the earlier verified runtime archive whose SHA-256 starts with `235f4780cbe1`. The public manifest digest is `sha256:9e129d462e5d9efad9979e1e9eefc879319ba367107ba0c48ec4955bfe3079c7`. Current source builds generate the split-layer archive directly from `deploy.sh`; the fresh `.20` and `.30` clean rebuilds both produced `aa34cb675f83ff6cade31cbbb357b1c31d793bee18da491f501d7c39fda3612a`.
 
 After the vLLM service is ready:
 
