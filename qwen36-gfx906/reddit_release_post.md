@@ -73,6 +73,20 @@ Docker Hub: joe2gaan/localaiservers
 
 The Docker Hub tag is runtime-only, not weight-bundled. That keeps the pull practical while still giving users the tuned ROCm/vLLM/gfx906 runtime without waiting through the native build. Model weights are mounted through the local Hugging Face cache.
 
+Published runtime tag:
+
+```text
+joe2gaan/localaiservers:qwen36-gfx906-c1-topk8-runtime-archive-235f4780cbe1
+```
+
+Docker Hub manifest digest:
+
+```text
+sha256:9e129d462e5d9efad9979e1e9eefc879319ba367107ba0c48ec4955bfe3079c7
+```
+
+The source runtime archive was verified at `235f4780cbe12b1168c42c11ae9368bee41de7fd9e4eb5ec7f4c3c1c3f7e59a5`; the Docker Hub image is the same runtime repacked into a 29-layer manifest so the registry can accept the large ROCm/PyTorch payload reliably.
+
 Source-build path:
 
 ```bash
@@ -100,7 +114,7 @@ AUTO_STAGE_MODEL=1 \
 python3 ./run_qwen36_live_tps.py
 ```
 
-The archive-hash tag is the one I would cite for reproduction because it identifies the image bytes. The `latest` tag is only for convenience.
+The archive-hash tag is the one I would cite for reproduction because it identifies the verified source archive lineage. For exact Docker Hub identity, cite the manifest digest. The `latest` tag is only for convenience.
 
 Current build path:
 
