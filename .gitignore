@@ -28,6 +28,20 @@
 **/*.py[cod]
 .DS_Store
 
+# Local scratch workspace
+.tmp/
+
 # Local Codex/OpenCode runner artifacts
 run_codex_unshare.sh
 codex-x86_64-unknown-linux-musl-*
+
+# Private operations, participant, payment, and fulfillment artifacts
+ops/private/
+ops/out/
+*.private.csv
+participants*.csv
+payments*.csv
+wise*.csv
+labels*.pdf
+shipping-labels/
+qc-results/
