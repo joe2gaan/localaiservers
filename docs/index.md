@@ -1,0 +1,15 @@
+# Documentation Index
+
+- [Impact](impact.md)
+- [Funding](funding.md)
+- [Program boundaries](program-boundaries.md)
+- [GitHub repo settings](github-repo-settings.md)
+- [Main-branch wording audit](main-branch-wording-audit.md)
+- [Public risk review](main-public-risk-review.md)
+- [Public benefit readiness report](main-public-benefit-readiness-report.md)
+- [Grant concept note](../grants/concept-note-gfx906-community-ai-access.md)
+- [Grants overview](../grants/README.md)
+- [Qwen3.6 GFX906 reproduction notes](../qwen36-gfx906/README.md)
+- [Qwen3.6 live TPS media page](https://joe2gaan.github.io/localaiservers/qwen36-gfx906/media/)
+- [Contributor backlog](../issues/README.md)
+- [Documentation license placeholder](LICENSE-DOCS.md)
