@@ -1,0 +1,72 @@
+name: Benchmark report
+description: Share a scoped, reproducible benchmark report.
+title: "[Benchmark]: "
+labels:
+  - benchmark
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Attach logs or screenshots only after redacting secrets, private paths, private host details, participant data, payment data, and vendor data.
+  - type: input
+    id: model
+    attributes:
+      label: Model
+      placeholder: Qwen/Qwen3.6-35B-A3B
+    validations:
+      required: true
+  - type: textarea
+    id: hardware
+    attributes:
+      label: Hardware
+      description: Include GPU model/count/VRAM, CPU, RAM, storage, and relevant topology notes.
+    validations:
+      required: true
+  - type: textarea
+    id: runtime
+    attributes:
+      label: Runtime image or build
+      description: Include image tag/digest, Docker archive SHA-256, commit, or build notes.
+    validations:
+      required: true
+  - type: textarea
+    id: command
+    attributes:
+      label: Command used
+      description: Include the exact command or script invocation after redaction.
+    validations:
+      required: true
+  - type: input
+    id: context_length
+    attributes:
+      label: Context length
+    validations:
+      required: true
+  - type: textarea
+    id: prompt_decode
+    attributes:
+      label: Prompt/decode performance
+      description: Include prompt processing, decode throughput, wall-clock measurements, and how they were measured.
+    validations:
+      required: true
+  - type: textarea
+    id: vram
+    attributes:
+      label: VRAM usage
+      description: Include peak and steady-state VRAM when available.
+    validations:
+      required: false
+  - type: textarea
+    id: thermals_power
+    attributes:
+      label: Temperature/power notes
+      description: Include sensor method and values when available.
+    validations:
+      required: false
+  - type: textarea
+    id: logs
+    attributes:
+      label: Redacted logs/screenshots
+      description: Include only redacted evidence that is safe for public review.
+    validations:
+      required: false
