@@ -2,7 +2,7 @@
   "name": "qwen36_gfx906_c1_topk8_fastpath_async_reproducible",
   "status": "deploy_ready",
   "model": "Qwen/Qwen3.6-35B-A3B",
-  "source_run": "staging/minimal_fasttrack/model_selection_campaign_20260520/runs/deploy_qwen36_c1_topk8_fastpath_async_host10_20260526_202550",
+  "source_run": "public_main_branch_qwen36_gfx906_runtime_notes",
   "image": "qwen36-gfx906-c1-topk8-fastpath-reproducible",
   "command": [
     "vllm",
@@ -77,8 +77,8 @@
     "files/E=256,N=128,device_name=AMD_GFX906.json"
   ],
   "artifact_notes": {
-    "deploy_contract": "Reproducible replay of the async TP4 C1 topk8 winner contract with portable runtime mounts and optional pre-staged HF cache.",
-    "image_recipe": "Build from ubuntu:24.04 + public ROCm + vllm/triton/flash-atn pinned commits, no private base runtime required.",
+    "deploy_contract": "Reproducible replay of the async TP4 C1 topk8 runtime profile with portable runtime mounts and optional pre-staged HF cache.",
+    "image_recipe": "Build from ubuntu:24.04 + public ROCm + vllm/triton/flash-atn pinned commits, no non-public base runtime required.",
     "source": "qwen3.6-35b async TP4 topk8 deploy campaign"
   }
 }

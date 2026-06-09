@@ -1,6 +1,6 @@
 # Qwen3.6-35B-A3B Async TP4 C1 TopK8 Runner (Reproducible)
 
-This bundle is a deploy package for the Qwen3.6-35B-A3B async TP4 C1 topk8 winner contract on `4x AMD Instinct MI50 32GB` hosts (`gfx906`).
+This bundle is a deploy package for the Qwen3.6-35B-A3B async TP4 C1 topk8 reference runtime profile on `4x AMD Instinct MI50 32GB` hosts (`gfx906`).
 It is designed to run without host-specific paths and can be rebuilt from public sources plus the patch/config heredocs embedded in `deploy.sh`.
 
 ## Live TPS Video
@@ -24,7 +24,7 @@ Click the preview image to watch the playable GitHub Pages video: https://joe2ga
 - Applies bundled patch overlays into a local runtime bundle (`./runtime/patches`).
 - Mounts tuned MoE config and caches into container paths.
 - Optionally stages model files into local `./hf_cache`.
-- Launches the exact winner serving command:
+- Launches the reference serving command:
   - tensor parallel `4`
   - async scheduling enabled
   - `--tool-call-parser hermes`
@@ -36,11 +36,11 @@ Click the preview image to watch the playable GitHub Pages video: https://joe2ga
 
 ## Public and fully reproducible image
 
-The previous private base dependency (`ai-infos/...`) has been replaced with a from-scratch build path:
+The previous non-public base dependency has been replaced with a from-scratch build path:
 
 - Base: `ubuntu:noble-20250127@sha256:72297848456d5d37d1262630108ab308d3e9ec7ed1c3286a32fe09856619a782`
 - Ubuntu package snapshots: `20250501T000000Z` bootstrap and `20260315T000000Z` vLLM build stage
-- ROCm repos: `rocm` + `amdgpu` `6.3.4`, with fail-fast package-version drift gates matching the `.10` reference image
+- ROCm repos: `rocm` + `amdgpu` `6.3.4`, with fail-fast package-version drift gates matching the local reference image
 - Full apt package-set lock for the public-source rebuild stage: `dpkg-query -W | LC_ALL=C sort | sha256sum` must equal `21df06cd008564fb7367a6d995bd196e234ffa0e1de9778b08edfda28f68dc15`
 - PyTorch ROCm wheels: `2.9.1+rocm6.3`
 - vLLM package version override: `0.0.0+gfx906`
@@ -82,10 +82,7 @@ Current split-layer `deploy.sh` SHA256:
 
 Run the same `BUILD_ONLY=1 FORCE_REBUILD=1 REPRO_DOCKER_LOAD_ARCHIVE=0` build on two separate gfx906 servers from clean per-run isolated Docker roots, then compare the generated `.docker.tar.sha256` files.
 
-The current split-layer final runtime build was validated on:
-
-- `.20`: `ai@<redacted-host>:<redacted-path>
-- `.30`: `ai@<redacted-host>:<redacted-path>
+The current split-layer final runtime build was validated on two independent GFX906 hosts using clean per-run working directories.
 
 Both hosts produced this canonical split-layer archive hash:
 
@@ -100,10 +97,7 @@ manifest sha256:81e8641d50393b647e9c8078c81fbfdbab8ab1cc99c50b0b4a2439634bec0774
 config   sha256:e45309183e6f35cae6fb8f9d8d6f016253f281a5e7187e1f11a57e5e28ef5e86
 ```
 
-The previous monolithic final-copy build was validated on:
-
-- `.30`: `ai@<redacted-host>:<redacted-path>
-- `.40`: `ai@<redacted-host>:<redacted-path>
+The previous monolithic final-copy build was validated on two independent GFX906 hosts using clean per-run working directories.
 
 Both hosts produced this pre-split canonical archive hash:
 
@@ -118,7 +112,7 @@ manifest sha256:c850cc4edadb5a33314c6c8e3d4b01df83be0453230e9db59dd12c484b7f905e
 config   sha256:a43fb58523579aeb8d50a963a88cf0535d326ac5c2b713d5ec1b60e705dd8001
 ```
 
-The `.40` build was slower but still valid: its timestamp rewrite took `5187.2s` and tarball send took `235.8s`, while `.30` took `2477.5s` and `67.5s` respectively. This difference did not change the final bytes. The split-layer build intentionally produces a different archive hash from this pre-split value; the reproducibility check is that independent split-layer builds produce the same new hash.
+The slower monolithic validation run was still valid: its timestamp rewrite took `5187.2s` and tarball send took `235.8s`, while the faster run took `2477.5s` and `67.5s` respectively. This difference did not change the final bytes. The split-layer build intentionally produces a different archive hash from this pre-split value; the reproducibility check is that independent split-layer builds produce the same new hash.
 
 To verify that Docker/containerd state is contained in the execution directory, run:
 
@@ -130,7 +124,7 @@ docker system df
 
 Expected `DockerRootDir` is `$(pwd)/.d/d`, or the path selected with `DOCKER_ISOLATED_DAEMON_DIR`.
 
-Validated on `ai@10.0.0.40` with:
+Validated on a GFX906 runtime host with:
 
 - `/v1/models` responding for `Qwen/Qwen3.6-35B-A3B`
 - plain chat completion returning successfully
@@ -142,7 +136,7 @@ From any directory, invoke the script by path; outputs (Dockerfile, runtime env,
 
 ```bash
 cd /path/where/you/want/artifacts
-/full/path/to/.tmp/deployable_configs/qwen36_gfx906_c1_topk8_fastpath_async_reproducible/deploy.sh
+/full/path/to/localaiservers/qwen36-gfx906/deploy.sh
 ```
 
 For the reproducible image path, run `deploy.sh`; it writes the generated Dockerfile, generated `.dockerignore`, and entrypoint, then invokes daemonless pinned BuildKit with the deterministic docker archive exporter. Direct `docker compose build` remains useful for diagnostics, but it does not use the full deterministic exporter path:
@@ -195,7 +189,7 @@ The source runtime archive used for the currently published Docker Hub tag was v
 aa34cb675f83ff6cade31cbbb357b1c31d793bee18da491f501d7c39fda3612a
 ```
 
-Current `deploy.sh` builds the split-layer runtime archive directly. Clean rebuilds on `.20` and `.30` both produced `aa34cb675f83ff6cade31cbbb357b1c31d793bee18da491f501d7c39fda3612a`; the Docker Hub tag above was pushed from that verified image. The manifest digest above is the exact Docker Hub identity for the currently published tag, and the registry config digest matches the tested local image ID: `sha256:e45309183e6f35cae6fb8f9d8d6f016253f281a5e7187e1f11a57e5e28ef5e86`.
+Current `deploy.sh` builds the split-layer runtime archive directly. Clean rebuilds on two independent GFX906 hosts both produced `aa34cb675f83ff6cade31cbbb357b1c31d793bee18da491f501d7c39fda3612a`; the Docker Hub tag above was pushed from that verified image. The manifest digest above is the exact Docker Hub identity for the currently published tag, and the registry config digest matches the tested local image ID: `sha256:e45309183e6f35cae6fb8f9d8d6f016253f281a5e7187e1f11a57e5e28ef5e86`.
 
 After a successful archive build, publish from the build directory:
 
@@ -365,7 +359,7 @@ The harness is intentionally synthetic: it sets `max_tokens=min_tokens`, uses `i
 You can also use `make` for common bundle operations:
 
 ```bash
-cd /full/path/to/.tmp/deployable_configs/qwen36_gfx906_c1_topk8_fastpath_async_reproducible
+cd /full/path/to/localaiservers/qwen36-gfx906
 make help          # show available targets
 make build         # docker compose build only
 make run           # execute full deploy workflow
@@ -468,7 +462,7 @@ To run the package from any working directory and keep all generated artifacts i
 
 ```bash
 cd /your/deploy/workdir
-/path/to/.tmp/deployable_configs/qwen36_gfx906_c1_topk8_fastpath_async_reproducible/deploy.sh
+/path/to/localaiservers/qwen36-gfx906/deploy.sh
 ```
 
 ## Artifact cleanup
