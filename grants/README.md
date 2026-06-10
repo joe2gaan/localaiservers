@@ -1,6 +1,9 @@
 # Grants
 
-This directory contains grant-facing public material for LocalAIServers. The language should stay grounded in committed repository evidence and should not claim unreleased technical work, private program activity, hardware inventory, funding commitments, or benchmark results that are not documented in the repo.
+This directory contains grant-facing public material for LocalAIServers. The language
+should stay grounded in committed repository evidence and should not claim unreleased
+technical work, private program activity, hardware inventory, funding commitments, or
+benchmark results that are not documented in the repo.
 
 ## Current Materials
 
@@ -19,4 +22,7 @@ This directory contains grant-facing public material for LocalAIServers. The lan
 
 ## Boundaries
 
-Grant language should not imply that donors or funders receive hardware, program placement, procurement access, special treatment, or any other private benefit. Program payments for hardware verification, pass-through costs, or fulfillment are separate from charitable donations and should not be presented as charitable gifts.
+Grant language should not imply that donors or funders receive hardware, program
+placement, procurement access, special treatment, or any other private benefit. Program
+payments for hardware verification, pass-through costs, or fulfillment are separate from
+charitable donations and should not be presented as charitable gifts.

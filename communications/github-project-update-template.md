@@ -6,7 +6,9 @@ LocalAIServers public documentation update: [short topic]
 
 ## Summary
 
-This update improves public documentation for locally hosted AI servers, with a focus on reproducible local AI deployment notes, GFX906 / MI50-class hardware documentation, hardware verification standards, benchmark reporting, and community AI research access.
+This update improves public documentation for locally hosted AI servers, with a focus on
+reproducible local AI deployment notes, GFX906 / MI50-class hardware documentation,
+hardware verification standards, benchmark reporting, and community AI research access.
 
 ## What Changed
 
@@ -22,10 +24,15 @@ This update improves public documentation for locally hosted AI servers, with a 
 
 ## Boundaries
 
-This is public education and open-source maintenance work. It does not claim official ROCm support or AMD endorsement. Benchmark notes are scoped to the documented hardware, runtime, command, and workload.
+This is public education and open-source maintenance work. It does not claim official
+ROCm support or AMD endorsement. Benchmark notes are scoped to the documented hardware,
+runtime, command, and workload.
 
-Charitable donations support public documentation, open-source maintenance, QC methodology, benchmark reporting, and community AI research access. Program payments for hardware verification, pass-through costs, or fulfillment are separate from donations.
+Charitable donations support public documentation, open-source maintenance, QC
+methodology, benchmark reporting, and community AI research access. Program payments for
+hardware verification, pass-through costs, or fulfillment are separate from donations.
 
 ## Review Request
 
-Please review for clarity, reproducibility, missing context, and any public-risk wording that should be tightened.
+Please review for clarity, reproducibility, missing context, and any public-risk wording
+that should be tightened.

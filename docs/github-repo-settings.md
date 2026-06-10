@@ -33,7 +33,8 @@ Use the GitHub Pages URL if enabled:
 https://joe2gaan.github.io/localaiservers/
 ```
 
-If GitHub Pages is not enabled for the repo, use this placeholder until a reviewed project site is available:
+If GitHub Pages is not enabled for the repo, use this placeholder until a reviewed
+project site is available:
 
 ```text
 https://REPLACE-WITH-PROJECT-SITE
@@ -56,4 +57,5 @@ Donations support open-source maintenance, documentation, QC methodology, benchm
 - Do not put legal filing details in GitHub About.
 - Do not put Wise/payment links in GitHub About.
 - Do not mention group-buy pricing or vendor details in GitHub About.
-- Do not use GitHub About to imply donor hardware, program access, discounts, or private benefits.
+- Do not use GitHub About to imply donor hardware, program access, discounts, or private
+  benefits.

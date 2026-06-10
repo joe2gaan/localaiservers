@@ -32,7 +32,9 @@ body:
     id: environment
     attributes:
       label: Environment
-      description: Include OS, GPU model, ROCm/runtime versions, image tag or digest, and relevant script version.
+      description:
+        Include OS, GPU model, ROCm/runtime versions, image tag or digest, and relevant
+        script version.
     validations:
       required: true
   - type: textarea

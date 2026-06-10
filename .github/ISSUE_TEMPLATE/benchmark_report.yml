@@ -19,14 +19,16 @@ body:
     id: hardware
     attributes:
       label: Hardware
-      description: Include GPU model/count/VRAM, CPU, RAM, storage, and relevant topology notes.
+      description:
+        Include GPU model/count/VRAM, CPU, RAM, storage, and relevant topology notes.
     validations:
       required: true
   - type: textarea
     id: runtime
     attributes:
       label: Runtime image or build
-      description: Include image tag/digest, Docker archive SHA-256, commit, or build notes.
+      description:
+        Include image tag/digest, Docker archive SHA-256, commit, or build notes.
     validations:
       required: true
   - type: textarea
@@ -46,7 +48,9 @@ body:
     id: prompt_decode
     attributes:
       label: Prompt/decode performance
-      description: Include prompt processing, decode throughput, wall-clock measurements, and how they were measured.
+      description:
+        Include prompt processing, decode throughput, wall-clock measurements, and how
+        they were measured.
     validations:
       required: true
   - type: textarea

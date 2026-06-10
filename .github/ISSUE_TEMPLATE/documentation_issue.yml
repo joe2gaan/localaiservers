@@ -33,6 +33,7 @@ body:
     id: reproduction_context
     attributes:
       label: Reproduction context
-      description: Include command, image tag, hardware, or environment details if applicable.
+      description:
+        Include command, image tag, hardware, or environment details if applicable.
     validations:
       required: false

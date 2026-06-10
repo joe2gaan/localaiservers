@@ -1,6 +1,8 @@
 # Contributor Issue Backlog
 
-These files are draft GitHub issues that can be copied into the issue tracker. They are intentionally documentation-heavy so contributors can help without needing private operations context.
+These files are draft GitHub issues that can be copied into the issue tracker. They are
+intentionally documentation-heavy so contributors can help without needing private
+operations context.
 
 ## Draft Issues
 
@@ -12,4 +14,6 @@ These files are draft GitHub issues that can be copied into the issue tracker. T
 - [006 - GitHub Pages docs index good first issue](006-github-pages-doc-index.md)
 - [007 - Funding documentation review](007-funding-doc-review.md)
 
-Before posting any issue, verify that it does not include private hostnames, private IPs, private paths, payment data, participant data, vendor data, secrets, or unredacted logs.
+Before posting any issue, verify that it does not include private hostnames, private
+IPs, private paths, payment data, participant data, vendor data, secrets, or unredacted
+logs.

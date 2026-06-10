@@ -4,11 +4,14 @@ Docs cleanup: typos, broken links, and wording consistency
 
 ## Context
 
-The repository now has public-benefit, funding, program-boundary, grant, communication, and technical runtime docs. Small cleanup contributions can improve readability and credibility.
+The repository now has public-benefit, funding, program-boundary, grant, communication,
+and technical runtime docs. Small cleanup contributions can improve readability and
+credibility.
 
 ## Desired Outcome
 
-Fix typos, broken links, heading inconsistencies, stale references, or unclear wording across Markdown files.
+Fix typos, broken links, heading inconsistencies, stale references, or unclear wording
+across Markdown files.
 
 ## Acceptance Criteria
 
@@ -27,4 +30,5 @@ Good first issue
 
 ## Privacy Reminder
 
-No logs should be needed. Do not add private paths, private host details, payment data, participant data, vendor data, or legal filing details.
+No logs should be needed. Do not add private paths, private host details, payment data,
+participant data, vendor data, or legal filing details.
