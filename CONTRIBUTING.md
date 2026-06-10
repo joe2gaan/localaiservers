@@ -1,6 +1,7 @@
 # Contributing
 
-Contributions should improve public documentation, reproducibility, benchmark clarity, repository hygiene, or hardware verification methodology.
+Contributions should improve public documentation, reproducibility, benchmark clarity,
+repository hygiene, or hardware verification methodology.
 
 ## Good Contribution Areas
 
@@ -13,14 +14,17 @@ Contributions should improve public documentation, reproducibility, benchmark cl
 
 ## Evidence Standard
 
-Do not add technical claims that are not evidenced in committed files, public image identities, reproducible commands, benchmark output, or clearly labeled future plans. Do not claim official ROCm support or AMD endorsement.
+Do not add technical claims that are not evidenced in committed files, public image
+identities, reproducible commands, benchmark output, or clearly labeled future plans. Do
+not claim official ROCm support or AMD endorsement.
 
 ## Privacy Rules
 
 Do not commit or post:
 
 - Secrets, tokens, private keys, or credentials.
-- Participant data, payment data, routing details, account details, shipping records, or labels.
+- Participant data, payment data, routing details, account details, shipping records, or
+  labels.
 - Private hostnames, private IPs, home-directory paths, or private logs.
 - Legal filing documents, filing screenshots, addresses, or tax identifiers.
 - Vendor quotes, private procurement notes, or private operational records.
@@ -50,4 +54,6 @@ find . -name "*.sh" -not -path "./.git/*" -print0 | xargs -0 -r bash -n
 find . -name "*.py" -not -path "./.git/*" -print0 | xargs -0 -r python3 -m py_compile
 ```
 
-Do not run GPU workloads, Docker builds, ROCm builds, or model downloads unless the issue or pull request specifically requires them and you have the right local environment.
+Do not run GPU workloads, Docker builds, ROCm builds, or model downloads unless the
+issue or pull request specifically requires them and you have the right local
+environment.
