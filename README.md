@@ -109,16 +109,11 @@ recommended long-term documentation/data license is summarized in
 
 ## Funding and Program Boundaries
 
-LocalAIServers is an IRS-recognized 501(c)(3) public charity. Charitable donations
-support public documentation, open-source maintenance, QC methodology, benchmark
-reporting, reproducibility workflows, and public education around locally hosted AI
-systems.
+LocalAIServers is an IRS-recognized 501(c)(3) public charity. Charitable donations support public documentation, open-source maintenance, QC methodology, benchmark reporting, reproducibility workflows, and public education around locally hosted AI systems.
 
-Donations do not provide hardware, preferential treatment, discounts, procurement
-access, or private benefits.
+Donations do not provide hardware, preferential treatment, discounts, procurement access, or private benefits.
 
-See [docs/funding.md](docs/funding.md) and
-[docs/program-boundaries.md](docs/program-boundaries.md).
+See [docs/funding.md](docs/funding.md) and [docs/program-boundaries.md](docs/program-boundaries.md).
 
 ## Existing Qwen3.6 Reproducibility Instructions
 
