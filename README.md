@@ -1,10 +1,126 @@
 # LocalAIServers
 
-Deployable local AI server configurations and reproducible performance notes.
+LocalAIServers is a 501(c)(3) public charity providing public education and open-source
+infrastructure for locally hosted AI systems.
 
-## Qwen3.6-35B-A3B on 4x MI50 32GB
+LocalAIServers preserves affordable AI research infrastructure by maintaining a
+controlled air-gapped GFX906 compute site for benchmarking, hardware verification, and
+reproducibility work. The cluster is not a public login service. Public benefit is
+delivered through published outputs: open-source deployment scripts, reproducible
+benchmark reports, QC methods, source-level findings, hardware verification standards,
+and educational documentation.
 
-The first release target is a reproducible `gfx906` runtime for:
+## What This Repository Provides
+
+- Reproducible local AI server configurations.
+- GFX906 / ROCm runtime maintenance notes.
+- Public benchmark reports.
+- Source-level kernel and graph-runtime findings.
+- Hardware verification and QC methodology.
+- Educational documentation for locally hosted AI systems.
+
+## Current Flagship Artifact
+
+The current flagship public artifact is the Qwen3.6 / GFX906 / MI50 TP4 runtime work:
+
+- Hardware target: 4x AMD Instinct MI50 32GB / GFX906.
+- Model: `Qwen/Qwen3.6-35B-A3B`.
+- Runtime: reproducible Docker/vLLM/ROCm deployment package.
+- Public benchmark summary: sustained 90+ TPS backend decode on the documented
+  fixed-token long-decode run, with a shorter fixed-token backend decode result over 100
+  TPS.
+
+Canonical technical deployment package:
+[qwen36-gfx906/README.md](qwen36-gfx906/README.md)
+
+Stable benchmark artifact:
+[benchmarks/qwen36-gfx906-mi50-tp4/](benchmarks/qwen36-gfx906-mi50-tp4/)
+
+## Controlled Air-Gapped Compute Model
+
+The LocalAIServers GFX906 cluster is controlled research and verification
+infrastructure, not an open public login environment. It is used to validate hardware,
+reproduce AI workloads, test source/runtime changes, and publish public outputs. This
+allows the public to benefit from the methods, code, benchmark reports, QC standards,
+and findings without requiring direct access to the cluster.
+
+See [docs/controlled-air-gapped-compute.md](docs/controlled-air-gapped-compute.md).
+
+## Source-Level GFX906 Maintenance
+
+This repo includes source-level GFX906 kernel/runtime work, not only benchmark scripts.
+LocalAIServers documents source-level kernel/runtime adaptation for GFX906-class
+systems, including MoE fastpath analysis, dense RowParallel/RCCL collective-boundary
+research, graph-runtime integration, rejected-path evidence, promotion methodology, and
+technical progress reporting under [docs/](docs/).
+
+Current source-level proof documents:
+
+- [GFX906 source kernel inventory](docs/gfx906-source-kernel-inventory-20260612.md)
+- [GFX906 key learnings](docs/gfx906-key-learnings-20260606.md)
+- [Technical progress summary](docs/gfx906-technical-progress-summary.md)
+- [Experimental methodology](docs/gfx906-experimental-methodology.md)
+- [Current research roadmap](docs/gfx906-current-research-roadmap.md)
+
+## Public Outputs
+
+Public benefit is delivered through:
+
+- Deployment scripts.
+- Docker/runtime details.
+- Reproducible benchmark methods.
+- QC and hardware verification methods.
+- Source-kernel inventories.
+- Experiment and key-learning summaries.
+- Public documentation.
+
+## Reproducibility and Promotion Policy
+
+Results are promoted only when they pass optimized serving-path validation, backend
+metric checks, and correctness requirements. Diagnostic-only paths and near-tie results
+are recorded as source milestones, not serving winners.
+
+See [docs/reproducibility-policy.md](docs/reproducibility-policy.md).
+
+## Roadmap
+
+See [docs/roadmap.md](docs/roadmap.md).
+
+## Funder Proof Index
+
+See [docs/funder-proof-index.md](docs/funder-proof-index.md) for the reviewer-oriented
+map of benchmark proof, canonical deployment artifacts, source-level GFX906
+preservation work, experimental methodology, QC methods, and the public-output model.
+
+## How To Contribute
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Citation
+
+See [CITATION.cff](CITATION.cff).
+
+## License
+
+Code is licensed under [Apache-2.0](LICENSE). Documentation licensing still has a
+human-review placeholder at [docs/LICENSE-DOCS.md](docs/LICENSE-DOCS.md), and the
+recommended long-term documentation/data license is summarized in
+[docs/license-recommendation.md](docs/license-recommendation.md).
+
+## Funding and Program Boundaries
+
+LocalAIServers is an IRS-recognized 501(c)(3) public charity. Charitable donations support public documentation, open-source maintenance, QC methodology, benchmark reporting, reproducibility workflows, and public education around locally hosted AI systems.
+
+Donations do not provide hardware, preferential treatment, discounts, procurement access, or private benefits.
+
+See [docs/funding.md](docs/funding.md) and [docs/program-boundaries.md](docs/program-boundaries.md).
+
+## Existing Qwen3.6 Reproducibility Instructions
+
+The canonical deployment package is [qwen36-gfx906/README.md](qwen36-gfx906/README.md).
+The root README preserves the existing quick-start instructions below for continuity.
+
+The current public runtime target is:
 
 ```text
 Model: Qwen/Qwen3.6-35B-A3B
@@ -13,12 +129,6 @@ Parallelism: TP4
 Runtime image: joe2gaan/localaiservers:qwen36-gfx906-c1-topk8-runtime-archive-aa34cb675f83
 Docker Hub digest: sha256:f5e69ee127b766960e386e0e4eda8e26c399bd02f57c494847cb9a92ce04d8ac
 ```
-
-## Live TPS Video
-
-[![Qwen3.6-35B-A3B gfx906 live TPS video preview](qwen36-gfx906/media/qwen36_ref20_machiavelli_100_to_1000_tps_preview.jpg)](https://joe2gaan.github.io/localaiservers/qwen36-gfx906/media/)
-
-Click the preview image to watch the playable GitHub Pages video: https://joe2gaan.github.io/localaiservers/qwen36-gfx906/media/
 
 Start here:
 
@@ -43,7 +153,7 @@ AUTO_STAGE_MODEL=1 \
 ./deploy.sh
 ```
 
-The image entrypoint launches vLLM with the tested TP4/O3/Tree-LL command. The command inside the container is:
+The image entrypoint launches vLLM with the tested TP4/O3/Tree-LL command:
 
 ```bash
 vllm serve Qwen/Qwen3.6-35B-A3B \
@@ -64,7 +174,13 @@ vllm serve Qwen/Qwen3.6-35B-A3B \
   --language-model-only
 ```
 
-The currently published Docker Hub image is the 29-layer runtime produced by clean source rebuilds on `.20` and `.30`. Both rebuilds produced the same source archive SHA-256: `aa34cb675f83ff6cade31cbbb357b1c31d793bee18da491f501d7c39fda3612a`. The public Docker Hub manifest digest is `sha256:f5e69ee127b766960e386e0e4eda8e26c399bd02f57c494847cb9a92ce04d8ac`, and the registry config digest matches the tested local image ID: `sha256:e45309183e6f35cae6fb8f9d8d6f016253f281a5e7187e1f11a57e5e28ef5e86`.
+The currently published Docker Hub image is the 29-layer runtime produced by clean
+source rebuilds on two independent GFX906 hosts. Both rebuilds produced the same source
+archive SHA-256: `aa34cb675f83ff6cade31cbbb357b1c31d793bee18da491f501d7c39fda3612a`. The
+public Docker Hub manifest digest is
+`sha256:f5e69ee127b766960e386e0e4eda8e26c399bd02f57c494847cb9a92ce04d8ac`, and the
+registry config digest matches the tested local image ID:
+`sha256:e45309183e6f35cae6fb8f9d8d6f016253f281a5e7187e1f11a57e5e28ef5e86`.
 
 After the vLLM service is ready:
 
@@ -80,4 +196,6 @@ c1_10000:  95.66 TPS backend decode
 c1_10000:  95.36 client wall TPS
 ```
 
-See [qwen36-gfx906/README.md](qwen36-gfx906/README.md) for the full deployment and reproduction notes.
+See [qwen36-gfx906/README.md](qwen36-gfx906/README.md) for the full deployment and
+reproduction notes, including build pins, Docker archive hashes, runtime defaults, disk
+checks, and limitations.
