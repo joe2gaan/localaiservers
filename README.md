@@ -48,18 +48,19 @@ See [docs/controlled-air-gapped-compute.md](docs/controlled-air-gapped-compute.m
 
 ## Source-Level GFX906 Maintenance
 
+This repo includes source-level GFX906 kernel/runtime work, not only benchmark scripts.
 LocalAIServers documents source-level kernel/runtime adaptation for GFX906-class
-systems. The work includes MoE fastpath analysis, dense RowParallel/RCCL
-collective-boundary research, rejected-path evidence, promotion methodology, and
+systems, including MoE fastpath analysis, dense RowParallel/RCCL collective-boundary
+research, graph-runtime integration, rejected-path evidence, promotion methodology, and
 technical progress reporting under [docs/](docs/).
 
-Current source inventory and key-learning documents are represented as placeholders
-until the source files are added to the public repository:
+Current source-level proof documents:
 
 - [GFX906 source kernel inventory](docs/gfx906-source-kernel-inventory-20260612.md)
 - [GFX906 key learnings](docs/gfx906-key-learnings-20260606.md)
 - [Technical progress summary](docs/gfx906-technical-progress-summary.md)
 - [Experimental methodology](docs/gfx906-experimental-methodology.md)
+- [Current research roadmap](docs/gfx906-current-research-roadmap.md)
 
 ## Public Outputs
 
