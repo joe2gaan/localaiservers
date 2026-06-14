@@ -3,12 +3,12 @@
 LocalAIServers is a 501(c)(3) public charity providing public education and open-source
 infrastructure for locally hosted AI systems.
 
-LocalAIServers preserves affordable AI research infrastructure by maintaining controlled
-air-gapped GFX906 compute for benchmarking, hardware verification, and reproducibility
-work. The cluster is not a public login service. Public benefit is delivered through
-published outputs: open-source deployment scripts, reproducible benchmark reports, QC
-methods, source-level findings, hardware verification standards, and educational
-documentation.
+LocalAIServers preserves affordable AI research infrastructure by maintaining a
+controlled air-gapped GFX906 compute site for benchmarking, hardware verification, and
+reproducibility work. The cluster is not a public login service. Public benefit is
+delivered through published outputs: open-source deployment scripts, reproducible
+benchmark reports, QC methods, source-level findings, hardware verification standards,
+and educational documentation.
 
 ## What This Repository Provides
 
@@ -85,6 +85,12 @@ See [docs/reproducibility-policy.md](docs/reproducibility-policy.md).
 ## Roadmap
 
 See [docs/roadmap.md](docs/roadmap.md).
+
+## Funder Proof Index
+
+See [docs/funder-proof-index.md](docs/funder-proof-index.md) for the reviewer-oriented
+map of benchmark proof, canonical deployment artifacts, source-level GFX906
+preservation work, experimental methodology, QC methods, and the public-output model.
 
 ## How To Contribute
 

@@ -28,8 +28,16 @@ rejected paths, source milestones, and promotion methodology.
 - The dense 27B gate remains open. The source record describes the current dense work as
   a RowParallel / RCCL or NCCL collective-boundary problem, especially around MLP/down
   and repeated `1x5120` allreduce behavior.
+- The current documented dense source high-water is the graph-safe non-resident
+  sidecar Tree/LL allreduce runtime plus exact public-RCCL fallback for captured
+  attention `call_site=1664`, using the `2048/1536/1536` sidecar descriptor split. The
+  source inventory reports this as a serving milestone and current source high-water,
+  not a dense gate clear.
 - Current dense profiles are described as NCCL/RCCL dominated, with source notes
   separating source milestones, serving milestones, active lanes, and rejected paths.
+- Earlier singlework/LL16/prims-inline RCCL work remains important source evidence, but
+  it is no longer the current best dense readout when compared with the latest
+  sidecar/public1664 source record.
 - Negative results are preserved as reusable public evidence so other community
   builders do not repeat already-tested paths.
 
@@ -50,7 +58,9 @@ trustworthy.
 Current roadmap direction from the source inventory and key-learning record:
 
 - Dense 27B work remains focused on RowParallel collective-boundary reduction or
-  acceleration, including RCCL/Tree/LL source work and graph-native boundary changes.
+  acceleration, including non-resident sidecar work, public-RCCL fallback at selected
+  captured call sites, RCCL/Tree/LL source work, call-site routing, and graph-native
+  boundary changes.
 - MoE work should protect and document the cleared TP4 publication path while testing
   source changes that reduce communication count without changing semantics.
 - Prefill and concurrency work should remain separate from single-request c1 decode

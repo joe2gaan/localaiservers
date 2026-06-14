@@ -23,16 +23,22 @@ evidence, and rejected paths.
 - Source milestones and serving winners are distinct categories.
 - Prefill, decode, and end-to-end TPS claims should not be mixed.
 - Microbench results are source evidence, not serving promotion by themselves.
+- Direct replay is necessary but not sufficient for promotion.
+- Microbench or direct-replay wins require serving-path validation before public
+  promotion.
+- Strict decode ladders should be used before public promotion when the claim concerns
+  sustained decode behavior.
 
 ## Promotion Ladder
 
 1. Hypothesis or source path identified.
 2. Direct replay or component evidence collected.
-3. Optimized serving path tested.
-4. Backend metric evidence collected.
-5. Correctness validated.
-6. Standard decode ladder run where relevant.
-7. Result categorized as promoted, rejected, source milestone, diagnostic, active lane,
+3. Direct replay checked against the serving integration risk.
+4. Optimized serving path tested.
+5. Backend metric evidence collected.
+6. Correctness validated.
+7. Standard decode ladder run where relevant.
+8. Result categorized as promoted, rejected, source milestone, diagnostic, active lane,
    or superseded.
 
 ## Disposition Labels
