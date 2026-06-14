@@ -38,7 +38,7 @@ Donations support:
 Donations do not provide:
 
 - Hardware.
-- Priority access.
+- Preferential treatment.
 - Discounts.
 - Program participation.
 - Procurement access.
@@ -53,10 +53,10 @@ goods or services are provided in exchange for donations.
 
 ## Payment Boundary
 
-This repository must not include Wise links, personal payment links, routing details,
-account details, or hardware program payment links. Program payments for hardware
-verification, pass-through costs, or fulfillment are separate from charitable donations
-and should not be represented as charitable gifts.
+This repository must not include private payment-provider details, personal payment
+collection details, banking details, or hardware program payment collection details.
+Program payments for hardware verification, pass-through costs, or fulfillment are
+separate from charitable donations and should not be represented as charitable gifts.
 
 ## Suggested CTA Variants
 

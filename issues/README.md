@@ -15,5 +15,5 @@ operations context.
 - [007 - Funding documentation review](007-funding-doc-review.md)
 
 Before posting any issue, verify that it does not include private hostnames, private
-IPs, private paths, payment data, participant data, vendor data, secrets, or unredacted
-logs.
+IPs, private paths, payment data, participant data, supplier data, secrets, or
+unredacted logs.

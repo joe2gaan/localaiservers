@@ -24,11 +24,11 @@ GitHub settings recommendations, and records public wording/risk reviews.
    charitable donations are separate from hardware verification, pass-through costs, and
    fulfillment.
 5. Private/legal/payment/participant data: no high/medium remaining findings after
-   remediation. Real payment links, addresses, filing documents, tax identifiers,
-   participant data, and vendor quotes were not added.
+   remediation. Real payment collection details, addresses, filing documents, tax
+   identifiers, participant data, and supplier records were not added.
 6. Unreleased dense source claims: none added.
-7. Group-buy/resale/private-benefit language: no promotional or benefit-offer language
-   added. Risk terms appear only in avoidance/review contexts where needed.
+7. Private-benefit procurement language: no promotional or benefit-offer language added.
+   Risk terms appear only in avoidance/review contexts where needed.
 8. Local runner artifacts ignored and untracked: yes, subject to final command
    confirmation.
 9. GitHub settings recommendations: ready in

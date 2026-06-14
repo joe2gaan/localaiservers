@@ -31,4 +31,4 @@ Good first issue
 ## Privacy Reminder
 
 No logs should be needed. Do not add private paths, private host details, payment data,
-participant data, vendor data, or legal filing details.
+participant data, supplier data, or legal filing details.

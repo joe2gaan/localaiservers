@@ -19,7 +19,7 @@ committing.
 
 - Confirms the donation placeholder is still a placeholder unless a reviewed public
   donation page is ready.
-- Confirms donations are not described as providing hardware, priority access,
+- Confirms donations are not described as providing hardware, preferential treatment,
   discounts, program participation, or private benefits.
 - Confirms program payments for hardware verification, pass-through costs, or
   fulfillment are described as separate from donations.
@@ -35,5 +35,5 @@ Intermediate
 
 ## Privacy Reminder
 
-Do not add payment links, routing details, account details, filing documents, addresses,
-tax identifiers, participant data, or private operational records.
+Do not add payment collection details, banking details, filing documents, addresses, tax
+identifiers, participant data, or private operational records.

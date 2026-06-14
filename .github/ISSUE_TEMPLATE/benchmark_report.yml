@@ -7,7 +7,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Attach logs or screenshots only after redacting secrets, private paths, private host details, participant data, payment data, and vendor data.
+        Attach logs or screenshots only after redacting secrets, private paths, private host details, participant data, payment data, and supplier data.
   - type: input
     id: model
     attributes:

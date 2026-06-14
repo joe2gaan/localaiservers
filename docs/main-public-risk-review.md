@@ -10,9 +10,9 @@ runner artifacts. It covers tracked files and the new public-benefit documentati
 in this pass. It does not run GPU workloads, Docker builds, ROCm builds, model
 downloads, or long-running validation.
 
-No EIN, IRS determination letter, state filing details, home address, routing details,
-account details, real payment link, participant dataset, vendor quote, live pricing, or
-tracked local Codex runner binary was found in the committed branch review.
+No tax identifier, filing detail, personal address, banking detail, real payment
+collection detail, participant dataset, supplier record, live pricing, or tracked local
+Codex runner binary was found in the committed branch review.
 
 ## High Severity Findings
 

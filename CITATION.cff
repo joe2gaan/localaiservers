@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+message: "If you use these artifacts, please cite LocalAIServers."
+title: "LocalAIServers GFX906 Preservation and Reproducible Benchmarking Artifacts"
+version: 0.1.0
+authors:
+  - family-names: Williams
+    given-names: Joe
+repository-code: "https://github.com/joe2gaan/localaiservers"
+license: Apache-2.0
