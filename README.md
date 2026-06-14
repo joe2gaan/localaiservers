@@ -111,8 +111,8 @@ recommended long-term documentation/data license is summarized in
 
 LocalAIServers is an IRS-recognized 501(c)(3) public charity. Charitable donations
 support public documentation, open-source maintenance, QC methodology, benchmark
-reporting, and community AI research access. Program payments for hardware verification,
-pass-through costs, or fulfillment are separate from donations.
+reporting, reproducibility workflows, and public education around locally hosted AI
+systems.
 
 Donations do not provide hardware, preferential treatment, discounts, procurement
 access, or private benefits.
