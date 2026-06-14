@@ -3,47 +3,33 @@
 ## Recommended Repo Description
 
 ```text
-Reproducible local AI server configs, benchmark notes, and public documentation for GFX906 / MI50-class hardware.
-```
-
-## Alternative Longer Description
-
-```text
-Open-source documentation, reproducible runtime notes, and benchmark reporting for locally hosted AI on GFX906 / MI50-class hardware.
+Open-source local AI server configs, GFX906 runtime maintenance, reproducible benchmarks, and QC methods for affordable AI research infrastructure.
 ```
 
 ## Recommended Topics
 
-- `local-ai`
 - `gfx906`
-- `mi50`
 - `rocm`
 - `vllm`
+- `local-ai`
+- `mi50`
+- `amd-instinct`
 - `qwen`
 - `ai-infrastructure`
-- `reproducible-research`
-- `benchmark`
 - `open-source`
+- `hardware-verification`
+- `reproducible-benchmarks`
+- `air-gapped-compute`
 
 ## Recommended Website
 
-Use the GitHub Pages URL if enabled:
-
-```text
-https://joe2gaan.github.io/localaiservers/
-```
-
-If GitHub Pages is not enabled for the repo, use this placeholder until a reviewed
-project site is available:
-
-```text
-https://REPLACE-WITH-PROJECT-SITE
-```
+Set the repository website to `https://localaiservers.com` once the landing page is live
+and reviewed.
 
 ## Recommended Pinned README Tagline
 
 ```text
-Public-benefit documentation for reproducible local AI servers on GFX906 / MI50-class hardware.
+Public education and open-source infrastructure for reproducible local AI on GFX906 / MI50-class hardware.
 ```
 
 ## Donation CTA Wording
@@ -55,7 +41,7 @@ Donations support open-source maintenance, documentation, QC methodology, benchm
 ## Warnings
 
 - Do not put legal filing details in GitHub About.
-- Do not put Wise/payment links in GitHub About.
-- Do not mention group-buy pricing or vendor details in GitHub About.
-- Do not use GitHub About to imply donor hardware, program access, discounts, or private
-  benefits.
+- Do not put payment collection details in GitHub About.
+- Do not put private procurement details in GitHub About.
+- Do not use GitHub About to imply donor hardware, program access, discounts,
+  procurement access, or private benefits.

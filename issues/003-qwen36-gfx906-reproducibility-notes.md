@@ -32,4 +32,4 @@ Intermediate
 ## Privacy Reminder
 
 If using logs to clarify behavior, redact local paths, host details, tokens, participant
-data, payment data, and vendor data before posting.
+data, payment data, and supplier data before posting.

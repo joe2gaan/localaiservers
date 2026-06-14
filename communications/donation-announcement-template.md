@@ -18,8 +18,8 @@ https://REPLACE-WITH-DONATION-PAGE
 ```
 
 Program payments for hardware verification, pass-through costs, or fulfillment are
-separate from charitable donations. Donations do not provide hardware, priority access,
-discounts, program participation, or private benefits.
+separate from charitable donations. Donations do not provide hardware, preferential
+treatment, discounts, program participation, or private benefits.
 
 Current public repo:
 

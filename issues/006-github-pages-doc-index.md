@@ -18,7 +18,7 @@ existing GFX906 media page.
 - Links to `docs/index.md`, impact, funding, program boundaries, grant concept note,
   risk review, and `qwen36-gfx906/README.md`.
 - Keeps the page plain and maintainable.
-- Does not add payment links or private operational details.
+- Does not add payment collection details or private operational details.
 - Does not make new technical claims.
 
 ## Suggested Labels

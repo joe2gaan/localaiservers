@@ -53,12 +53,12 @@ behavior, Docker builds, ROCm builds, model downloads, or benchmark reproduction
   validation logs, or funding results that are not in committed public files.
 - Do not describe unreleased dense source work or unreleased mixed prompt/decode tooling
   as current repo capability.
-- Do not imply donations provide hardware, priority access, discounts, procurement
-  access, program participation, or other private benefits.
-- Do not add legal filing details, tax identifiers, determination letters, addresses,
-  private payment links, routing details, account details, participant data, vendor
-  quotes, or private operations records.
-- Do not use group-buy, resale, marketplace, exclusive-deal, or lowest-price framing.
+- Do not imply donations provide hardware, preferential treatment, discounts,
+  procurement access, program participation, or other private benefits.
+- Do not add legal filing details, tax identifiers, addresses, private payment
+  collection details, banking details, participant data, supplier records, or private
+  operations records.
+- Do not use coordinated-purchasing, commercial procurement, or private-benefit framing.
 
 ## Donation And Grant Wording Gaps
 
@@ -144,7 +144,7 @@ This pass adds or updates:
 - `*.private.csv`
 - `participants*.csv`
 - `payments*.csv`
-- `wise*.csv`
+- private payment-provider CSVs
 - `labels*.pdf`
 - `shipping-labels/`
 - `qc-results/`

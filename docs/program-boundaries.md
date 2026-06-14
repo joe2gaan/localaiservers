@@ -59,14 +59,14 @@ benefits unless reviewed by qualified advisors.
 
 Fulfillment and shipping logistics are operational matters and should not be published
 in this repository. Do not commit labels, participant lists, payment records, shipping
-records, routing details, account details, vendor quotes, or private logistics notes.
+records, banking details, supplier records, or private logistics notes.
 
 ## No Private Benefit for Donors
 
-Donations do not provide hardware, priority access, discounts, special treatment,
-procurement access, program participation, or other private benefits. Any goods or
-services connected to a non-donation program must be clearly separated from charitable
-donations and specifically disclosed.
+Donations do not provide hardware, preferential treatment, discounts, procurement
+access, program participation, or other private benefits. Any goods or services
+connected to a non-donation program must be clearly separated from charitable donations
+and specifically disclosed.
 
 ## Public Repository Rule
 
