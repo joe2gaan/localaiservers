@@ -20,6 +20,7 @@ GFX906 Preservation & Public AI Research Infrastructure
 - [Experimental methodology](gfx906-experimental-methodology.md)
 - [Current GFX906 research roadmap](gfx906-current-research-roadmap.md)
 - [Controlled air-gapped compute model](controlled-air-gapped-compute.md)
+- [Public output model](public-output-model.md)
 - [QC methodology](qc-methodology.md)
 - [Hardware verification standards](hardware-verification-standards.md)
 - [Roadmap](roadmap.md)
@@ -44,6 +45,8 @@ workflows.
   proof point while linking back to the canonical deployment package.
 - The source inventory and key learnings show source-level kernel/runtime maintenance,
   not only benchmark posting.
+- The experimental methodology records strict promotion rules for optimized serving
+  paths, backend metrics, correctness, profiles, and decode ladders.
 - The technical progress summary separates MoE publication evidence from open dense
   RowParallel/RCCL research.
 - The controlled compute model explains why public benefit comes from published
@@ -59,6 +62,12 @@ workflows.
 - Source-level findings.
 - QC and verification methods.
 - Educational documentation.
+
+## Current Review Posture
+
+LocalAIServers already has controlled GFX906 infrastructure, public benchmark proof,
+reproducible deployment artifacts, source-level GFX906 preservation work, strict
+experimental methodology, QC / hardware verification methods, and a public-output model.
 
 ## What Funding Would Scale
 
