@@ -77,7 +77,7 @@ The reproducibility contract is the SHA256 of the exported Docker archive writte
 Current `deploy.sh` SHA256:
 
 ```text
-af14325202ccee5e42e73a72747ab9978113d12804dac1285b1389fec4264a09  deploy.sh
+f44ab315c93f0b74ad2fc93a4c859e3d43ab558be997c7832c3aa299e655745f  deploy.sh
 ```
 
 Run the same `BUILD_ONLY=1 FORCE_REBUILD=1 REPRO_DOCKER_LOAD_ARCHIVE=0` build on two separate gfx906 servers from clean per-run isolated Docker roots. For strict v0.1.0 source reproduction, set:

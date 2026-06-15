@@ -14639,7 +14639,7 @@ if [[ "${AUTO_STAGE_MODEL}" == "1" ]]; then
   MODEL_CACHE_DIR="${HF_CACHE_DIR}/hub/models--${MODEL_SAFE}"
   if [[ ! -d "${MODEL_CACHE_DIR}" || "$(resolve_bool "${AUTO_STAGE_MODEL_FORCE}")" == "1" || ! -f "${MODEL_CACHE_DIR}/config.json" ]]; then
     echo "staging model cache for ${MODEL_REPO_ID} into ${HF_CACHE_DIR}"
-    docker run --rm \
+    docker run --rm -i \
       --network host \
       --entrypoint python3 \
       -v "${HF_CACHE_DIR}:/root/.cache/huggingface" \
