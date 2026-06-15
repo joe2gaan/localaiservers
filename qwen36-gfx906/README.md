@@ -77,7 +77,7 @@ The reproducibility contract is the SHA256 of the exported Docker archive writte
 Current `deploy.sh` SHA256:
 
 ```text
-86f4f94f75f05185e0815329c0b013fbf73ec6b204d9605e166b2797980160f6  deploy.sh
+6264df83c41c95524d796abe9bb1d0ea05978f313ea9e87ed4c0a4685e8d5847  deploy.sh
 ```
 
 Run the same `BUILD_ONLY=1 FORCE_REBUILD=1 REPRO_DOCKER_LOAD_ARCHIVE=0` build on two separate gfx906 servers from clean per-run isolated Docker roots. For strict v0.1.0 source reproduction, set:
@@ -227,6 +227,7 @@ chmod +x deploy.sh
 
 DEPLOY_IMAGE=joe2gaan/localaiservers:qwen36-gfx906-c1-topk8-runtime-archive-aa34cb675f83 \
 DOCKER_ISOLATED_DAEMON_ENABLED=0 \
+HF_HUB_DISABLE_XET=1 \
 USE_PREBUILT_IMAGE=1 \
 PREBUILT_IMAGE_PULL=1 \
 AUTO_STAGE_MODEL=1 \
@@ -235,8 +236,9 @@ AUTO_STAGE_MODEL=1 \
 
 `DOCKER_ISOLATED_DAEMON_ENABLED=0` uses the host Docker daemon for the prebuilt image
 path. Use this path on hosts where the user is in the Docker group but does not have
-noninteractive sudo. Byte-for-byte source rebuild validation is a separate path and
-should set `EXPECTED_REPRO_DOCKER_ARCHIVE_SHA256` as described above.
+noninteractive sudo. `HF_HUB_DISABLE_XET=1` uses the standard Hugging Face download
+path for first-run model staging. Byte-for-byte source rebuild validation is a separate
+path and should set `EXPECTED_REPRO_DOCKER_ARCHIVE_SHA256` as described above.
 
 ### Manual vLLM launch after the image is built
 

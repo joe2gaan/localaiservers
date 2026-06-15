@@ -69,6 +69,7 @@ write_embedded_deploy_env() {
 : "${PATCH_SRC_UTILS:=}"
 : "${AUTO_STAGE_MODEL:=0}"
 : "${HF_TOKEN:=}"
+: "${HF_HUB_DISABLE_XET:=1}"
 : "${MODEL_REPO_ID:=Qwen/Qwen3.6-35B-A3B}"
 : "${AUTO_STAGE_MODEL_FORCE:=0}"
 : "${DOCKER_ISOLATED_DAEMON_ENABLED:=1}"
@@ -1214,6 +1215,9 @@ services:
       TRITON_CACHE_DIR: /root/.triton
       TORCHINDUCTOR_CACHE_DIR: /tmp/torchinductor_root
       VLLM_CACHE_ROOT: /root/.cache/vllm
+      HF_HOME: /root/.cache/huggingface
+      HUGGINGFACE_HUB_CACHE: /root/.cache/huggingface/hub
+      HF_HUB_DISABLE_XET: ${HF_HUB_DISABLE_XET}
       HIP_VISIBLE_DEVICES: ${HIP_VISIBLE_DEVICES}
 COMPOSE
 }
@@ -14634,6 +14638,7 @@ if [[ "${AUTO_STAGE_MODEL}" == "1" ]]; then
       -v "${HF_CACHE_DIR}:/root/.cache/huggingface" \
       -e HF_HOME=/root/.cache/huggingface \
       -e HUGGINGFACE_HUB_CACHE=/root/.cache/huggingface/hub \
+      -e HF_HUB_DISABLE_XET="${HF_HUB_DISABLE_XET}" \
       -e DO_NOT_TRACK=1 \
       ${HF_TOKEN:+-e HUGGINGFACE_HUB_TOKEN="${HF_TOKEN}"} \
       "${STAGE_IMAGE}" - "${MODEL_REPO_ID}" <<'PY'
@@ -14692,6 +14697,7 @@ REQUIRED_GPU_VRAM_GIB=${REQUIRED_GPU_VRAM_GIB}
 REQUIRED_GPU_FREE_VRAM_GIB=${REQUIRED_GPU_FREE_VRAM_GIB}
 
 HF_CACHE_DIR=${HF_CACHE_DIR}
+HF_HUB_DISABLE_XET=${HF_HUB_DISABLE_XET}
 RUNTIME_ROOT=${RUNTIME_ROOT}
 MOE_CONFIG_DIR=${MOE_CONFIG_DIR}
 VLLM_TUNED_CONFIG_FOLDER=${VLLM_TUNED_CONFIG_FOLDER}

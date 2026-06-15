@@ -148,6 +148,7 @@ chmod +x deploy.sh
 
 DEPLOY_IMAGE=joe2gaan/localaiservers:qwen36-gfx906-c1-topk8-runtime-archive-aa34cb675f83 \
 DOCKER_ISOLATED_DAEMON_ENABLED=0 \
+HF_HUB_DISABLE_XET=1 \
 USE_PREBUILT_IMAGE=1 \
 PREBUILT_IMAGE_PULL=1 \
 AUTO_STAGE_MODEL=1 \
@@ -156,8 +157,9 @@ AUTO_STAGE_MODEL=1 \
 
 `DOCKER_ISOLATED_DAEMON_ENABLED=0` uses the host Docker daemon for the prebuilt image
 path, which is the correct path for hosts where the user is in the Docker group but
-does not have noninteractive sudo. Byte-for-byte source rebuild validation remains a
-separate release-reproduction path.
+does not have noninteractive sudo. `HF_HUB_DISABLE_XET=1` uses the standard Hugging
+Face download path for first-run model staging. Byte-for-byte source rebuild validation
+remains a separate release-reproduction path.
 
 The image entrypoint launches vLLM with the tested TP4/O3/Tree-LL command:
 
