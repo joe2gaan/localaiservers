@@ -188,7 +188,16 @@ After the vLLM service is ready:
 python3 ./run_qwen36_live_tps.py
 ```
 
-Reference fixed-token single-request results on the validated 4x MI50 32GB lane:
+Released v0.1.0 fixed-token single-request publication baseline on the validated 4x
+MI50 32GB lane:
+
+```text
+c1_10000: 90+ TPS sustained backend decode publication baseline
+```
+
+The canonical Qwen3.6 README also preserves a newer 95+ TPS 10K validation result for
+the same runtime lane. That result is not part of the v0.1.0 publication release and
+should be cited only after a separate release publishes it:
 
 ```text
 c1_2000:  101.47 TPS backend decode
