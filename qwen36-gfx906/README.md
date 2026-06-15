@@ -77,7 +77,7 @@ The reproducibility contract is the SHA256 of the exported Docker archive writte
 Current `deploy.sh` SHA256:
 
 ```text
-6264df83c41c95524d796abe9bb1d0ea05978f313ea9e87ed4c0a4685e8d5847  deploy.sh
+af14325202ccee5e42e73a72747ab9978113d12804dac1285b1389fec4264a09  deploy.sh
 ```
 
 Run the same `BUILD_ONLY=1 FORCE_REBUILD=1 REPRO_DOCKER_LOAD_ARCHIVE=0` build on two separate gfx906 servers from clean per-run isolated Docker roots. For strict v0.1.0 source reproduction, set:
@@ -239,6 +239,10 @@ path. Use this path on hosts where the user is in the Docker group but does not 
 noninteractive sudo. `HF_HUB_DISABLE_XET=1` uses the standard Hugging Face download
 path for first-run model staging. Byte-for-byte source rebuild validation is a separate
 path and should set `EXPECTED_REPRO_DOCKER_ARCHIVE_SHA256` as described above.
+
+With `AUTO_STAGE_MODEL=1`, `deploy.sh` downloads the model snapshot before launching
+vLLM, retries transient shard download failures, and verifies the safetensor shard
+references before the runtime container is started.
 
 ### Manual vLLM launch after the image is built
 

@@ -158,8 +158,9 @@ AUTO_STAGE_MODEL=1 \
 `DOCKER_ISOLATED_DAEMON_ENABLED=0` uses the host Docker daemon for the prebuilt image
 path, which is the correct path for hosts where the user is in the Docker group but
 does not have noninteractive sudo. `HF_HUB_DISABLE_XET=1` uses the standard Hugging
-Face download path for first-run model staging. Byte-for-byte source rebuild validation
-remains a separate release-reproduction path.
+Face download path for first-run model staging. With `AUTO_STAGE_MODEL=1`, the script
+downloads and verifies the model snapshot before launching vLLM. Byte-for-byte source
+rebuild validation remains a separate release-reproduction path.
 
 The image entrypoint launches vLLM with the tested TP4/O3/Tree-LL command:
 

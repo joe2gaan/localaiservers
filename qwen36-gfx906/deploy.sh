@@ -70,6 +70,11 @@ write_embedded_deploy_env() {
 : "${AUTO_STAGE_MODEL:=0}"
 : "${HF_TOKEN:=}"
 : "${HF_HUB_DISABLE_XET:=1}"
+: "${HF_HUB_DOWNLOAD_TIMEOUT:=120}"
+: "${HF_HUB_ETAG_TIMEOUT:=30}"
+: "${HF_HUB_DOWNLOAD_MAX_WORKERS:=4}"
+: "${MODEL_STAGE_RETRIES:=6}"
+: "${MODEL_STAGE_RETRY_SLEEP_SECONDS:=15}"
 : "${MODEL_REPO_ID:=Qwen/Qwen3.6-35B-A3B}"
 : "${AUTO_STAGE_MODEL_FORCE:=0}"
 : "${DOCKER_ISOLATED_DAEMON_ENABLED:=1}"
@@ -1218,6 +1223,8 @@ services:
       HF_HOME: /root/.cache/huggingface
       HUGGINGFACE_HUB_CACHE: /root/.cache/huggingface/hub
       HF_HUB_DISABLE_XET: ${HF_HUB_DISABLE_XET}
+      HF_HUB_DOWNLOAD_TIMEOUT: ${HF_HUB_DOWNLOAD_TIMEOUT}
+      HF_HUB_ETAG_TIMEOUT: ${HF_HUB_ETAG_TIMEOUT}
       HIP_VISIBLE_DEVICES: ${HIP_VISIBLE_DEVICES}
 COMPOSE
 }
@@ -14639,11 +14646,20 @@ if [[ "${AUTO_STAGE_MODEL}" == "1" ]]; then
       -e HF_HOME=/root/.cache/huggingface \
       -e HUGGINGFACE_HUB_CACHE=/root/.cache/huggingface/hub \
       -e HF_HUB_DISABLE_XET="${HF_HUB_DISABLE_XET}" \
+      -e HF_HUB_DOWNLOAD_TIMEOUT="${HF_HUB_DOWNLOAD_TIMEOUT}" \
+      -e HF_HUB_ETAG_TIMEOUT="${HF_HUB_ETAG_TIMEOUT}" \
+      -e HF_HUB_DOWNLOAD_MAX_WORKERS="${HF_HUB_DOWNLOAD_MAX_WORKERS}" \
+      -e MODEL_STAGE_RETRIES="${MODEL_STAGE_RETRIES}" \
+      -e MODEL_STAGE_RETRY_SLEEP_SECONDS="${MODEL_STAGE_RETRY_SLEEP_SECONDS}" \
       -e DO_NOT_TRACK=1 \
       ${HF_TOKEN:+-e HUGGINGFACE_HUB_TOKEN="${HF_TOKEN}"} \
       "${STAGE_IMAGE}" - "${MODEL_REPO_ID}" <<'PY'
+import json
+import os
 import sys
 import subprocess
+import time
+from pathlib import Path
 
 try:
   from huggingface_hub import snapshot_download
@@ -14655,9 +14671,43 @@ if len(sys.argv) != 2:
   raise SystemExit('expected model id argument')
 
 model_id = sys.argv[1]
-print(f'staging {model_id}')
-path = snapshot_download(repo_id=model_id)
-print(f'staged {model_id} at {path}')
+max_workers = int(os.environ.get('HF_HUB_DOWNLOAD_MAX_WORKERS', '4'))
+retries = int(os.environ.get('MODEL_STAGE_RETRIES', '6'))
+retry_sleep = int(os.environ.get('MODEL_STAGE_RETRY_SLEEP_SECONDS', '15'))
+
+def verify_snapshot(snapshot_path: str) -> None:
+  root = Path(snapshot_path)
+  index_path = root / 'model.safetensors.index.json'
+  if index_path.exists():
+    with index_path.open('r', encoding='utf-8') as f:
+      index = json.load(f)
+    expected = sorted(set(index.get('weight_map', {}).values()))
+    if not expected:
+      raise RuntimeError(f'{index_path} has no weight_map entries')
+    missing = [name for name in expected if not (root / name).is_file()]
+    if missing:
+      raise RuntimeError(f'missing {len(missing)} safetensors shards after staging: {missing[:5]}')
+    print(f'verified {len(expected)} safetensors shard references', flush=True)
+  else:
+    shards = sorted(root.glob('*.safetensors'))
+    if not shards:
+      raise RuntimeError('no safetensors shards found after staging')
+    print(f'verified {len(shards)} safetensors shard files', flush=True)
+
+last_error = None
+for attempt in range(1, retries + 1):
+  try:
+    print(f'staging {model_id} attempt {attempt}/{retries} with max_workers={max_workers}', flush=True)
+    path = snapshot_download(repo_id=model_id, max_workers=max_workers)
+    verify_snapshot(path)
+    print(f'staged {model_id} at {path}', flush=True)
+    break
+  except Exception as exc:
+    last_error = exc
+    print(f'warning: staging attempt {attempt}/{retries} failed: {exc}', file=sys.stderr, flush=True)
+    if attempt == retries:
+      raise
+    time.sleep(retry_sleep)
 PY
   else
     echo "using existing model cache at ${MODEL_CACHE_DIR}"
@@ -14698,6 +14748,11 @@ REQUIRED_GPU_FREE_VRAM_GIB=${REQUIRED_GPU_FREE_VRAM_GIB}
 
 HF_CACHE_DIR=${HF_CACHE_DIR}
 HF_HUB_DISABLE_XET=${HF_HUB_DISABLE_XET}
+HF_HUB_DOWNLOAD_TIMEOUT=${HF_HUB_DOWNLOAD_TIMEOUT}
+HF_HUB_ETAG_TIMEOUT=${HF_HUB_ETAG_TIMEOUT}
+HF_HUB_DOWNLOAD_MAX_WORKERS=${HF_HUB_DOWNLOAD_MAX_WORKERS}
+MODEL_STAGE_RETRIES=${MODEL_STAGE_RETRIES}
+MODEL_STAGE_RETRY_SLEEP_SECONDS=${MODEL_STAGE_RETRY_SLEEP_SECONDS}
 RUNTIME_ROOT=${RUNTIME_ROOT}
 MOE_CONFIG_DIR=${MOE_CONFIG_DIR}
 VLLM_TUNED_CONFIG_FOLDER=${VLLM_TUNED_CONFIG_FOLDER}
