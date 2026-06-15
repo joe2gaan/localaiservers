@@ -70,19 +70,21 @@ The runtime image is emitted from a final `FROM scratch` stage that copies only 
 
 The final runtime stage is split into deterministic copy layers around the large ROCm, PyTorch, and Triton-cache payloads. This preserves the cleaned runtime filesystem while avoiding a single 60+ GB registry layer; the same pinned BuildKit `type=docker,dest=...,rewrite-timestamp=true` exporter still writes the canonical archive.
 
-The reproducibility contract is the SHA256 of the exported Docker archive written under `./.repro-docker-archives/`. Docker Engine can report different local image IDs on different storage backends after loading the same archive, so compare the `.docker.tar.sha256` file for byte-for-byte reproduction.
+The reproducibility contract is the SHA256 of the exported Docker archive written under `./.repro-docker-archives/`. Docker Engine can report different local image IDs on different storage backends after loading the same archive, so compare the `.docker.tar.sha256` file for byte-for-byte reproduction. Current `deploy.sh` defaults to `BYTE_FOR_BYTE_VALIDATION_MODE=1`, which checks the exported archive against the published release target and exits non-zero on a mismatch.
 
 ### Byte-for-byte validation
 
-Current split-layer `deploy.sh` SHA256:
+Current `deploy.sh` SHA256:
 
 ```text
-0392affe7194f35d5e596c7e0f6b29f65f84c4e38f6e281952332f298a9c1991  deploy.sh
+445c715c6e7cd19481bd49c7a8ea8dee2de889464425b48385a9d5d3279f2843  deploy.sh
 ```
 
-Run the same `BUILD_ONLY=1 FORCE_REBUILD=1 REPRO_DOCKER_LOAD_ARCHIVE=0` build on two separate gfx906 servers from clean per-run isolated Docker roots, then compare the generated `.docker.tar.sha256` files.
+Run the same `BUILD_ONLY=1 FORCE_REBUILD=1 REPRO_DOCKER_LOAD_ARCHIVE=0` build on two separate gfx906 servers from clean per-run isolated Docker roots. By default, `BYTE_FOR_BYTE_VALIDATION_MODE=1` checks the generated `.docker.tar.sha256` against the expected release archive SHA and fails the source-build path if it differs.
 
-The current split-layer final runtime build was validated on two independent GFX906 hosts using clean per-run working directories.
+Use `BYTE_FOR_BYTE_VALIDATION_MODE=0` only for non-canonical local deploys or diagnostics where no byte-for-byte release-reproduction claim is being made. A source build that requires this override is not evidence that the published release archive was reproduced.
+
+The v0.1.0 split-layer final runtime build was validated on two independent GFX906 hosts using clean per-run working directories.
 
 Both hosts produced this canonical split-layer archive hash:
 
@@ -189,7 +191,7 @@ The source runtime archive used for the currently published Docker Hub tag was v
 aa34cb675f83ff6cade31cbbb357b1c31d793bee18da491f501d7c39fda3612a
 ```
 
-Current `deploy.sh` builds the split-layer runtime archive directly. Clean rebuilds on two independent GFX906 hosts both produced `aa34cb675f83ff6cade31cbbb357b1c31d793bee18da491f501d7c39fda3612a`; the Docker Hub tag above was pushed from that verified image. The manifest digest above is the exact Docker Hub identity for the currently published tag, and the registry config digest matches the tested local image ID: `sha256:e45309183e6f35cae6fb8f9d8d6f016253f281a5e7187e1f11a57e5e28ef5e86`.
+The Docker Hub tag above is the exact prebuilt image identity for the currently published runtime. The release-reproduction source-build target is the archive SHA shown above. Current `deploy.sh` builds the split-layer runtime archive directly and defaults to `BYTE_FOR_BYTE_VALIDATION_MODE=1`; in that mode, a source archive SHA mismatch is an error and the build is not release-reproduction evidence. The manifest digest above is the exact Docker Hub identity for the currently published tag, and the registry config digest matches the tested local image ID: `sha256:e45309183e6f35cae6fb8f9d8d6f016253f281a5e7187e1f11a57e5e28ef5e86`.
 
 Publishing to the `joe2gaan/localaiservers` Docker Hub repository is maintainer-only.
 Public users should not attempt to push images to the LocalAIServers Docker Hub

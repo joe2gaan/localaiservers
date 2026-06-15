@@ -101,6 +101,8 @@ write_embedded_deploy_env() {
 : "${REPRO_DOCKER_ARCHIVE_DIR:=./.repro-docker-archives}"
 : "${REPRO_DOCKER_ARCHIVE_NAME:=${DEPLOY_IMAGE//\//_}.docker.tar}"
 : "${REPRO_DOCKER_ARCHIVE_PATH:=}"
+: "${BYTE_FOR_BYTE_VALIDATION_MODE:=1}"
+: "${EXPECTED_REPRO_DOCKER_ARCHIVE_SHA256:=aa34cb675f83ff6cade31cbbb357b1c31d793bee18da491f501d7c39fda3612a}"
 : "${MIN_FREE_GIB_REPRO_DOCKER_ARCHIVE:=180}"
 : "${PINNED_BUILDX_ENABLED:=1}"
 : "${PINNED_BUILDX_VERSION:=0.30.1}"
@@ -12867,6 +12869,38 @@ resolve_bool() {
   esac
 }
 
+validate_repro_docker_archive_sha() {
+  local archive_path="$1"
+  local actual_sha="$2"
+
+  if [[ "$(resolve_bool "${BYTE_FOR_BYTE_VALIDATION_MODE:-1}")" != "1" ]]; then
+    echo "warning: BYTE_FOR_BYTE_VALIDATION_MODE=0; skipping exported Docker archive SHA validation" >&2
+    echo "warning: this build is a local deploy artifact, not byte-for-byte evidence for the published release" >&2
+    return 0
+  fi
+
+  if [[ -z "${EXPECTED_REPRO_DOCKER_ARCHIVE_SHA256:-}" ]]; then
+    echo "error: BYTE_FOR_BYTE_VALIDATION_MODE=1 but EXPECTED_REPRO_DOCKER_ARCHIVE_SHA256 is empty" >&2
+    return 1
+  fi
+
+  if [[ -z "${actual_sha}" ]]; then
+    echo "error: could not read Docker archive SHA for ${archive_path}" >&2
+    return 1
+  fi
+
+  if [[ "${actual_sha}" != "${EXPECTED_REPRO_DOCKER_ARCHIVE_SHA256}" ]]; then
+    echo "error: byte-for-byte Docker archive SHA mismatch" >&2
+    echo "expected: ${EXPECTED_REPRO_DOCKER_ARCHIVE_SHA256}" >&2
+    echo "actual:   ${actual_sha}" >&2
+    echo "archive:  ${archive_path}" >&2
+    echo "Set BYTE_FOR_BYTE_VALIDATION_MODE=0 only for non-canonical local deploys where release reproduction is not being claimed." >&2
+    return 1
+  fi
+
+  echo "byte-for-byte Docker archive SHA verified: ${actual_sha}"
+}
+
 prompt_continue_on_gpu_gate_failure() {
   local reason="$1"
 
@@ -14032,8 +14066,11 @@ build_image_reproducibly_with_buildctl_daemonless() {
       --progress="${BUILDKIT_PROGRESS:-plain}"
 
   if [[ "${keep_archive}" == "1" ]]; then
+    local archive_sha
     echo "reproducible docker archive: ${archive_path}"
     sha256sum "${archive_path}" | tee "${archive_path}.sha256"
+    archive_sha="$(awk '{print $1}' "${archive_path}.sha256")"
+    validate_repro_docker_archive_sha "${archive_path}" "${archive_sha}"
     if [[ "$(resolve_bool "${REPRO_DOCKER_LOAD_ARCHIVE:-1}")" == "1" && "$(resolve_bool "${BUILD_ONLY:-0}")" == "0" ]]; then
       echo "loading reproducible docker archive into active Docker daemon"
       docker load -i "${archive_path}"
@@ -14092,8 +14129,11 @@ build_image_reproducibly_with_buildx() {
   "${build_args[@]}"
 
   if [[ "$(resolve_bool "${REPRO_EXPORT_DOCKER_ARCHIVE:-1}")" == "1" ]]; then
+    local archive_sha
     echo "reproducible docker archive: ${REPRO_DOCKER_ARCHIVE_PATH}"
     sha256sum "${REPRO_DOCKER_ARCHIVE_PATH}" | tee "${REPRO_DOCKER_ARCHIVE_PATH}.sha256"
+    archive_sha="$(awk '{print $1}' "${REPRO_DOCKER_ARCHIVE_PATH}.sha256")"
+    validate_repro_docker_archive_sha "${REPRO_DOCKER_ARCHIVE_PATH}" "${archive_sha}"
     if [[ "$(resolve_bool "${REPRO_DOCKER_LOAD_ARCHIVE:-1}")" == "1" && "$(resolve_bool "${BUILD_ONLY:-0}")" == "0" ]]; then
       echo "loading reproducible docker archive into active Docker daemon"
       docker load -i "${REPRO_DOCKER_ARCHIVE_PATH}"
@@ -14341,6 +14381,8 @@ REPRO_DOCKER_LOAD_ARCHIVE="${REPRO_DOCKER_LOAD_ARCHIVE:-1}"
 REPRO_DOCKER_ARCHIVE_DIR="${REPRO_DOCKER_ARCHIVE_DIR:-./.repro-docker-archives}"
 REPRO_DOCKER_ARCHIVE_NAME="${REPRO_DOCKER_ARCHIVE_NAME:-${DEPLOY_IMAGE//\//_}.docker.tar}"
 REPRO_DOCKER_ARCHIVE_PATH="${REPRO_DOCKER_ARCHIVE_PATH:-}"
+BYTE_FOR_BYTE_VALIDATION_MODE="${BYTE_FOR_BYTE_VALIDATION_MODE:-1}"
+EXPECTED_REPRO_DOCKER_ARCHIVE_SHA256="${EXPECTED_REPRO_DOCKER_ARCHIVE_SHA256:-aa34cb675f83ff6cade31cbbb357b1c31d793bee18da491f501d7c39fda3612a}"
 MIN_FREE_GIB_REPRO_DOCKER_ARCHIVE="${MIN_FREE_GIB_REPRO_DOCKER_ARCHIVE:-180}"
 HIP_VISIBLE_DEVICES="${HIP_VISIBLE_DEVICES:-auto}"
 GPU_AUTO_SELECT="${GPU_AUTO_SELECT:-1}"
@@ -14381,6 +14423,14 @@ if [[ -z "${REPRO_DOCKER_ARCHIVE_PATH}" ]]; then
 else
   REPRO_DOCKER_ARCHIVE_PATH="$(abs_path "${REPRO_DOCKER_ARCHIVE_PATH}" "${RUN_DIR}")"
   REPRO_DOCKER_ARCHIVE_DIR="$(dirname "${REPRO_DOCKER_ARCHIVE_PATH}")"
+fi
+
+if [[ "$(resolve_bool "${BYTE_FOR_BYTE_VALIDATION_MODE}")" == "1" && "$(resolve_bool "${USE_PREBUILT_IMAGE}")" != "1" ]]; then
+  if [[ "$(resolve_bool "${DOCKER_REPRODUCIBLE_BUILDX_EXPORT:-1}")" != "1" || "$(resolve_bool "${REPRO_EXPORT_DOCKER_ARCHIVE}")" != "1" ]]; then
+    echo "error: BYTE_FOR_BYTE_VALIDATION_MODE=1 requires DOCKER_REPRODUCIBLE_BUILDX_EXPORT=1 and REPRO_EXPORT_DOCKER_ARCHIVE=1 for source builds" >&2
+    echo "Set BYTE_FOR_BYTE_VALIDATION_MODE=0 only for non-canonical local deploys where release reproduction is not being claimed." >&2
+    exit 1
+  fi
 fi
 
 TRITON_CACHE_HOST="${RUNTIME_ROOT}/root/.triton"
@@ -14655,6 +14705,9 @@ DOCKER_REPRODUCIBLE_BUILDX_EXPORT=${DOCKER_REPRODUCIBLE_BUILDX_EXPORT}
 DOCKER_REPRODUCIBLE_EXPORT_MODE=${DOCKER_REPRODUCIBLE_EXPORT_MODE}
 DOCKER_REPRODUCIBLE_EXPORTER_PROBE=${DOCKER_REPRODUCIBLE_EXPORTER_PROBE}
 REPRO_DOCKER_LOAD_ARCHIVE=${REPRO_DOCKER_LOAD_ARCHIVE}
+REPRO_DOCKER_ARCHIVE_PATH=${REPRO_DOCKER_ARCHIVE_PATH}
+BYTE_FOR_BYTE_VALIDATION_MODE=${BYTE_FOR_BYTE_VALIDATION_MODE}
+EXPECTED_REPRO_DOCKER_ARCHIVE_SHA256=${EXPECTED_REPRO_DOCKER_ARCHIVE_SHA256}
 EOF
 
 export BUILDKIT_PROGRESS="${BUILDKIT_PROGRESS:-plain}"

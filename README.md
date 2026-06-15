@@ -174,10 +174,14 @@ vllm serve Qwen/Qwen3.6-35B-A3B \
   --language-model-only
 ```
 
-The currently published Docker Hub image is the 29-layer runtime produced by clean
-source rebuilds on two independent GFX906 hosts. Both rebuilds produced the same source
-archive SHA-256: `aa34cb675f83ff6cade31cbbb357b1c31d793bee18da491f501d7c39fda3612a`. The
-public Docker Hub manifest digest is
+The currently published Docker Hub image is the 29-layer runtime associated with the
+strict byte-for-byte source-archive validation target
+`aa34cb675f83ff6cade31cbbb357b1c31d793bee18da491f501d7c39fda3612a`. Source rebuilds
+should be treated as release-reproduction evidence only when the exported Docker archive
+matches that SHA-256. Current `deploy.sh` defaults to `BYTE_FOR_BYTE_VALIDATION_MODE=1`,
+which fails the source-build path on a mismatch; set `BYTE_FOR_BYTE_VALIDATION_MODE=0`
+only for non-canonical local deploys where no release-reproduction claim is being made.
+The prebuilt image path is validated separately by Docker Hub manifest digest:
 `sha256:f5e69ee127b766960e386e0e4eda8e26c399bd02f57c494847cb9a92ce04d8ac`, and the
 registry config digest matches the tested local image ID:
 `sha256:e45309183e6f35cae6fb8f9d8d6f016253f281a5e7187e1f11a57e5e28ef5e86`.
