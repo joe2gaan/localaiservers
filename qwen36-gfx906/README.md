@@ -70,19 +70,27 @@ The runtime image is emitted from a final `FROM scratch` stage that copies only 
 
 The final runtime stage is split into deterministic copy layers around the large ROCm, PyTorch, and Triton-cache payloads. This preserves the cleaned runtime filesystem while avoiding a single 60+ GB registry layer; the same pinned BuildKit `type=docker,dest=...,rewrite-timestamp=true` exporter still writes the canonical archive.
 
-The reproducibility contract is the SHA256 of the exported Docker archive written under `./.repro-docker-archives/`. Docker Engine can report different local image IDs on different storage backends after loading the same archive, so compare the `.docker.tar.sha256` file for byte-for-byte reproduction. Current `deploy.sh` defaults to `BYTE_FOR_BYTE_VALIDATION_MODE=1`, which checks the exported archive against the published release target and exits non-zero on a mismatch.
+The reproducibility contract is the SHA256 of the exported Docker archive written under `./.repro-docker-archives/`. Docker Engine can report different local image IDs on different storage backends after loading the same archive, so compare the `.docker.tar.sha256` file for byte-for-byte reproduction. The live `main` deploy script defaults to `BYTE_FOR_BYTE_VALIDATION_MODE=auto`, which records the exported archive SHA and enforces a byte-for-byte target only when `EXPECTED_REPRO_DOCKER_ARCHIVE_SHA256` is set.
 
 ### Byte-for-byte validation
 
 Current `deploy.sh` SHA256:
 
 ```text
-445c715c6e7cd19481bd49c7a8ea8dee2de889464425b48385a9d5d3279f2843  deploy.sh
+86f4f94f75f05185e0815329c0b013fbf73ec6b204d9605e166b2797980160f6  deploy.sh
 ```
 
-Run the same `BUILD_ONLY=1 FORCE_REBUILD=1 REPRO_DOCKER_LOAD_ARCHIVE=0` build on two separate gfx906 servers from clean per-run isolated Docker roots. By default, `BYTE_FOR_BYTE_VALIDATION_MODE=1` checks the generated `.docker.tar.sha256` against the expected release archive SHA and fails the source-build path if it differs.
+Run the same `BUILD_ONLY=1 FORCE_REBUILD=1 REPRO_DOCKER_LOAD_ARCHIVE=0` build on two separate gfx906 servers from clean per-run isolated Docker roots. For strict v0.1.0 source reproduction, set:
 
-Use `BYTE_FOR_BYTE_VALIDATION_MODE=0` only for non-canonical local deploys or diagnostics where no byte-for-byte release-reproduction claim is being made. A source build that requires this override is not evidence that the published release archive was reproduced.
+```bash
+EXPECTED_REPRO_DOCKER_ARCHIVE_SHA256=aa34cb675f83ff6cade31cbbb357b1c31d793bee18da491f501d7c39fda3612a \
+BUILD_ONLY=1 \
+FORCE_REBUILD=1 \
+REPRO_DOCKER_LOAD_ARCHIVE=0 \
+./deploy.sh
+```
+
+With `BYTE_FOR_BYTE_VALIDATION_MODE=auto`, the expected SHA above makes a mismatch fail the source-build path. Use `BYTE_FOR_BYTE_VALIDATION_MODE=1` when you want an error if no expected archive SHA is configured. Use `BYTE_FOR_BYTE_VALIDATION_MODE=0` only for non-canonical local deploys or diagnostics where no byte-for-byte release-reproduction claim is being made. A source build that requires this override is not evidence that the published release archive was reproduced.
 
 The v0.1.0 split-layer final runtime build was validated on two independent GFX906 hosts using clean per-run working directories.
 
@@ -191,7 +199,7 @@ The source runtime archive used for the currently published Docker Hub tag was v
 aa34cb675f83ff6cade31cbbb357b1c31d793bee18da491f501d7c39fda3612a
 ```
 
-The Docker Hub tag above is the exact prebuilt image identity for the currently published runtime. The release-reproduction source-build target is the archive SHA shown above. Current `deploy.sh` builds the split-layer runtime archive directly and defaults to `BYTE_FOR_BYTE_VALIDATION_MODE=1`; in that mode, a source archive SHA mismatch is an error and the build is not release-reproduction evidence. The manifest digest above is the exact Docker Hub identity for the currently published tag, and the registry config digest matches the tested local image ID: `sha256:e45309183e6f35cae6fb8f9d8d6f016253f281a5e7187e1f11a57e5e28ef5e86`.
+The Docker Hub tag above is the exact prebuilt image identity for the currently published runtime. The release-reproduction source-build target is the archive SHA shown above. Current `deploy.sh` builds the split-layer runtime archive directly and defaults to `BYTE_FOR_BYTE_VALIDATION_MODE=auto`; set `EXPECTED_REPRO_DOCKER_ARCHIVE_SHA256` to the release archive SHA when source-reproducing v0.1.0. A source archive SHA mismatch in that mode is an error and the build is not release-reproduction evidence. The manifest digest above is the exact Docker Hub identity for the currently published tag, and the registry config digest matches the tested local image ID: `sha256:e45309183e6f35cae6fb8f9d8d6f016253f281a5e7187e1f11a57e5e28ef5e86`.
 
 Publishing to the `joe2gaan/localaiservers` Docker Hub repository is maintainer-only.
 Public users should not attempt to push images to the LocalAIServers Docker Hub

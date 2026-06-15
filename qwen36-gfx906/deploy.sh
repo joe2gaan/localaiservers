@@ -101,8 +101,8 @@ write_embedded_deploy_env() {
 : "${REPRO_DOCKER_ARCHIVE_DIR:=./.repro-docker-archives}"
 : "${REPRO_DOCKER_ARCHIVE_NAME:=${DEPLOY_IMAGE//\//_}.docker.tar}"
 : "${REPRO_DOCKER_ARCHIVE_PATH:=}"
-: "${BYTE_FOR_BYTE_VALIDATION_MODE:=1}"
-: "${EXPECTED_REPRO_DOCKER_ARCHIVE_SHA256:=aa34cb675f83ff6cade31cbbb357b1c31d793bee18da491f501d7c39fda3612a}"
+: "${BYTE_FOR_BYTE_VALIDATION_MODE:=auto}"
+: "${EXPECTED_REPRO_DOCKER_ARCHIVE_SHA256:=}"
 : "${MIN_FREE_GIB_REPRO_DOCKER_ARCHIVE:=180}"
 : "${PINNED_BUILDX_ENABLED:=1}"
 : "${PINNED_BUILDX_VERSION:=0.30.1}"
@@ -12872,20 +12872,28 @@ resolve_bool() {
 validate_repro_docker_archive_sha() {
   local archive_path="$1"
   local actual_sha="$2"
+  local mode="${BYTE_FOR_BYTE_VALIDATION_MODE:-auto}"
+  mode="${mode,,}"
 
-  if [[ "$(resolve_bool "${BYTE_FOR_BYTE_VALIDATION_MODE:-1}")" != "1" ]]; then
+  if [[ "$(resolve_bool "${mode}")" != "1" && "${mode}" != "auto" ]]; then
     echo "warning: BYTE_FOR_BYTE_VALIDATION_MODE=0; skipping exported Docker archive SHA validation" >&2
     echo "warning: this build is a local deploy artifact, not byte-for-byte evidence for the published release" >&2
     return 0
   fi
 
-  if [[ -z "${EXPECTED_REPRO_DOCKER_ARCHIVE_SHA256:-}" ]]; then
-    echo "error: BYTE_FOR_BYTE_VALIDATION_MODE=1 but EXPECTED_REPRO_DOCKER_ARCHIVE_SHA256 is empty" >&2
+  if [[ -z "${actual_sha}" ]]; then
+    echo "error: could not read Docker archive SHA for ${archive_path}" >&2
     return 1
   fi
 
-  if [[ -z "${actual_sha}" ]]; then
-    echo "error: could not read Docker archive SHA for ${archive_path}" >&2
+  if [[ -z "${EXPECTED_REPRO_DOCKER_ARCHIVE_SHA256:-}" ]]; then
+    if [[ "${mode}" == "auto" ]]; then
+      echo "warning: BYTE_FOR_BYTE_VALIDATION_MODE=auto and EXPECTED_REPRO_DOCKER_ARCHIVE_SHA256 is empty" >&2
+      echo "warning: recorded archive SHA ${actual_sha}; no release byte-for-byte target was enforced" >&2
+      echo "warning: set EXPECTED_REPRO_DOCKER_ARCHIVE_SHA256 for strict release reproduction, or BYTE_FOR_BYTE_VALIDATION_MODE=0 for local deploys" >&2
+      return 0
+    fi
+    echo "error: BYTE_FOR_BYTE_VALIDATION_MODE=1 requires EXPECTED_REPRO_DOCKER_ARCHIVE_SHA256" >&2
     return 1
   fi
 
@@ -14381,8 +14389,8 @@ REPRO_DOCKER_LOAD_ARCHIVE="${REPRO_DOCKER_LOAD_ARCHIVE:-1}"
 REPRO_DOCKER_ARCHIVE_DIR="${REPRO_DOCKER_ARCHIVE_DIR:-./.repro-docker-archives}"
 REPRO_DOCKER_ARCHIVE_NAME="${REPRO_DOCKER_ARCHIVE_NAME:-${DEPLOY_IMAGE//\//_}.docker.tar}"
 REPRO_DOCKER_ARCHIVE_PATH="${REPRO_DOCKER_ARCHIVE_PATH:-}"
-BYTE_FOR_BYTE_VALIDATION_MODE="${BYTE_FOR_BYTE_VALIDATION_MODE:-1}"
-EXPECTED_REPRO_DOCKER_ARCHIVE_SHA256="${EXPECTED_REPRO_DOCKER_ARCHIVE_SHA256:-aa34cb675f83ff6cade31cbbb357b1c31d793bee18da491f501d7c39fda3612a}"
+BYTE_FOR_BYTE_VALIDATION_MODE="${BYTE_FOR_BYTE_VALIDATION_MODE:-auto}"
+EXPECTED_REPRO_DOCKER_ARCHIVE_SHA256="${EXPECTED_REPRO_DOCKER_ARCHIVE_SHA256:-}"
 MIN_FREE_GIB_REPRO_DOCKER_ARCHIVE="${MIN_FREE_GIB_REPRO_DOCKER_ARCHIVE:-180}"
 HIP_VISIBLE_DEVICES="${HIP_VISIBLE_DEVICES:-auto}"
 GPU_AUTO_SELECT="${GPU_AUTO_SELECT:-1}"
@@ -14425,9 +14433,17 @@ else
   REPRO_DOCKER_ARCHIVE_DIR="$(dirname "${REPRO_DOCKER_ARCHIVE_PATH}")"
 fi
 
-if [[ "$(resolve_bool "${BYTE_FOR_BYTE_VALIDATION_MODE}")" == "1" && "$(resolve_bool "${USE_PREBUILT_IMAGE}")" != "1" ]]; then
+BYTE_FOR_BYTE_VALIDATION_MODE_NORMALIZED="${BYTE_FOR_BYTE_VALIDATION_MODE,,}"
+BYTE_FOR_BYTE_VALIDATION_REQUIRES_ARCHIVE=0
+if [[ "$(resolve_bool "${BYTE_FOR_BYTE_VALIDATION_MODE_NORMALIZED}")" == "1" ]]; then
+  BYTE_FOR_BYTE_VALIDATION_REQUIRES_ARCHIVE=1
+elif [[ "${BYTE_FOR_BYTE_VALIDATION_MODE_NORMALIZED}" == "auto" && -n "${EXPECTED_REPRO_DOCKER_ARCHIVE_SHA256}" ]]; then
+  BYTE_FOR_BYTE_VALIDATION_REQUIRES_ARCHIVE=1
+fi
+
+if [[ "${BYTE_FOR_BYTE_VALIDATION_REQUIRES_ARCHIVE}" == "1" && "$(resolve_bool "${USE_PREBUILT_IMAGE}")" != "1" ]]; then
   if [[ "$(resolve_bool "${DOCKER_REPRODUCIBLE_BUILDX_EXPORT:-1}")" != "1" || "$(resolve_bool "${REPRO_EXPORT_DOCKER_ARCHIVE}")" != "1" ]]; then
-    echo "error: BYTE_FOR_BYTE_VALIDATION_MODE=1 requires DOCKER_REPRODUCIBLE_BUILDX_EXPORT=1 and REPRO_EXPORT_DOCKER_ARCHIVE=1 for source builds" >&2
+    echo "error: byte-for-byte archive validation requires DOCKER_REPRODUCIBLE_BUILDX_EXPORT=1 and REPRO_EXPORT_DOCKER_ARCHIVE=1 for source builds" >&2
     echo "Set BYTE_FOR_BYTE_VALIDATION_MODE=0 only for non-canonical local deploys where release reproduction is not being claimed." >&2
     exit 1
   fi
