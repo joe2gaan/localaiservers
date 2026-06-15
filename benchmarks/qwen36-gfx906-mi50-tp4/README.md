@@ -18,19 +18,19 @@ Instinct MI50 32GB.
 - Docker Hub digest:
   `sha256:f5e69ee127b766960e386e0e4eda8e26c399bd02f57c494847cb9a92ce04d8ac`.
 
-## Reference Results
+## Publication Result
 
-The canonical technical README reports:
+This benchmark artifact should be cited as the reproducible 90+ TPS sustained 10K
+publication baseline for the documented GFX906 MI50 TP4 runtime lane.
 
 ```text
-c1_2000:  101.47 TPS backend decode
-c1_10000:  95.66 TPS backend decode
-c1_10000:  95.36 client wall TPS
+c1_10000: 90+ TPS sustained backend decode publication baseline
 ```
 
-These are fixed-token single-request reference results for the documented runtime lane.
-They are not general claims about all prompts, all workloads, all GFX906 systems, or
-officially supported performance.
+The canonical technical README preserves exact run tables, commands, and reproduction
+details. This benchmark summary is intentionally framed as the publication baseline,
+not as a latest-result announcement or general claim about all prompts, workloads,
+GFX906 systems, or officially supported performance.
 
 ## Reproduction Link
 

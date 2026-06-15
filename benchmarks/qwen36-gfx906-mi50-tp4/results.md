@@ -2,22 +2,20 @@
 
 This file includes only numbers already present in the public repository.
 
-## Fixed-Token Single-Request Results
+## Publication Baseline
 
 ```text
-c1_2000:  101.47 TPS backend decode
-c1_10000:  95.66 TPS backend decode
-c1_10000:  95.36 client wall TPS
+c1_10000: 90+ TPS sustained backend decode publication baseline
 ```
 
 ## Interpretation
 
-- `c1_2000` is reported as backend decode TPS.
-- `c1_10000` includes both backend decode TPS and client wall TPS.
-- Backend decode TPS and client wall TPS are separate metrics.
+- `c1_10000` is the sustained 10K-token publication lane for this release artifact.
 - The sustained public headline is the documented 90+ TPS backend decode result.
-- The 100+ TPS result is a shorter fixed-token backend decode result and should be cited
-  with that context.
+- Exact run tables, shorter fixed-token results, and later measurements are kept in the
+  canonical technical deployment README, where they can be cited with full reproduction
+  context.
+- Backend decode TPS and client wall TPS are separate metrics.
 
 ## Result Categories
 
@@ -25,4 +23,4 @@ c1_10000:  95.36 client wall TPS
 - Publication gate: yes, for the reproducible Qwen3.6 GFX906 MI50 TP4 public artifact.
 - Source milestone: not claimed by this benchmark summary alone.
 - Current winner: not claimed here; use the canonical technical README and current
-  source records for any future winner language.
+  source records for any future winner or latest-result language.
