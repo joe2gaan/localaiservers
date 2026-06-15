@@ -12,9 +12,11 @@ c1_10000: 90+ TPS sustained backend decode publication baseline
 
 - `c1_10000` is the sustained 10K-token publication lane for this release artifact.
 - The sustained public headline is the documented 90+ TPS backend decode result.
-- Exact run tables, shorter fixed-token results, and later measurements are kept in the
-  canonical technical deployment README, where they can be cited with full reproduction
-  context.
+- LocalAIServers has reached 95+ TPS on Qwen3.6 10K decode, but that version is outside
+  this v0.1.0 publication release and should be cited only after it is published
+  separately.
+- Exact run tables and shorter fixed-token results are kept in the canonical technical
+  deployment README, where they can be cited with full reproduction context.
 - Backend decode TPS and client wall TPS are separate metrics.
 
 ## Result Categories

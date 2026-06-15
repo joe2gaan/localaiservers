@@ -32,6 +32,10 @@ details. This benchmark summary is intentionally framed as the publication basel
 not as a latest-result announcement or general claim about all prompts, workloads,
 GFX906 systems, or officially supported performance.
 
+LocalAIServers has reached 95+ TPS on Qwen3.6 10K decode, but that version is outside
+this v0.1.0 publication release and should be cited only after it is published
+separately.
+
 ## Reproduction Link
 
 The canonical technical deployment package is
