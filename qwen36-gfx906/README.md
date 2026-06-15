@@ -226,11 +226,17 @@ curl -fsSL https://raw.githubusercontent.com/joe2gaan/localaiservers/main/qwen36
 chmod +x deploy.sh
 
 DEPLOY_IMAGE=joe2gaan/localaiservers:qwen36-gfx906-c1-topk8-runtime-archive-aa34cb675f83 \
+DOCKER_ISOLATED_DAEMON_ENABLED=0 \
 USE_PREBUILT_IMAGE=1 \
 PREBUILT_IMAGE_PULL=1 \
 AUTO_STAGE_MODEL=1 \
 ./deploy.sh
 ```
+
+`DOCKER_ISOLATED_DAEMON_ENABLED=0` uses the host Docker daemon for the prebuilt image
+path. Use this path on hosts where the user is in the Docker group but does not have
+noninteractive sudo. Byte-for-byte source rebuild validation is a separate path and
+should set `EXPECTED_REPRO_DOCKER_ARCHIVE_SHA256` as described above.
 
 ### Manual vLLM launch after the image is built
 
