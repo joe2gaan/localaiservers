@@ -169,7 +169,7 @@ The Docker Hub repository for the prebuilt runtime image is:
 joe2gaan/localaiservers
 ```
 
-The Docker Hub image is intended to publish the built gfx906 runtime, not model weights. The model cache remains a mounted directory (`./hf_cache`) so pulls stay practical and users can reuse, update, or pre-stage weights independently.
+The Docker Hub image provides the built gfx906 runtime, not model weights. The model cache remains a mounted directory (`./hf_cache`) so pulls stay practical and users can reuse, update, or pre-stage weights independently.
 
 Currently published runtime tag:
 
@@ -191,40 +191,16 @@ aa34cb675f83ff6cade31cbbb357b1c31d793bee18da491f501d7c39fda3612a
 
 Current `deploy.sh` builds the split-layer runtime archive directly. Clean rebuilds on two independent GFX906 hosts both produced `aa34cb675f83ff6cade31cbbb357b1c31d793bee18da491f501d7c39fda3612a`; the Docker Hub tag above was pushed from that verified image. The manifest digest above is the exact Docker Hub identity for the currently published tag, and the registry config digest matches the tested local image ID: `sha256:e45309183e6f35cae6fb8f9d8d6f016253f281a5e7187e1f11a57e5e28ef5e86`.
 
-After a successful archive build, publish from the build directory:
+Publishing to the `joe2gaan/localaiservers` Docker Hub repository is maintainer-only.
+Public users should not attempt to push images to the LocalAIServers Docker Hub
+namespace. The public repository intentionally does not include the private publishing
+helper; public reproduction should use local builds, local archive loads, or the
+published runtime image and digest above.
+
+Pull the published runtime image with:
 
 ```bash
-cd /path/to/build-dir
-source ./.deploy.docker-host.env 2>/dev/null || true
-docker login
-PUBLISH_PUSH=1 /path/to/publish-dockerhub.sh
-```
-
-The helper defaults to:
-
-```text
-DOCKERHUB_REPO=joe2gaan/localaiservers
-IMAGE_VARIANT=qwen36-gfx906-c1-topk8-runtime
-```
-
-It tags the loaded archive as:
-
-```text
-joe2gaan/localaiservers:qwen36-gfx906-c1-topk8-runtime-<deploy_sha8>
-joe2gaan/localaiservers:qwen36-gfx906-c1-topk8-runtime-archive-<archive_sha12>
-joe2gaan/localaiservers:qwen36-gfx906-c1-topk8-runtime-latest
-```
-
-Dry run without pushing:
-
-```bash
-./publish-dockerhub.sh
-```
-
-Pull after publishing:
-
-```bash
-docker pull joe2gaan/localaiservers:qwen36-gfx906-c1-topk8-runtime-<deploy_sha8>
+docker pull joe2gaan/localaiservers:qwen36-gfx906-c1-topk8-runtime-archive-aa34cb675f83
 ```
 
 For normal runtime, mount the local Hugging Face/model cache and runtime cache rather than baking weights into the image.
@@ -363,7 +339,6 @@ cd /full/path/to/localaiservers/qwen36-gfx906
 make help          # show available targets
 make build         # docker compose build only
 make run           # execute full deploy workflow
-make publish       # tag/publish built archive to Docker Hub; dry run unless PUBLISH_PUSH=1
 make check-gpu      # run 4x32GiB and free-VRAM GPU preflight
 make run-temp-root # deploy with temporary Docker data-root
 make down          # stop/remove compose service

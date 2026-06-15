@@ -1,4 +1,4 @@
-.PHONY: help build run publish down logs status clean dist-clean check-space check-gpu
+.PHONY: help build run down logs status clean dist-clean check-space check-gpu
 
 SHELL := /bin/sh
 BUNDLE_COMPOSE := docker-compose.deploy.yml
@@ -6,15 +6,14 @@ BUNDLE_COMPOSE_ENV := deploy.env
 RUNTIME_ENV := .deploy.runtime.env
 LOCAL_DOCKER_TAR := $(wildcard .*.image.tar)
 LOCAL_DOCKER_TAR_FALLBACK := .*.image.tar
-DEPLOY_IMAGE := $(shell awk -F"'" 'BEGIN{img="qwen36-gfx906-c1-topk8-fastpath-reproducible"} /^DEPLOY_IMAGE=/{img=$$2; exit} END{print img}' $(BUNDLE_COMPOSE_ENV))
-TEMP_DOCKER_ROOT := $(shell awk -F"'" '/^DOCKER_TEMP_DATA_ROOT_DIR=/ {print $$2; exit}' $(BUNDLE_COMPOSE_ENV))
-CONTAINER_NAME := $(shell awk -F"'" '/^CONTAINER_NAME=/ {print $$2; exit}' $(BUNDLE_COMPOSE_ENV))
+DEPLOY_IMAGE := $(shell if [ -f "$(BUNDLE_COMPOSE_ENV)" ]; then awk -F"'" 'BEGIN{img="qwen36-gfx906-c1-topk8-fastpath-reproducible"} /^DEPLOY_IMAGE=/{img=$$2; exit} END{print img}' "$(BUNDLE_COMPOSE_ENV)"; else printf '%s\n' qwen36-gfx906-c1-topk8-fastpath-reproducible; fi)
+TEMP_DOCKER_ROOT := $(shell if [ -f "$(BUNDLE_COMPOSE_ENV)" ]; then awk -F"'" '/^DOCKER_TEMP_DATA_ROOT_DIR=/ {print $$2; exit}' "$(BUNDLE_COMPOSE_ENV)"; fi)
+CONTAINER_NAME := $(shell if [ -f "$(BUNDLE_COMPOSE_ENV)" ]; then awk -F"'" '/^CONTAINER_NAME=/ {print $$2; exit}' "$(BUNDLE_COMPOSE_ENV)"; fi)
 
 help:
 	@echo "Targets:"
 	@echo "  build              - build image using docker compose and current env file."
 	@echo "  run                - full deploy workflow (calls ./deploy.sh)."
-	@echo "  publish            - tag built archive for Docker Hub (dry run unless PUBLISH_PUSH=1)."
 	@echo "  run-temp-root      - build with temporary Docker data-root, then restore daemon config and start."
 	@echo "  down               - stop and remove compose service."
 	@echo "  logs               - tail service logs."
@@ -33,9 +32,6 @@ build:
 
 run:
 	./deploy.sh
-
-publish:
-	./publish-dockerhub.sh
 
 run-temp-root:
 	DOCKER_TEMP_DATA_ROOT_ENABLED=1 \
