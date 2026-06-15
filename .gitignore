@@ -18,6 +18,7 @@
 **/*.docker.tar
 **/*.docker.tar.sha256
 **/*.image.tar
+**/publish-dockerhub.sh
 
 # Videos and large proof artifacts
 **/videos/
