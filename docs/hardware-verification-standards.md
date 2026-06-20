@@ -51,6 +51,16 @@ target, metric source, and workload scope.
 - Communication-sensitive workload failure.
 - Benchmark evidence without backend metric support.
 
+## GFX906 / MI50 32GB VRAM QC Field Check
+
+LocalAIServers maintains a public field-check tool for MI50 32GB / GFX906-class
+cards:
+
+[tools/gfx906-mi50-vram-qc](../tools/gfx906-mi50-vram-qc/)
+
+The tool is educational QC methodology. It is not certification, warranty,
+procurement support, resale support, or an official AMD validation.
+
 ## Reporting Format
 
 Reports should include hardware class, measured VRAM, runtime stack, command, metric

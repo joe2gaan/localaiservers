@@ -54,6 +54,14 @@ Validation should include device visibility, basic memory checks where available
 multi-GPU sanity checks, and at least one workload that exercises the intended AI
 runtime path.
 
+## Practical Field QC Tooling
+
+The [GFX906 / MI50 32GB VRAM QC field-check tool](../tools/gfx906-mi50-vram-qc/)
+is a maintained example of practical public QC methodology. It checks ROCm/HIP
+visibility, kernel-reported VRAM totals, and a large transient VRAM allocation/check.
+It is an educational diagnostic, not certification, warranty evidence, procurement
+support, resale support, or an official AMD validation.
+
 ## Benchmark Reproducibility
 
 Benchmark reports should include model, runtime image or build, command, metrics,

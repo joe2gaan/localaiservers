@@ -23,6 +23,7 @@ GFX906 Preservation & Public AI Research Infrastructure
 - [Public output model](public-output-model.md)
 - [QC methodology](qc-methodology.md)
 - [Hardware verification standards](hardware-verification-standards.md)
+- [GFX906 / MI50 32GB VRAM QC field-check tool](../tools/gfx906-mi50-vram-qc/)
 - [Roadmap](roadmap.md)
 
 ## Current Infrastructure
