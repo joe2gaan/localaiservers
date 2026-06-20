@@ -10,9 +10,11 @@ write_embedded_deploy_env() {
   mkdir -p "$(dirname "${env_file}")"
   cat <<'DEPLOY_ENV' > "${env_file}"
 #!/usr/bin/env bash
-# Default tuning values for the Qwen3.6-35B-A3B async TP4 C1 topk8 fastpath profile.
-# Target host: 4x AMD Instinct MI50 32GB.
+# Default tuning values for the Qwen3.6 ROCm7.2 gfx906 release profiles.
+# Use QWEN36_PROFILE=dense27b_tp8_fullbar_p2pon, moe35b_tp4_fullbar_p2pon,
+# or moe35b_tp8_fullbar_p2pon.
 # Uses ":=" assignment so caller-supplied env vars stay authoritative.
+: "${QWEN36_PROFILE:=moe35b_tp4_fullbar_p2pon}"
 : "${MODEL:=Qwen/Qwen3.6-35B-A3B}"
 : "${SERVED_MODEL_NAME:=Qwen/Qwen3.6-35B-A3B}"
 : "${PORT:=8001}"
@@ -29,8 +31,11 @@ write_embedded_deploy_env() {
 : "${DISABLE_ASYNC_SCHEDULING:=0}"
 : "${NCCL_ALGO:=Tree}"
 : "${NCCL_PROTO:=LL}"
-: "${NCCL_P2P_DISABLE:=1}"
+: "${NCCL_P2P_DISABLE:=0}"
+: "${NCCL_MIN_NCHANNELS:=}"
 : "${NCCL_MAX_NCHANNELS:=1}"
+: "${NCCL_NTHREADS:=}"
+: "${RCCL_TREES:=}"
 : "${FLASH_ATTENTION_TRITON_AMD_ENABLE:=TRUE}"
 : "${FLASH_ATTENTION_TRITON_AMD_REF:=TRUE}"
 : "${OMP_NUM_THREADS:=4}"
@@ -38,6 +43,7 @@ write_embedded_deploy_env() {
 : "${GPU_AUTO_SELECT:=1}"
 : "${GPU_TARGET_ARCH:=gfx906}"
 : "${GPU_TARGET_ARCH_ALIASES:=gfx906,gfx9006}"
+: "${GPU_TARGET_DIDS:=0x66a1,26273}"
 : "${REQUIRED_GPU_MODEL_HINT:=4x gfx906 AMD GPUs with >=32GiB VRAM each}"
 : "${REQUIRED_GPU_COUNT:=4}"
 : "${REQUIRED_GPU_VRAM_GIB:=32}"
@@ -47,10 +53,10 @@ write_embedded_deploy_env() {
 : "${AUTO_CONTINUE_GPU_CHECK:=0}"
 : "${HF_CACHE_DIR:=./hf_cache}"
 : "${RUNTIME_ROOT:=./runtime}"
-: "${MOE_CONFIG_DIR:=./runtime/vllm_tuned_moe_configs/native_gfx906_qwen36_tp4_n128_c1_parallel_variants_20260525/m8_n32_k32_w2_wave1_k1_llmm1_rpb2_naivec1_nccl_tree_ll_10k_host30}"
+: "${MOE_CONFIG_DIR:=./runtime/vllm_tuned_moe_configs/native_gfx906_qwen36_tp4_n128_c1_parallel_variants_20260525/m8_n32_k32_w2_wave1_k1_llmm1_rpb2_naivec1_nccl_tree_ll_10k}"
 : "${VLLM_TUNED_CONFIG_FOLDER:=/opt/vllm_tuned_moe_configs}"
 : "${CONTAINER_NAME:=vllm_qwen36_gfx906_c1_topk8_fastpath_m8n32_rpb2}"
-: "${DEPLOY_IMAGE:=qwen36-gfx906-c1-topk8-fastpath-reproducible}"
+: "${DEPLOY_IMAGE:=joe2gaan/localaiservers:qwen36-gfx906-rocm72-dense-moe-runtime-archive-0a2dbd6b7f0b}"
 : "${USE_PREBUILT_IMAGE:=0}"
 : "${PREBUILT_IMAGE_PULL:=1}"
 : "${STAGE_IMAGE:=python:3.12-slim}"
@@ -59,6 +65,9 @@ write_embedded_deploy_env() {
 : "${RUNTIME_PATCH_DIR:=./runtime/patches}"
 : "${BUNDLE_PATCH_TARGET:=/opt/vllm_patch_bundle}"
 : "${DOCKERFILE_PATH:=./Dockerfile}"
+: "${GFX906_RUNTIME_SOURCE_DIR:=${SCRIPT_DIR}/files/gfx906_runtime}"
+: "${GFX906_RUNTIME_BUNDLE_CONTEXT_DIR:=./.gfx906_runtime_bundle}"
+: "${INSTALL_BUNDLED_GFX906_RUNTIME:=1}"
 : "${QWEN36_PYTHON_SRC_DIR:=}"
 : "${ROCM_PATCH_SRC_FILE:=}"
 : "${TRITON_ATTENTION_BACKEND_SRC_FILE:=}"
@@ -68,6 +77,7 @@ write_embedded_deploy_env() {
 : "${PATCH_SRC_PR41457:=}"
 : "${PATCH_SRC_UTILS:=}"
 : "${AUTO_STAGE_MODEL:=0}"
+: "${AUTO_RESOLVE_LOCAL_HF_SNAPSHOT:=1}"
 : "${HF_TOKEN:=}"
 : "${HF_HUB_DISABLE_XET:=1}"
 : "${HF_HUB_DOWNLOAD_TIMEOUT:=120}"
@@ -94,6 +104,40 @@ write_embedded_deploy_env() {
 : "${REFRESH_MOE_CONFIG:=0}"
 : "${MOE_CONFIG_BASENAME:=E=256,N=128,device_name=AMD_GFX906.json}"
 : "${PREFER_REASONING_PARSER:=qwen3}"
+: "${VLLM_QWEN36_MOE_TP4X2_IN_TP8:=}"
+: "${VLLM_QWEN36_MOE_TP4X2_SHARED:=}"
+: "${VLLM_QWEN36_MOE_TP4X2_FUSE_SHARED_ROUTED_REDUCE:=}"
+: "${VLLM_GFX906_ROWPAR_MUTABLE_AR:=}"
+: "${VLLM_GFX906_QWEN_MLP_INTERLEAVED_SWIGLU:=}"
+: "${VLLM_GFX906_QWEN_MLP_INTERLEAVED_SWIGLU_STRICT:=}"
+: "${VLLM_GFX906_QWEN_MLP_INTERLEAVED_SWIGLU_EXT_PATH:=}"
+: "${VLLM_GFX906_PERSISTENT_AR:=}"
+: "${VLLM_GFX906_PERSISTENT_AR_STRICT:=}"
+: "${VLLM_GFX906_PERSISTENT_AR_LIB:=}"
+: "${VLLM_GFX906_PERSISTENT_AR_KIND_ROUTE:=}"
+: "${VLLM_GFX906_PERSISTENT_AR_NWARPS:=}"
+: "${VLLM_GFX906_PERSISTENT_AR_BLOCK_THREADS:=}"
+: "${VLLM_GFX906_ROWPAR_BOUNDARY_CUT:=}"
+: "${VLLM_GFX906_ROWPAR_BOUNDARY_MLP_SHAPES:=}"
+: "${VLLM_GFX906_PERSISTENT_AR_PREINIT_ON_GRAPH_CAPTURE:=}"
+: "${VLLM_GFX906_PERSISTENT_AR_SKIP_GRAPH_CAPTURE_CONTEXTS:=}"
+: "${VLLM_GFX906_PERSISTENT_AR_MULTIROW:=}"
+: "${VLLM_GFX906_PERSISTENT_AR_MULTIWORK_NWARPS:=}"
+: "${VLLM_GFX906_PERSISTENT_AR_MULTIWORK_BLOCK_THREADS:=}"
+: "${VLLM_GFX906_PERSISTENT_AR_LOG_LIMIT:=}"
+: "${GFX906_PERSISTENT_AR_DEFER_WORKER:=}"
+: "${GFX906_PERSISTENT_AR_IDLE_SLEEP_ITERS:=}"
+: "${VLLM_GFX906_PERSISTENT_AR_CAPTURE_ONLY:=}"
+: "${VLLM_GFX906_PERSISTENT_AR_CAPTURE_UNSTARTED:=}"
+: "${VLLM_GFX906_PERSISTENT_AR_START_AFTER_CAPTURE:=}"
+: "${VLLM_GFX906_PERSISTENT_AR_START_AFTER_PREFILL:=}"
+: "${VLLM_GFX906_PERSISTENT_AR_START_ON_FIRST_USE:=}"
+: "${VLLM_GFX906_PERSISTENT_AR_START_AFTER_PREFILL_MIN_TOKENS:=}"
+: "${VLLM_GFX906_PERSISTENT_AR_START_AFTER_PREFILL_REQ_PREFIX:=}"
+: "${VLLM_GFX906_PERSISTENT_AR_WATCHDOG:=}"
+: "${VLLM_GFX906_PERSISTENT_AR_WATCHDOG_INTERVAL:=}"
+: "${VLLM_GFX906_PERSISTENT_AR_WATCHDOG_MAX:=}"
+: "${VLLM_NCCL_SO_PATH:=}"
 : "${BUILDKIT_PROGRESS:=plain}"
 : "${COMPOSE_PROGRESS:=plain}"
 : "${COMPOSE_ANSI:=never}"
@@ -107,8 +151,6 @@ write_embedded_deploy_env() {
 : "${REPRO_DOCKER_ARCHIVE_DIR:=./.repro-docker-archives}"
 : "${REPRO_DOCKER_ARCHIVE_NAME:=${DEPLOY_IMAGE//\//_}.docker.tar}"
 : "${REPRO_DOCKER_ARCHIVE_PATH:=}"
-: "${BYTE_FOR_BYTE_VALIDATION_MODE:=auto}"
-: "${EXPECTED_REPRO_DOCKER_ARCHIVE_SHA256:=}"
 : "${MIN_FREE_GIB_REPRO_DOCKER_ARCHIVE:=180}"
 : "${PINNED_BUILDX_ENABLED:=1}"
 : "${PINNED_BUILDX_VERSION:=0.30.1}"
@@ -133,9 +175,122 @@ write_embedded_deploy_env() {
 DEPLOY_ENV
 }
 
+apply_qwen36_profile_defaults() {
+  : "${QWEN36_PROFILE:=moe35b_tp4_fullbar_p2pon}"
+  case "${QWEN36_PROFILE}" in
+    moe35b_tp4_fullbar_p2pon)
+      : "${MODEL:=Qwen/Qwen3.6-35B-A3B}"
+      : "${SERVED_MODEL_NAME:=Qwen/Qwen3.6-35B-A3B}"
+      : "${MODEL_REPO_ID:=Qwen/Qwen3.6-35B-A3B}"
+      : "${TP_SIZE:=4}"
+      : "${MAX_MODEL_LEN:=131072}"
+      : "${TOOL_CALL_PARSER:=hermes}"
+      : "${REASONING_PARSER:=qwen3}"
+      : "${PREFER_REASONING_PARSER:=qwen3}"
+      : "${VLLM_ENABLE_C1_TOPK8_MOE_FASTPATH:=1}"
+      : "${EXTRA_VLLM_ARGS:=--language-model-only}"
+      : "${DISABLE_ASYNC_SCHEDULING:=0}"
+      : "${NCCL_ALGO:=Tree}"
+      : "${NCCL_PROTO:=LL}"
+      : "${NCCL_P2P_DISABLE:=0}"
+      : "${NCCL_MAX_NCHANNELS:=1}"
+      : "${HIP_VISIBLE_DEVICES:=auto}"
+      : "${REQUIRED_GPU_COUNT:=4}"
+      : "${REQUIRED_GPU_MODEL_HINT:=4x full-BAR gfx906 AMD GPUs with >=32GiB VRAM each}"
+      : "${CONTAINER_NAME:=vllm_qwen36_moe35b_tp4_fullbar_p2pon}"
+      ;;
+    moe35b_tp8_fullbar_p2pon)
+      : "${MODEL:=Qwen/Qwen3.6-35B-A3B}"
+      : "${SERVED_MODEL_NAME:=Qwen/Qwen3.6-35B-A3B}"
+      : "${MODEL_REPO_ID:=Qwen/Qwen3.6-35B-A3B}"
+      : "${TP_SIZE:=8}"
+      : "${MAX_MODEL_LEN:=131072}"
+      : "${TOOL_CALL_PARSER:=hermes}"
+      : "${REASONING_PARSER:=qwen3}"
+      : "${PREFER_REASONING_PARSER:=qwen3}"
+      : "${VLLM_ENABLE_C1_TOPK8_MOE_FASTPATH:=force}"
+      : "${EXTRA_VLLM_ARGS:=--language-model-only}"
+      : "${DISABLE_ASYNC_SCHEDULING:=1}"
+      : "${NCCL_ALGO:=Tree}"
+      : "${NCCL_PROTO:=LL}"
+      : "${NCCL_P2P_DISABLE:=0}"
+      : "${NCCL_MAX_NCHANNELS:=1}"
+      : "${VLLM_QWEN36_MOE_TP4X2_IN_TP8:=1}"
+      : "${VLLM_QWEN36_MOE_TP4X2_SHARED:=1}"
+      : "${VLLM_QWEN36_MOE_TP4X2_FUSE_SHARED_ROUTED_REDUCE:=1}"
+      : "${HIP_VISIBLE_DEVICES:=auto}"
+      : "${REQUIRED_GPU_COUNT:=8}"
+      : "${REQUIRED_GPU_MODEL_HINT:=8x full-BAR gfx906 AMD GPUs with >=32GiB VRAM each}"
+      : "${CONTAINER_NAME:=vllm_qwen36_moe35b_tp8_fullbar_p2pon}"
+      ;;
+    dense27b_tp8_fullbar_p2pon)
+      : "${MODEL:=Qwen/Qwen3.6-27B}"
+      : "${SERVED_MODEL_NAME:=Qwen3.6-27B}"
+      : "${MODEL_REPO_ID:=Qwen/Qwen3.6-27B}"
+      : "${TP_SIZE:=8}"
+      : "${MAX_MODEL_LEN:=131072}"
+      : "${TOOL_CALL_PARSER:=qwen3_coder}"
+      : "${REASONING_PARSER:=qwen3}"
+      : "${PREFER_REASONING_PARSER:=qwen3}"
+      : "${VLLM_ENABLE_C1_TOPK8_MOE_FASTPATH:=0}"
+      : "${EXTRA_VLLM_ARGS:=--max-num-seqs 2 --max-num-batched-tokens 4 --no-enable-prefix-caching}"
+      : "${DISABLE_ASYNC_SCHEDULING:=0}"
+      : "${NCCL_ALGO:=Tree}"
+      : "${NCCL_PROTO:=LL}"
+      : "${NCCL_P2P_DISABLE:=0}"
+      : "${NCCL_MIN_NCHANNELS:=4}"
+      : "${NCCL_MAX_NCHANNELS:=4}"
+      : "${NCCL_NTHREADS:=128}"
+      : "${RCCL_TREES:=(0(1(3)(4))(2(5)(6(7))))|(2(3(5)(6))(4(7)(0(1))))|(4(5(7)(0))(6(1)(2(3))))|(6(7(1)(2))(0(3)(4(5))))}"
+      : "${VLLM_NCCL_SO_PATH:=/rccl-overlay/install/lib/librccl.so.1}"
+      : "${VLLM_GFX906_ROWPAR_MUTABLE_AR:=1}"
+      : "${VLLM_GFX906_QWEN_MLP_INTERLEAVED_SWIGLU:=1}"
+      : "${VLLM_GFX906_QWEN_MLP_INTERLEAVED_SWIGLU_STRICT:=1}"
+      : "${VLLM_GFX906_QWEN_MLP_INTERLEAVED_SWIGLU_EXT_PATH:=/usr/share/ollama/kernel_labs/gfx906_swiglu_gemv_ext_native_runtime_20260608/gfx906_swiglu_gemv_ext_20260607.so}"
+      : "${VLLM_GFX906_PERSISTENT_AR:=1}"
+      : "${VLLM_GFX906_PERSISTENT_AR_STRICT:=1}"
+      : "${VLLM_GFX906_PERSISTENT_AR_LIB:=/opt/gfx906/libgfx906_persistent_tree_ll_ar_default_20260613.so}"
+      : "${VLLM_GFX906_PERSISTENT_AR_KIND_ROUTE:=1}"
+      : "${VLLM_GFX906_PERSISTENT_AR_NWARPS:=4}"
+      : "${VLLM_GFX906_PERSISTENT_AR_BLOCK_THREADS:=256}"
+      : "${VLLM_GFX906_ROWPAR_BOUNDARY_CUT:=0}"
+      : "${VLLM_GFX906_ROWPAR_BOUNDARY_MLP_SHAPES:=2176x5120}"
+      : "${VLLM_GFX906_PERSISTENT_AR_PREINIT_ON_GRAPH_CAPTURE:=1}"
+      : "${VLLM_GFX906_PERSISTENT_AR_SKIP_GRAPH_CAPTURE_CONTEXTS:=1}"
+      : "${VLLM_GFX906_PERSISTENT_AR_MULTIROW:=1}"
+      : "${VLLM_GFX906_PERSISTENT_AR_MULTIWORK_NWARPS:=2}"
+      : "${VLLM_GFX906_PERSISTENT_AR_MULTIWORK_BLOCK_THREADS:=128}"
+      : "${VLLM_GFX906_PERSISTENT_AR_LOG_LIMIT:=64}"
+      : "${GFX906_PERSISTENT_AR_DEFER_WORKER:=0}"
+      : "${GFX906_PERSISTENT_AR_IDLE_SLEEP_ITERS:=0}"
+      : "${VLLM_GFX906_PERSISTENT_AR_CAPTURE_ONLY:=0}"
+      : "${VLLM_GFX906_PERSISTENT_AR_CAPTURE_UNSTARTED:=0}"
+      : "${VLLM_GFX906_PERSISTENT_AR_START_AFTER_CAPTURE:=0}"
+      : "${VLLM_GFX906_PERSISTENT_AR_START_AFTER_PREFILL:=0}"
+      : "${VLLM_GFX906_PERSISTENT_AR_START_ON_FIRST_USE:=0}"
+      : "${VLLM_GFX906_PERSISTENT_AR_START_AFTER_PREFILL_MIN_TOKENS:=2}"
+      : "${VLLM_GFX906_PERSISTENT_AR_START_AFTER_PREFILL_REQ_PREFIX:=chatcmpl-}"
+      : "${VLLM_GFX906_PERSISTENT_AR_WATCHDOG:=0}"
+      : "${VLLM_GFX906_PERSISTENT_AR_WATCHDOG_INTERVAL:=15}"
+      : "${VLLM_GFX906_PERSISTENT_AR_WATCHDOG_MAX:=40}"
+      : "${HIP_VISIBLE_DEVICES:=auto}"
+      : "${REQUIRED_GPU_COUNT:=8}"
+      : "${REQUIRED_GPU_MODEL_HINT:=8x full-BAR gfx906 AMD GPUs with >=32GiB VRAM each}"
+      : "${CONTAINER_NAME:=vllm_qwen36_dense27b_tp8_fullbar_p2pon}"
+      ;;
+    *)
+      echo "error: unknown QWEN36_PROFILE=${QWEN36_PROFILE}" >&2
+      echo "valid profiles: dense27b_tp8_fullbar_p2pon, moe35b_tp4_fullbar_p2pon, moe35b_tp8_fullbar_p2pon" >&2
+      exit 1
+      ;;
+  esac
+}
+
 if [[ -f "${SCRIPT_DIR}/deploy.env" ]]; then
   source "${SCRIPT_DIR}/deploy.env"
+  apply_qwen36_profile_defaults
 else
+  apply_qwen36_profile_defaults
   write_embedded_deploy_env "${DEFAULT_DEPLOY_ENV_PATH}"
   source "${DEFAULT_DEPLOY_ENV_PATH}"
 fi
@@ -185,20 +340,22 @@ write_embedded_dockerfile() {
 
   cat <<'DOCKERFILE' > "${dockerfile_path}"
 ARG SOURCE_DATE_EPOCH=1764000000
-FROM ubuntu:noble-20250127@sha256:72297848456d5d37d1262630108ab308d3e9ec7ed1c3286a32fe09856619a782 AS vllm-gfx906-repro-build
+ARG ROCM_GFX906_BASE_IMAGE=docker.io/mixa3607/rocm-gfx906:7.2.1-complete
+FROM ${ROCM_GFX906_BASE_IMAGE} AS vllm-gfx906-repro-build
 ARG SOURCE_DATE_EPOCH=1764000000
 
 # Reproduce ai-infos/vllm-gfx906-mobydick:qwen3.6-35B-A3B internals from public sources.
 ARG DEBIAN_FRONTEND=noninteractive
 ENV DEBIAN_FRONTEND=${DEBIAN_FRONTEND}
-ENV ROCM_VERSION=6.3.4
-ENV AMDGPU_VERSION=6.3.4
-ENV PYTORCH_INDEX_URL=https://download.pytorch.org/whl/rocm6.3
-ENV TORCH_VERSION=2.9.1+rocm6.3
-ENV TORCHVISION_VERSION=0.24.1+rocm6.3
-ENV TORCHAUDIO_VERSION=2.9.1+rocm6.3
-ENV PYTORCH_TRITON_ROCM_VERSION=3.5.1
-ENV AMDSMI_VERSION=6.3.3
+ENV ROCM_VERSION=7.2.1
+ENV AMDGPU_VERSION=not-installed
+ENV PYTORCH_INDEX_URL=https://download.pytorch.org/whl/rocm7.2
+ENV TORCH_VERSION=2.11.0+rocm7.2
+ENV TORCHVISION_VERSION=0.26.0+rocm7.2
+ENV TORCHAUDIO_VERSION=2.11.0+rocm7.2
+ENV PYTORCH_TRITON_ROCM_VERSION=3.6.0
+ENV AMDSMI_VERSION=7.0.2
+ENV ROCM72_EXPERIMENT_SKIP_DPKG_LOCKS=1
 ENV MAX_JOBS=32
 ENV VLLM_COMMIT=6a52668c14dc9cb94a270d94bfec735fe627ed0c
 ENV VLLM_PACKAGE_VERSION=0.0.0+gfx906
@@ -214,7 +371,7 @@ ENV AMDGPU_TARGETS=gfx906
 ENV CMAKE_HIP_ARCHITECTURES=gfx906
 ENV FLASH_ATTENTION_TRITON_AMD_ENABLE=TRUE
 ENV FLASH_ATTENTION_TRITON_AMD_REF=TRUE
-ENV LD_LIBRARY_PATH=/opt/rocm/lib:/opt/rocm/lib64:
+ENV LD_LIBRARY_PATH=/opt/gfx906:/rccl-overlay/install/lib:/opt/rocm/lib:/opt/rocm/lib64:/usr/local/lib:
 ENV PATH=/opt/venv/bin:/opt/rocm/bin:/opt/rocm/llvm/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ENV PYTHONPATH=/opt/qwen36-python
 ENV PYTHONUNBUFFERED=1
@@ -233,7 +390,7 @@ ENV UBUNTU_BOOTSTRAP_SNAPSHOT=20250501T000000Z
 ENV UBUNTU_VLLM_SNAPSHOT=20260315T000000Z
 
 ARG TRITON_REPO=https://github.com/ai-infos/triton-gfx906.git
-ARG TRITON_REF=eee3139afb2f12651d82e5068787a342bebbf57e
+ARG TRITON_REF=v3.6.0+gfx906
 ARG FLASH_ATTENTION_REPO=https://github.com/ai-infos/flash-attention-gfx906.git
 ARG FLASH_ATTN_REPO_REF=0ac8e77b2a6cf773ecf17bc486e1a11fe1e066e0
 ARG VLLM_SRC_REPO=https://github.com/ai-infos/vllm-gfx906-mobydick.git
@@ -258,7 +415,7 @@ RUN printf "Package: *\nPin: release o=repo.radeon.com\nPin-Priority: 600\n" > /
     mkdir -p /etc/apt/keyrings && \
     curl --fail --location --show-error --silent --retry 20 --retry-all-errors --connect-timeout 30 --max-time 300 https://repo.radeon.com/rocm/rocm.gpg.key | gpg --dearmor -o /etc/apt/keyrings/rocm.gpg && \
     printf "deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg] https://repo.radeon.com/rocm/apt/${ROCM_VERSION}/ noble main\n" > /etc/apt/sources.list.d/rocm.list && \
-    printf "deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg] https://repo.radeon.com/amdgpu/${AMDGPU_VERSION}/ubuntu noble main\n" > /etc/apt/sources.list.d/amdgpu.list && \
+    rm -f /etc/apt/sources.list.d/amdgpu.list && \
     apt-get update -o Acquire::Check-Valid-Until=false || apt-get update -o Acquire::AllowInsecureRepositories=true -o Acquire::AllowDowngradeToInsecureRepositories=true && \
     apt-get install -y --no-install-recommends -o Dir::Cache::archives=/var/tmp/apt-cache \
       sudo \
@@ -272,7 +429,42 @@ RUN printf "Package: *\nPin: release o=repo.radeon.com\nPin-Priority: 600\n" > /
       build-essential && \
     rm -rf /var/lib/apt/lists/* /var/tmp/apt-cache/*
 
+RUN cat >/usr/local/bin/restore-gfx906-rocm-payload <<'SH' && chmod 0755 /usr/local/bin/restore-gfx906-rocm-payload
+#!/usr/bin/env bash
+set -euo pipefail
+torch_lib=/opt/venv/lib/python3.12/site-packages/torch/lib
+if [[ ! -d "${torch_lib}" ]]; then
+  echo "error: torch lib directory not found: ${torch_lib}" >&2
+  exit 1
+fi
+rccl_src=""
+for candidate in /usr/local/lib/librccl.so /opt/rocm/lib/librccl.so /opt/rocm-*/lib/librccl.so; do
+  if [[ -e "${candidate}" ]]; then
+    rccl_src="${candidate}"
+    break
+  fi
+done
+if [[ -z "${rccl_src}" ]]; then
+  echo "error: patched ROCm librccl.so not found under /opt/rocm/lib, /usr/local/lib, or /opt/rocm-*/lib" >&2
+  exit 1
+fi
+rm -f "${torch_lib}"/librccl.so*
+cp -L "${rccl_src}" "${torch_lib}/librccl.so"
+if [[ -d /opt/rocm/lib/rocblas ]]; then
+  rm -rf "${torch_lib}/rocblas"
+  cp -a /opt/rocm/lib/rocblas "${torch_lib}/rocblas"
+fi
+if command -v grep >/dev/null 2>&1; then
+  grep -a -q gfx906 "${torch_lib}/librccl.so"
+fi
+echo "restored gfx906 ROCm payloads into PyTorch torch/lib"
+SH
+
 RUN set -eu; \
+    if [ "${ROCM72_EXPERIMENT_SKIP_DPKG_LOCKS:-0}" = "1" ]; then \
+      echo "ROCm 7.2 experiment: skipping old ROCm 6.3 apt version lock"; \
+      exit 0; \
+    fi; \
     for spec in \
       "amd-smi-lib=25.1.0.60304-76~24.04" \
       "amdgpu-core=1:6.3.60304-2125197.24.04" \
@@ -384,6 +576,10 @@ RUN printf "deb https://snapshot.ubuntu.com/ubuntu/${UBUNTU_VLLM_SNAPSHOT} noble
     rm -rf /var/lib/apt/lists/*
 
 RUN set -eu; \
+    if [ "${ROCM72_EXPERIMENT_SKIP_DPKG_LOCKS:-0}" = "1" ]; then \
+      echo "ROCm 7.2 experiment: skipping old Ubuntu dpkg version lock"; \
+      exit 0; \
+    fi; \
     for spec in \
       "build-essential=12.10ubuntu1" \
       "curl=8.5.0-2ubuntu10.8" \
@@ -408,6 +604,10 @@ RUN set -eu; \
     done
 
 RUN set -eu; \
+    if [ "${ROCM72_EXPERIMENT_SKIP_DPKG_LOCKS:-0}" = "1" ]; then \
+      echo "ROCm 7.2 experiment: skipping old full dpkg package hash lock"; \
+      exit 0; \
+    fi; \
     expected_dpkg_lock="21df06cd008564fb7367a6d995bd196e234ffa0e1de9778b08edfda28f68dc15"; \
     actual_dpkg_lock="$(dpkg-query -W | LC_ALL=C sort | sha256sum | awk '{print $1}')"; \
     if [ "${actual_dpkg_lock}" != "${expected_dpkg_lock}" ]; then \
@@ -438,7 +638,7 @@ if importlib.util.find_spec("annotated_doc") is None:
     print("error: unable to import pinned annotated_doc runtime dependency", file=sys.stderr)
     raise SystemExit(1)
 PY
-RUN cat > /usr/local/bin/canonicalize-wheel <<'PY' && chmod +x /usr/local/bin/canonicalize-wheel
+RUN cat > /usr/local/bin/canonicalize-wheel <<'PY' && chmod 0755 /usr/local/bin/canonicalize-wheel
 #!/opt/venv/bin/python
 from pathlib import Path
 import os
@@ -642,7 +842,7 @@ python-dateutil==2.9.0.post0
 python-dotenv==1.2.2
 python-json-logger==4.0.0
 python-multipart==0.0.22
-pytorch-triton-rocm==3.5.1
+pytorch-triton-rocm==3.6.0
 pyzmq==27.1.0
 redis==7.3.0
 referencing==0.37.0
@@ -674,9 +874,9 @@ tensorizer==2.10.1
 tiktoken==0.12.0
 timm==1.0.25
 tokenizers==0.22.2
-torch==2.9.1+rocm6.3
-torchaudio==2.9.1+rocm6.3
-torchvision==0.24.1+rocm6.3
+torch==2.11.0+rocm7.2
+torchaudio==2.11.0+rocm7.2
+torchvision==0.26.0+rocm7.2
 tqdm==4.67.3
 transformers==5.7.0
 typer==0.25.0
@@ -694,9 +894,10 @@ yarl==1.23.0
 zipp==3.23.0
 zstandard==0.25.0
 PIPLOCK
-RUN grep -Ev '^(triton @|vllm @|flash_attn==)' /tmp/reference-pip-freeze.txt > /tmp/reference-pip-constraints.txt && \
+RUN grep -Ev '^(triton @|vllm @|flash_attn==|torch==|torchvision==|torchaudio==|pytorch-triton-rocm==)' /tmp/reference-pip-freeze.txt > /tmp/reference-pip-constraints.txt && \
     grep -Ev '^(triton @|vllm @|flash_attn==|torch==|torchvision==|torchaudio==|pytorch-triton-rocm==)' /tmp/reference-pip-freeze.txt > /tmp/reference-pip-install.txt
-RUN /opt/venv/bin/pip install --force-reinstall --extra-index-url "${PYTORCH_INDEX_URL}" -c /tmp/reference-pip-constraints.txt torch==${TORCH_VERSION} torchvision==${TORCHVISION_VERSION} torchaudio==${TORCHAUDIO_VERSION}
+RUN /opt/venv/bin/pip install --force-reinstall --extra-index-url "${PYTORCH_INDEX_URL}" -c /tmp/reference-pip-constraints.txt torch==${TORCH_VERSION} torchvision==${TORCHVISION_VERSION} torchaudio==${TORCHAUDIO_VERSION} && \
+    /usr/local/bin/restore-gfx906-rocm-payload
 
 WORKDIR /opt/src
 RUN git clone ${TRITON_REPO} triton-gfx906 && \
@@ -780,6 +981,7 @@ RUN find /workspace/vllm -exec touch -h -d "@${SOURCE_DATE_EPOCH}" {} +
 
 RUN /opt/venv/bin/pip install --no-deps --force-reinstall --extra-index-url "${PYTORCH_INDEX_URL}" -r /tmp/reference-pip-install.txt && \
     /opt/venv/bin/pip install --no-deps --force-reinstall --extra-index-url "${PYTORCH_INDEX_URL}" torch==${TORCH_VERSION} torchvision==${TORCHVISION_VERSION} torchaudio==${TORCHAUDIO_VERSION} && \
+    /usr/local/bin/restore-gfx906-rocm-payload && \
     /opt/venv/bin/pip install --no-deps --force-reinstall packaging==26.2 setuptools==79.0.1 setuptools-scm==9.2.2 wheel==0.46.3 && \
     /opt/venv/bin/pip install --no-deps --force-reinstall amdsmi==${AMDSMI_VERSION} && \
     find /opt/venv -xdev -exec touch -h -d "@${SOURCE_DATE_EPOCH}" {} +
@@ -866,20 +1068,22 @@ if missing:
     raise SystemExit("missing qwen36-python sidecar inputs: " + ", ".join(missing))
 PY
 
-RUN /opt/venv/bin/pip uninstall -y triton-rocm || true && \
-    /opt/venv/bin/python - <<'PY'
+RUN /opt/venv/bin/python - <<'PY'
+import importlib.util
 import importlib.metadata as md
 
-expected = "3.5.1+git90c4b262"
+expected = "3.6.0+git82957a51"
 got = md.version("triton")
 if got != expected:
     raise SystemExit(f"unexpected gfx906 Triton version before vLLM build: {got} != {expected}")
+if importlib.util.find_spec("triton") is None:
+    raise SystemExit("gfx906 Triton metadata is present but importable triton package is missing before vLLM build")
 PY
 
 RUN /opt/venv/bin/python - <<'PY'
 import torch
 
-expected = "2.9.1+rocm6.3"
+expected = "2.11.0+rocm7.2"
 if torch.__version__ != expected:
     raise SystemExit(f"unexpected torch version before vLLM build: {torch.__version__} != {expected}")
 PY
@@ -894,14 +1098,16 @@ RUN rm -rf build "${REPRO_BUILD_ROOT}/vllm" "${REPRO_WHEEL_ROOT}/vllm" "${REPRO_
     ( /opt/venv/bin/pip uninstall -y semantic-version setuptools-rust || true ) && \
     find /opt/venv/lib/python3.12/site-packages/vllm /opt/venv/lib/python3.12/site-packages/vllm-*.dist-info -exec touch -h -d "@${SOURCE_DATE_EPOCH}" {} +
 
-RUN /opt/venv/bin/pip uninstall -y triton-rocm || true && \
-    /opt/venv/bin/python - <<'PY'
+RUN /opt/venv/bin/python - <<'PY'
+import importlib.util
 import importlib.metadata as md
 
-expected = "3.5.1+git90c4b262"
+expected = "3.6.0+git82957a51"
 got = md.version("triton")
 if got != expected:
     raise SystemExit(f"unexpected gfx906 Triton version after vLLM build: {got} != {expected}")
+if importlib.util.find_spec("triton") is None:
+    raise SystemExit("gfx906 Triton metadata is present but importable triton package is missing after vLLM build")
 PY
 
 
@@ -912,16 +1118,11 @@ import importlib.metadata as importlib_metadata
 import pathlib
 import torch
 
-expected = "2.9.1+rocm6.3"
+expected = "2.11.0+rocm7.2"
 if torch.__version__ != expected:
     raise SystemExit(f"unexpected torch version after runtime deps: {torch.__version__} != {expected}")
-if not str(torch.version.hip).startswith("6.3"):
+if not str(torch.version.hip).startswith("7.2"):
     raise SystemExit(f"unexpected torch HIP runtime after runtime deps: {torch.version.hip}")
-
-for dist in importlib_metadata.distributions():
-    name = (dist.metadata.get("Name") or "").lower()
-    if name == "triton-rocm":
-        raise SystemExit("unexpected triton-rocm package in gfx906 image")
 
 required_modules = [
     "fastapi",
@@ -930,6 +1131,7 @@ required_modules = [
     "anyio",
     "httpx",
     "huggingface_hub",
+    "triton",
     "typing_inspection",
     "uvicorn",
 ]
@@ -968,9 +1170,9 @@ for raw in Path("/tmp/reference-pip-freeze.txt").read_text().splitlines():
     if not raw or raw.startswith("#") or " @ " in raw:
         continue
     name, version = raw.split("==", 1)
-    expected[canonicalize_name(name)] = version
+expected[canonicalize_name(name)] = version
 expected["vllm"] = "0.0.0+gfx906"
-expected["triton"] = "3.5.1+git90c4b262"
+expected["triton"] = "3.6.0+git82957a51"
 
 actual = {
     canonicalize_name(dist.metadata["Name"]): dist.version
@@ -1014,11 +1216,10 @@ RUN set -eu; \
 WORKDIR /tmp
 
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+RUN chmod 0755 /usr/local/bin/docker-entrypoint.sh
 
 FROM vllm-gfx906-repro-build AS vllm-gfx906-repro-smallroot
 RUN rm -rf \
-    /opt/rocm-6.3.4/lib \
     /opt/venv/lib/python3.12/site-packages/torch/lib \
     /opt/venv/lib/python3.12/site-packages/nvidia \
     /root/.triton
@@ -1057,14 +1258,15 @@ RUN rm -rf \
 
 FROM scratch AS vllm-gfx906-repro-runtime
 ARG SOURCE_DATE_EPOCH=1764000000
-ENV ROCM_VERSION=6.3.4
-ENV AMDGPU_VERSION=6.3.4
-ENV PYTORCH_INDEX_URL=https://download.pytorch.org/whl/rocm6.3
-ENV TORCH_VERSION=2.9.1+rocm6.3
-ENV TORCHVISION_VERSION=0.24.1+rocm6.3
-ENV TORCHAUDIO_VERSION=2.9.1+rocm6.3
-ENV PYTORCH_TRITON_ROCM_VERSION=3.5.1
-ENV AMDSMI_VERSION=6.3.3
+ENV ROCM_VERSION=7.2.1
+ENV AMDGPU_VERSION=not-installed
+ENV PYTORCH_INDEX_URL=https://download.pytorch.org/whl/rocm7.2
+ENV TORCH_VERSION=2.11.0+rocm7.2
+ENV TORCHVISION_VERSION=0.26.0+rocm7.2
+ENV TORCHAUDIO_VERSION=2.11.0+rocm7.2
+ENV PYTORCH_TRITON_ROCM_VERSION=3.6.0
+ENV AMDSMI_VERSION=7.0.2
+ENV ROCM72_EXPERIMENT_SKIP_DPKG_LOCKS=1
 ENV VLLM_COMMIT=6a52668c14dc9cb94a270d94bfec735fe627ed0c
 ENV VLLM_PACKAGE_VERSION=0.0.0+gfx906
 ENV VLLM_VERSION_OVERRIDE=0.0.0+gfx906
@@ -1076,7 +1278,7 @@ ENV AMDGPU_TARGETS=gfx906
 ENV CMAKE_HIP_ARCHITECTURES=gfx906
 ENV FLASH_ATTENTION_TRITON_AMD_ENABLE=TRUE
 ENV FLASH_ATTENTION_TRITON_AMD_REF=TRUE
-ENV LD_LIBRARY_PATH=/opt/rocm/lib:/opt/rocm/lib64:
+ENV LD_LIBRARY_PATH=/opt/gfx906:/rccl-overlay/install/lib:/opt/rocm/lib:/opt/rocm/lib64:/usr/local/lib:
 ENV PATH=/opt/venv/bin:/opt/rocm/bin:/opt/rocm/llvm/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ENV PYTHONPATH=/opt/qwen36-python
 ENV PYTHONUNBUFFERED=1
@@ -1090,19 +1292,6 @@ ENV LC_ALL=C.UTF-8
 ENV TZ=Etc/UTC
 
 COPY --from=vllm-gfx906-repro-smallroot / /
-
-COPY --from=vllm-gfx906-repro-build /opt/rocm-6.3.4/lib/hipblaslt /opt/rocm-6.3.4/lib/hipblaslt
-COPY --from=vllm-gfx906-repro-build /opt/rocm-6.3.4/lib/rocblas /opt/rocm-6.3.4/lib/rocblas
-COPY --from=vllm-gfx906-repro-build /opt/rocm-6.3.4/lib/rocfft /opt/rocm-6.3.4/lib/rocfft
-COPY --from=vllm-gfx906-repro-build /opt/rocm-6.3.4/lib/llvm /opt/rocm-6.3.4/lib/llvm
-COPY --from=vllm-gfx906-repro-build /opt/rocm-6.3.4/lib/hipsparselt /opt/rocm-6.3.4/lib/hipsparselt
-COPY --from=vllm-gfx906-repro-build /opt/rocm-6.3.4/lib/librocsolver.so.0.3.60304 /opt/rocm-6.3.4/lib/librocsolver.so.0.3.60304
-COPY --from=vllm-gfx906-repro-build /opt/rocm-6.3.4/lib/librocsparse.so.1.0.60304 /opt/rocm-6.3.4/lib/librocsparse.so.1.0.60304
-COPY --from=vllm-gfx906-repro-build /opt/rocm-6.3.4/lib/librccl.so.1.0.60304 /opt/rocm-6.3.4/lib/librccl.so.1.0.60304
-COPY --from=vllm-gfx906-repro-build /opt/rocm-6.3.4/lib/libMIOpen.so.1.0.60304 /opt/rocm-6.3.4/lib/libMIOpen.so.1.0.60304
-COPY --from=vllm-gfx906-repro-build /opt/rocm-6.3.4/lib/libdevice_gemm_operations.a /opt/rocm-6.3.4/lib/libdevice_gemm_operations.a
-COPY --from=vllm-gfx906-repro-build /opt/rocm-6.3.4/lib/libdevice_conv_operations.a /opt/rocm-6.3.4/lib/libdevice_conv_operations.a
-COPY --from=vllm-gfx906-repro-rocm-lib-rest /opt/rocm-6.3.4/lib /opt/rocm-6.3.4/lib
 
 COPY --from=vllm-gfx906-repro-build /opt/venv/lib/python3.12/site-packages/torch/lib/hipblaslt /opt/venv/lib/python3.12/site-packages/torch/lib/hipblaslt
 COPY --from=vllm-gfx906-repro-build /opt/venv/lib/python3.12/site-packages/torch/lib/rocblas /opt/venv/lib/python3.12/site-packages/torch/lib/rocblas
@@ -1121,6 +1310,24 @@ COPY --from=vllm-gfx906-repro-build /root/.triton/llvm /root/.triton/llvm
 COPY --from=vllm-gfx906-repro-build /root/.triton/nvidia /root/.triton/nvidia
 COPY --from=vllm-gfx906-repro-triton-rest /root/.triton /root/.triton
 
+COPY .gfx906_runtime_bundle /opt/gfx906_release_runtime
+RUN set -eux; \
+    mkdir -p \
+      /opt/gfx906 \
+      /rccl-overlay/install/lib \
+      /usr/share/ollama/kernel_labs/gfx906_swiglu_gemv_ext_native_runtime_20260608; \
+    if [ -f /opt/gfx906_release_runtime/native/rccl/lib/librccl.so.1.0 ]; then \
+      cp -a /opt/gfx906_release_runtime/native/rccl/lib/librccl.so.1.0 /rccl-overlay/install/lib/librccl.so.1.0; \
+      ln -sfn librccl.so.1.0 /rccl-overlay/install/lib/librccl.so.1; \
+      ln -sfn librccl.so.1 /rccl-overlay/install/lib/librccl.so; \
+    fi; \
+    if [ -f /opt/gfx906_release_runtime/native/sidecar_ar/libgfx906_sidecar_tree_ll_ar_multirow_count_2048_1536_1536_20260613.so ]; then \
+      cp -a /opt/gfx906_release_runtime/native/sidecar_ar/libgfx906_sidecar_tree_ll_ar_multirow_count_2048_1536_1536_20260613.so /opt/gfx906/libgfx906_persistent_tree_ll_ar_default_20260613.so; \
+    fi; \
+    if [ -f /opt/gfx906_release_runtime/native/swiglu/gfx906_swiglu_gemv_ext_20260607.so ]; then \
+      cp -a /opt/gfx906_release_runtime/native/swiglu/gfx906_swiglu_gemv_ext_20260607.so /usr/share/ollama/kernel_labs/gfx906_swiglu_gemv_ext_native_runtime_20260608/gfx906_swiglu_gemv_ext_20260607.so; \
+    fi
+
 WORKDIR /tmp
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 DOCKERFILE
@@ -1135,6 +1342,8 @@ write_embedded_dockerignore() {
 !Dockerfile
 !docker-entrypoint.sh
 !.dockerignore
+!.gfx906_runtime_bundle
+!.gfx906_runtime_bundle/**
 DOCKERIGNORE
 }
 
@@ -1201,7 +1410,11 @@ services:
       NCCL_ALGO: ${NCCL_ALGO}
       NCCL_PROTO: ${NCCL_PROTO}
       NCCL_P2P_DISABLE: ${NCCL_P2P_DISABLE}
+      NCCL_MIN_NCHANNELS: ${NCCL_MIN_NCHANNELS:-}
       NCCL_MAX_NCHANNELS: ${NCCL_MAX_NCHANNELS}
+      NCCL_NTHREADS: ${NCCL_NTHREADS:-}
+      RCCL_TREES: ${RCCL_TREES:-}
+      VLLM_NCCL_SO_PATH: ${VLLM_NCCL_SO_PATH:-}
       FLASH_ATTENTION_TRITON_AMD_ENABLE: ${FLASH_ATTENTION_TRITON_AMD_ENABLE}
       FLASH_ATTENTION_TRITON_AMD_REF: ${FLASH_ATTENTION_TRITON_AMD_REF}
       VLLM_LOGGING_LEVEL: INFO
@@ -1225,7 +1438,41 @@ services:
       HF_HUB_DISABLE_XET: ${HF_HUB_DISABLE_XET}
       HF_HUB_DOWNLOAD_TIMEOUT: ${HF_HUB_DOWNLOAD_TIMEOUT}
       HF_HUB_ETAG_TIMEOUT: ${HF_HUB_ETAG_TIMEOUT}
+      LD_LIBRARY_PATH: ${LD_LIBRARY_PATH:-/opt/gfx906:/rccl-overlay/install/lib:/usr/local/lib:/opt/rocm/lib:/opt/venv/lib/python3.12/site-packages/torch/lib}
       HIP_VISIBLE_DEVICES: ${HIP_VISIBLE_DEVICES}
+      VLLM_QWEN36_MOE_TP4X2_IN_TP8: ${VLLM_QWEN36_MOE_TP4X2_IN_TP8:-}
+      VLLM_QWEN36_MOE_TP4X2_SHARED: ${VLLM_QWEN36_MOE_TP4X2_SHARED:-}
+      VLLM_QWEN36_MOE_TP4X2_FUSE_SHARED_ROUTED_REDUCE: ${VLLM_QWEN36_MOE_TP4X2_FUSE_SHARED_ROUTED_REDUCE:-}
+      VLLM_GFX906_ROWPAR_MUTABLE_AR: ${VLLM_GFX906_ROWPAR_MUTABLE_AR:-}
+      VLLM_GFX906_QWEN_MLP_INTERLEAVED_SWIGLU: ${VLLM_GFX906_QWEN_MLP_INTERLEAVED_SWIGLU:-}
+      VLLM_GFX906_QWEN_MLP_INTERLEAVED_SWIGLU_STRICT: ${VLLM_GFX906_QWEN_MLP_INTERLEAVED_SWIGLU_STRICT:-}
+      VLLM_GFX906_QWEN_MLP_INTERLEAVED_SWIGLU_EXT_PATH: ${VLLM_GFX906_QWEN_MLP_INTERLEAVED_SWIGLU_EXT_PATH:-}
+      VLLM_GFX906_PERSISTENT_AR: ${VLLM_GFX906_PERSISTENT_AR:-}
+      VLLM_GFX906_PERSISTENT_AR_STRICT: ${VLLM_GFX906_PERSISTENT_AR_STRICT:-}
+      VLLM_GFX906_PERSISTENT_AR_LIB: ${VLLM_GFX906_PERSISTENT_AR_LIB:-}
+      VLLM_GFX906_PERSISTENT_AR_KIND_ROUTE: ${VLLM_GFX906_PERSISTENT_AR_KIND_ROUTE:-}
+      VLLM_GFX906_PERSISTENT_AR_NWARPS: ${VLLM_GFX906_PERSISTENT_AR_NWARPS:-}
+      VLLM_GFX906_PERSISTENT_AR_BLOCK_THREADS: ${VLLM_GFX906_PERSISTENT_AR_BLOCK_THREADS:-}
+      VLLM_GFX906_ROWPAR_BOUNDARY_CUT: ${VLLM_GFX906_ROWPAR_BOUNDARY_CUT:-}
+      VLLM_GFX906_ROWPAR_BOUNDARY_MLP_SHAPES: ${VLLM_GFX906_ROWPAR_BOUNDARY_MLP_SHAPES:-}
+      VLLM_GFX906_PERSISTENT_AR_PREINIT_ON_GRAPH_CAPTURE: ${VLLM_GFX906_PERSISTENT_AR_PREINIT_ON_GRAPH_CAPTURE:-}
+      VLLM_GFX906_PERSISTENT_AR_SKIP_GRAPH_CAPTURE_CONTEXTS: ${VLLM_GFX906_PERSISTENT_AR_SKIP_GRAPH_CAPTURE_CONTEXTS:-}
+      VLLM_GFX906_PERSISTENT_AR_MULTIROW: ${VLLM_GFX906_PERSISTENT_AR_MULTIROW:-}
+      VLLM_GFX906_PERSISTENT_AR_MULTIWORK_NWARPS: ${VLLM_GFX906_PERSISTENT_AR_MULTIWORK_NWARPS:-}
+      VLLM_GFX906_PERSISTENT_AR_MULTIWORK_BLOCK_THREADS: ${VLLM_GFX906_PERSISTENT_AR_MULTIWORK_BLOCK_THREADS:-}
+      VLLM_GFX906_PERSISTENT_AR_LOG_LIMIT: ${VLLM_GFX906_PERSISTENT_AR_LOG_LIMIT:-}
+      GFX906_PERSISTENT_AR_DEFER_WORKER: ${GFX906_PERSISTENT_AR_DEFER_WORKER:-}
+      GFX906_PERSISTENT_AR_IDLE_SLEEP_ITERS: ${GFX906_PERSISTENT_AR_IDLE_SLEEP_ITERS:-}
+      VLLM_GFX906_PERSISTENT_AR_CAPTURE_ONLY: ${VLLM_GFX906_PERSISTENT_AR_CAPTURE_ONLY:-}
+      VLLM_GFX906_PERSISTENT_AR_CAPTURE_UNSTARTED: ${VLLM_GFX906_PERSISTENT_AR_CAPTURE_UNSTARTED:-}
+      VLLM_GFX906_PERSISTENT_AR_START_AFTER_CAPTURE: ${VLLM_GFX906_PERSISTENT_AR_START_AFTER_CAPTURE:-}
+      VLLM_GFX906_PERSISTENT_AR_START_AFTER_PREFILL: ${VLLM_GFX906_PERSISTENT_AR_START_AFTER_PREFILL:-}
+      VLLM_GFX906_PERSISTENT_AR_START_ON_FIRST_USE: ${VLLM_GFX906_PERSISTENT_AR_START_ON_FIRST_USE:-}
+      VLLM_GFX906_PERSISTENT_AR_START_AFTER_PREFILL_MIN_TOKENS: ${VLLM_GFX906_PERSISTENT_AR_START_AFTER_PREFILL_MIN_TOKENS:-}
+      VLLM_GFX906_PERSISTENT_AR_START_AFTER_PREFILL_REQ_PREFIX: ${VLLM_GFX906_PERSISTENT_AR_START_AFTER_PREFILL_REQ_PREFIX:-}
+      VLLM_GFX906_PERSISTENT_AR_WATCHDOG: ${VLLM_GFX906_PERSISTENT_AR_WATCHDOG:-}
+      VLLM_GFX906_PERSISTENT_AR_WATCHDOG_INTERVAL: ${VLLM_GFX906_PERSISTENT_AR_WATCHDOG_INTERVAL:-}
+      VLLM_GFX906_PERSISTENT_AR_WATCHDOG_MAX: ${VLLM_GFX906_PERSISTENT_AR_WATCHDOG_MAX:-}
 COMPOSE
 }
 
@@ -1274,15 +1521,28 @@ export TORCH_BLAS_PREFER_HIPBLASLT="${TORCH_BLAS_PREFER_HIPBLASLT:-0}"
 export OMP_NUM_THREADS="${OMP_NUM_THREADS:-4}"
 export VLLM_LOGGING_LEVEL="${VLLM_LOGGING_LEVEL:-INFO}"
 export NCCL_P2P_DISABLE="${NCCL_P2P_DISABLE:-1}"
+export LD_LIBRARY_PATH="${LD_LIBRARY_PATH:-/opt/gfx906:/rccl-overlay/install/lib:/usr/local/lib:/opt/rocm/lib:/opt/venv/lib/python3.12/site-packages/torch/lib}"
 
 if [[ -n "${NCCL_ALGO:-}" ]]; then
   export NCCL_ALGO
 fi
+if [[ -n "${NCCL_MIN_NCHANNELS:-}" ]]; then
+  export NCCL_MIN_NCHANNELS
+fi
 if [[ -n "${NCCL_MAX_NCHANNELS:-}" ]]; then
   export NCCL_MAX_NCHANNELS
 fi
+if [[ -n "${NCCL_NTHREADS:-}" ]]; then
+  export NCCL_NTHREADS
+fi
 if [[ -n "${NCCL_PROTO:-}" ]]; then
   export NCCL_PROTO
+fi
+if [[ -n "${RCCL_TREES:-}" ]]; then
+  export RCCL_TREES
+fi
+if [[ -n "${VLLM_NCCL_SO_PATH:-}" ]]; then
+  export VLLM_NCCL_SO_PATH
 fi
 if [[ -n "${HIP_VISIBLE_DEVICES:-}" ]]; then
   export HIP_VISIBLE_DEVICES
@@ -1290,6 +1550,44 @@ fi
 if [[ -n "${VLLM_ENABLE_C1_TOPK8_MOE_FASTPATH:-}" ]]; then
   export VLLM_ENABLE_C1_TOPK8_MOE_FASTPATH
 fi
+for env_name in \
+  VLLM_QWEN36_MOE_TP4X2_IN_TP8 \
+  VLLM_QWEN36_MOE_TP4X2_SHARED \
+  VLLM_QWEN36_MOE_TP4X2_FUSE_SHARED_ROUTED_REDUCE \
+  VLLM_GFX906_ROWPAR_MUTABLE_AR \
+  VLLM_GFX906_QWEN_MLP_INTERLEAVED_SWIGLU \
+  VLLM_GFX906_QWEN_MLP_INTERLEAVED_SWIGLU_STRICT \
+  VLLM_GFX906_QWEN_MLP_INTERLEAVED_SWIGLU_EXT_PATH \
+  VLLM_GFX906_PERSISTENT_AR \
+  VLLM_GFX906_PERSISTENT_AR_STRICT \
+  VLLM_GFX906_PERSISTENT_AR_LIB \
+  VLLM_GFX906_PERSISTENT_AR_KIND_ROUTE \
+  VLLM_GFX906_PERSISTENT_AR_NWARPS \
+  VLLM_GFX906_PERSISTENT_AR_BLOCK_THREADS \
+  VLLM_GFX906_ROWPAR_BOUNDARY_CUT \
+  VLLM_GFX906_ROWPAR_BOUNDARY_MLP_SHAPES \
+  VLLM_GFX906_PERSISTENT_AR_PREINIT_ON_GRAPH_CAPTURE \
+  VLLM_GFX906_PERSISTENT_AR_SKIP_GRAPH_CAPTURE_CONTEXTS \
+  VLLM_GFX906_PERSISTENT_AR_MULTIROW \
+  VLLM_GFX906_PERSISTENT_AR_MULTIWORK_NWARPS \
+  VLLM_GFX906_PERSISTENT_AR_MULTIWORK_BLOCK_THREADS \
+  VLLM_GFX906_PERSISTENT_AR_LOG_LIMIT \
+  GFX906_PERSISTENT_AR_DEFER_WORKER \
+  GFX906_PERSISTENT_AR_IDLE_SLEEP_ITERS \
+  VLLM_GFX906_PERSISTENT_AR_CAPTURE_ONLY \
+  VLLM_GFX906_PERSISTENT_AR_CAPTURE_UNSTARTED \
+  VLLM_GFX906_PERSISTENT_AR_START_AFTER_CAPTURE \
+  VLLM_GFX906_PERSISTENT_AR_START_AFTER_PREFILL \
+  VLLM_GFX906_PERSISTENT_AR_START_ON_FIRST_USE \
+  VLLM_GFX906_PERSISTENT_AR_START_AFTER_PREFILL_MIN_TOKENS \
+  VLLM_GFX906_PERSISTENT_AR_START_AFTER_PREFILL_REQ_PREFIX \
+  VLLM_GFX906_PERSISTENT_AR_WATCHDOG \
+  VLLM_GFX906_PERSISTENT_AR_WATCHDOG_INTERVAL \
+  VLLM_GFX906_PERSISTENT_AR_WATCHDOG_MAX; do
+  if [[ -n "${!env_name:-}" ]]; then
+    export "${env_name}"
+  fi
+done
 
 copy_if_present() {
   local src="$1"
@@ -1309,6 +1607,22 @@ copy_if_present() {
 
 apply_patch_bundle() {
   local bundle_dir="${VLLM_PATCH_BUNDLE:-/opt/vllm_patch_bundle}"
+
+  if [[ -f "${bundle_dir}/native/rccl/lib/librccl.so.1.0" ]]; then
+    mkdir -p /rccl-overlay/install/lib
+    cp -a "${bundle_dir}/native/rccl/lib/librccl.so.1.0" /rccl-overlay/install/lib/librccl.so.1.0
+    ln -sfn librccl.so.1.0 /rccl-overlay/install/lib/librccl.so.1
+    ln -sfn librccl.so.1 /rccl-overlay/install/lib/librccl.so
+  fi
+  if [[ -f "${bundle_dir}/native/sidecar_ar/libgfx906_sidecar_tree_ll_ar_multirow_count_2048_1536_1536_20260613.so" ]]; then
+    mkdir -p /opt/gfx906
+    cp -a "${bundle_dir}/native/sidecar_ar/libgfx906_sidecar_tree_ll_ar_multirow_count_2048_1536_1536_20260613.so" /opt/gfx906/libgfx906_persistent_tree_ll_ar_default_20260613.so
+  fi
+  if [[ -f "${bundle_dir}/native/swiglu/gfx906_swiglu_gemv_ext_20260607.so" ]]; then
+    mkdir -p /usr/share/ollama/kernel_labs/gfx906_swiglu_gemv_ext_native_runtime_20260608
+    cp -a "${bundle_dir}/native/swiglu/gfx906_swiglu_gemv_ext_20260607.so" /usr/share/ollama/kernel_labs/gfx906_swiglu_gemv_ext_native_runtime_20260608/gfx906_swiglu_gemv_ext_20260607.so
+  fi
+
   local targets=(
     "shared_expert_gate.py:/opt/venv/lib/python3.12/site-packages/vllm/model_executor/layers/fused_moe/shared_expert_gate.py"
     "shared_expert_gate.py:/opt/src/vllm/vllm/model_executor/layers/fused_moe/shared_expert_gate.py"
@@ -1334,6 +1648,24 @@ apply_patch_bundle() {
     "qwen3_5.py:/opt/venv/lib/python3.12/site-packages/vllm/model_executor/models/qwen3_5.py"
     "qwen3_5.py:/opt/src/vllm/vllm/model_executor/models/qwen3_5.py"
     "qwen3_5.py:/workspace/vllm/vllm/model_executor/models/qwen3_5.py"
+    "parallel_state.py:/opt/venv/lib/python3.12/site-packages/vllm/distributed/parallel_state.py"
+    "parallel_state.py:/opt/src/vllm/vllm/distributed/parallel_state.py"
+    "parallel_state.py:/workspace/vllm/vllm/distributed/parallel_state.py"
+    "communication_op.py:/opt/venv/lib/python3.12/site-packages/vllm/distributed/communication_op.py"
+    "communication_op.py:/opt/src/vllm/vllm/distributed/communication_op.py"
+    "communication_op.py:/workspace/vllm/vllm/distributed/communication_op.py"
+    "linear.py:/opt/venv/lib/python3.12/site-packages/vllm/model_executor/layers/linear.py"
+    "linear.py:/opt/src/vllm/vllm/model_executor/layers/linear.py"
+    "linear.py:/workspace/vllm/vllm/model_executor/layers/linear.py"
+    "gfx906_persistent_ar.py:/opt/venv/lib/python3.12/site-packages/vllm/distributed/device_communicators/gfx906_persistent_ar.py"
+    "gfx906_persistent_ar.py:/opt/src/vllm/vllm/distributed/device_communicators/gfx906_persistent_ar.py"
+    "gfx906_persistent_ar.py:/workspace/vllm/vllm/distributed/device_communicators/gfx906_persistent_ar.py"
+    "qwen2_moe_interleaved_swiglu_20260608.py:/opt/venv/lib/python3.12/site-packages/vllm/model_executor/models/qwen2_moe.py"
+    "qwen2_moe_interleaved_swiglu_20260608.py:/opt/src/vllm/vllm/model_executor/models/qwen2_moe.py"
+    "qwen2_moe_interleaved_swiglu_20260608.py:/workspace/vllm/vllm/model_executor/models/qwen2_moe.py"
+    "qwen3_next.py:/opt/venv/lib/python3.12/site-packages/vllm/model_executor/models/qwen3_next.py"
+    "qwen3_next.py:/opt/src/vllm/vllm/model_executor/models/qwen3_next.py"
+    "qwen3_next.py:/workspace/vllm/vllm/model_executor/models/qwen3_next.py"
   )
 
   for item in "${targets[@]}"; do
@@ -1358,6 +1690,8 @@ apply_patch_bundle() {
     cp -a "${bundle_dir}/qwen36-python/." /opt/qwen36-python/
     export PYTHONPATH="/opt/qwen36-python${PYTHONPATH:+:${PYTHONPATH}}"
   fi
+
+  copy_if_present "${bundle_dir}/sitecustomize_postcapture_start.py" "/opt/vllm_trace_site/sitecustomize.py"
 
   if [[ -z "${PYTHONPATH}" ]]; then
     export PYTHONPATH="/workspace:${PYTHONPATH}"
@@ -12880,46 +13214,6 @@ resolve_bool() {
   esac
 }
 
-validate_repro_docker_archive_sha() {
-  local archive_path="$1"
-  local actual_sha="$2"
-  local mode="${BYTE_FOR_BYTE_VALIDATION_MODE:-auto}"
-  mode="${mode,,}"
-
-  if [[ "$(resolve_bool "${mode}")" != "1" && "${mode}" != "auto" ]]; then
-    echo "warning: BYTE_FOR_BYTE_VALIDATION_MODE=0; skipping exported Docker archive SHA validation" >&2
-    echo "warning: this build is a local deploy artifact, not byte-for-byte evidence for the published release" >&2
-    return 0
-  fi
-
-  if [[ -z "${actual_sha}" ]]; then
-    echo "error: could not read Docker archive SHA for ${archive_path}" >&2
-    return 1
-  fi
-
-  if [[ -z "${EXPECTED_REPRO_DOCKER_ARCHIVE_SHA256:-}" ]]; then
-    if [[ "${mode}" == "auto" ]]; then
-      echo "warning: BYTE_FOR_BYTE_VALIDATION_MODE=auto and EXPECTED_REPRO_DOCKER_ARCHIVE_SHA256 is empty" >&2
-      echo "warning: recorded archive SHA ${actual_sha}; no release byte-for-byte target was enforced" >&2
-      echo "warning: set EXPECTED_REPRO_DOCKER_ARCHIVE_SHA256 for strict release reproduction, or BYTE_FOR_BYTE_VALIDATION_MODE=0 for local deploys" >&2
-      return 0
-    fi
-    echo "error: BYTE_FOR_BYTE_VALIDATION_MODE=1 requires EXPECTED_REPRO_DOCKER_ARCHIVE_SHA256" >&2
-    return 1
-  fi
-
-  if [[ "${actual_sha}" != "${EXPECTED_REPRO_DOCKER_ARCHIVE_SHA256}" ]]; then
-    echo "error: byte-for-byte Docker archive SHA mismatch" >&2
-    echo "expected: ${EXPECTED_REPRO_DOCKER_ARCHIVE_SHA256}" >&2
-    echo "actual:   ${actual_sha}" >&2
-    echo "archive:  ${archive_path}" >&2
-    echo "Set BYTE_FOR_BYTE_VALIDATION_MODE=0 only for non-canonical local deploys where release reproduction is not being claimed." >&2
-    return 1
-  fi
-
-  echo "byte-for-byte Docker archive SHA verified: ${actual_sha}"
-}
-
 prompt_continue_on_gpu_gate_failure() {
   local reason="$1"
 
@@ -12973,43 +13267,116 @@ normalize_gpu_device_list() {
   done
 }
 
-ROCM_SMI_GPU_PROBE_LOADED=0
-ROCM_SMI_GPU_PROBE_CACHE=""
+ROCM_SMI_MEM_PROBE_LOADED=0
+ROCM_SMI_MEM_PROBE_CACHE=""
 
-get_rocm_smi_gpu_probe() {
-  if [[ "${ROCM_SMI_GPU_PROBE_LOADED}" != "1" ]]; then
-    ROCM_SMI_GPU_PROBE_LOADED=1
+get_rocm_smi_mem_probe() {
+  if [[ "${ROCM_SMI_MEM_PROBE_LOADED}" != "1" ]]; then
+    ROCM_SMI_MEM_PROBE_LOADED=1
     if command -v rocm-smi >/dev/null 2>&1; then
-      ROCM_SMI_GPU_PROBE_CACHE="$(rocm-smi --showproductname --showmeminfo vram 2>/dev/null || true)"
+      ROCM_SMI_MEM_PROBE_CACHE="$(rocm-smi --showmeminfo vram 2>/dev/null || true)"
     else
-      ROCM_SMI_GPU_PROBE_CACHE=""
+      ROCM_SMI_MEM_PROBE_CACHE=""
     fi
   fi
 
-  printf '%s\n' "${ROCM_SMI_GPU_PROBE_CACHE}"
+  printf '%s\n' "${ROCM_SMI_MEM_PROBE_CACHE}"
+}
+
+kfd_gpu_nodes() {
+  local node
+  local props
+  local target
+
+  for node in /sys/class/kfd/kfd/topology/nodes/[0-9]*; do
+    props="${node}/properties"
+    [[ -r "${props}" ]] || continue
+    target="$(awk '$1 == "gfx_target_version" { print $2; exit }' "${props}")"
+    [[ -n "${target}" && "${target}" != "0" ]] || continue
+    printf '%s\n' "${node}"
+  done | sort -V
+}
+
+gpu_kfd_node_path() {
+  local device_id="$1"
+  local ordinal=0
+  local node
+
+  while IFS= read -r node; do
+    if (( ordinal == device_id )); then
+      printf '%s\n' "${node}"
+      return 0
+    fi
+    ((ordinal++))
+  done < <(kfd_gpu_nodes)
+
+  return 1
+}
+
+gpu_card_device_path() {
+  local device_id="$1"
+  local node
+  local props
+  local render_minor
+  local card
+  local link
+
+  node="$(gpu_kfd_node_path "${device_id}" || true)"
+  if [[ -n "${node}" ]]; then
+    props="${node}/properties"
+    render_minor="$(awk '$1 == "drm_render_minor" { print $2; exit }' "${props}" 2>/dev/null || true)"
+    if [[ "${render_minor}" =~ ^[0-9]+$ && "${render_minor}" != "0" ]]; then
+      for link in /sys/class/drm/card[0-9]*/device; do
+        [[ -e "${link}" ]] || continue
+        card="${link%/device}"
+        if [[ -e "${card}/renderD${render_minor}" ]]; then
+          printf '%s\n' "${link}"
+          return 0
+        fi
+      done
+    fi
+  fi
+
+  if [[ -d "/sys/class/drm/card${device_id}/device" ]]; then
+    printf '/sys/class/drm/card%s/device\n' "${device_id}"
+    return 0
+  fi
+  if [[ -d "/sys/class/drm/card$((device_id + 1))/device" ]]; then
+    printf '/sys/class/drm/card%s/device\n' "$((device_id + 1))"
+    return 0
+  fi
+
+  return 1
 }
 
 list_rocm_gpu_ids() {
   local ids
-  local card_path
+  local node
+  local ordinal=0
 
-  ids="$(get_rocm_smi_gpu_probe | grep -oE 'GPU\[[0-9]+\]' | sed -E 's/GPU\[([0-9]+)\]/\1/' | sort -n -u || true)"
+  while IFS= read -r node; do
+    [[ -n "${node}" ]] || continue
+    printf '%s\n' "${ordinal}"
+    ((ordinal++))
+  done < <(kfd_gpu_nodes)
+  if (( ordinal > 0 )); then
+    return 0
+  fi
+
+  ids="$(get_rocm_smi_mem_probe | grep -oE 'GPU\[[0-9]+\]' | sed -E 's/GPU\[([0-9]+)\]/\1/' | sort -n -u || true)"
   if [[ -n "${ids}" ]]; then
     printf '%s\n' "${ids}"
     return 0
   fi
 
-  for card_path in /sys/class/drm/card[0-9]*; do
-    [[ -e "${card_path}" ]] || continue
-    basename "${card_path}" | sed -E 's/^card//'
-  done | sort -n -u
+  return 1
 }
 
 gpu_rocm_smi_field() {
   local device_id="$1"
   local field="$2"
 
-  get_rocm_smi_gpu_probe | awk -v gpu="GPU[${device_id}]" -v field="${field}" '
+  get_rocm_smi_mem_probe | awk -v gpu="GPU[${device_id}]" -v field="${field}" '
     index($0, gpu) && index($0, field) {
       sub(/^.*:[[:space:]]*/, "", $0)
       gsub(/^[[:space:]]+|[[:space:]]+$/, "", $0)
@@ -13023,14 +13390,27 @@ canonicalize_gpu_arch() {
   local arch="${1,,}"
   arch="$(printf '%s' "${arch}" | tr -cd '[:alnum:]_')"
   case "${arch}" in
-    gfx9006) echo "gfx906" ;;
+    90006|90600|gfx90006|gfx90600|gfx9006) echo "gfx906" ;;
     *) echo "${arch}" ;;
   esac
 }
 
 gpu_arch_rocm_smi() {
   local device_id="$1"
+  local node
+  local props
+  local target
   local arch
+
+  node="$(gpu_kfd_node_path "${device_id}" || true)"
+  if [[ -n "${node}" ]]; then
+    props="${node}/properties"
+    target="$(awk '$1 == "gfx_target_version" { print $2; exit }' "${props}" 2>/dev/null || true)"
+    if [[ -n "${target}" ]]; then
+      canonicalize_gpu_arch "${target}"
+      return 0
+    fi
+  fi
 
   arch="$(gpu_rocm_smi_field "${device_id}" "GFX Version" | awk '{print $1}' || true)"
   if [[ -n "${arch}" ]]; then
@@ -13068,6 +13448,81 @@ gpu_arch_matches_target() {
   return 1
 }
 
+canonicalize_gpu_did() {
+  local did="${1,,}"
+
+  did="$(printf '%s' "${did}" | tr -d '[:space:]')"
+  did="${did#did=}"
+  did="${did#device_id=}"
+  did="${did#0x}"
+  did="$(printf '%s' "${did}" | tr -cd '[:xdigit:]')"
+  if [[ -z "${did}" ]]; then
+    return 1
+  fi
+
+  if [[ "${did}" =~ [a-f] ]]; then
+    printf '%d\n' "$((16#${did}))"
+  else
+    printf '%d\n' "${did}"
+  fi
+}
+
+gpu_did_sysfs() {
+  local device_id="$1"
+  local node
+  local props
+  local did
+  local device_path
+
+  node="$(gpu_kfd_node_path "${device_id}" || true)"
+  if [[ -n "${node}" ]]; then
+    props="${node}/properties"
+    did="$(awk '$1 == "device_id" { print $2; exit }' "${props}" 2>/dev/null || true)"
+    if [[ -n "${did}" ]]; then
+      canonicalize_gpu_did "${did}"
+      return 0
+    fi
+  fi
+
+  device_path="$(gpu_card_device_path "${device_id}" || true)"
+  if [[ -n "${device_path}" && -r "${device_path}/device" ]]; then
+    did="$(tr -d '[:space:]' < "${device_path}/device")"
+    if [[ -n "${did}" ]]; then
+      canonicalize_gpu_did "${did}"
+      return 0
+    fi
+  fi
+
+  return 1
+}
+
+gpu_did_matches_target() {
+  local did
+  local targets
+  local -a target_list=()
+  local target
+
+  targets="${GPU_TARGET_DIDS:-}"
+  if [[ -z "${targets}" || "${targets,,}" == "any" ]]; then
+    return 0
+  fi
+
+  did="$(canonicalize_gpu_did "$1" || true)"
+  if [[ -z "${did}" ]]; then
+    return 1
+  fi
+
+  IFS=',' read -r -a target_list <<< "${targets}"
+  for target in "${target_list[@]:-}"; do
+    target="$(canonicalize_gpu_did "${target}" || true)"
+    if [[ -n "${target}" && "${did}" == "${target}" ]]; then
+      return 0
+    fi
+  done
+
+  return 1
+}
+
 gpu_vram_total_bytes_rocm_smi() {
   local device_id="$1"
   local bytes
@@ -13096,6 +13551,7 @@ gpu_vram_used_bytes_rocm_smi() {
 
 gpu_vram_gib_sysfs() {
   local device_id="$1"
+  local device_path
   local path
   local bytes
 
@@ -13105,7 +13561,8 @@ gpu_vram_gib_sysfs() {
     return 0
   fi
 
-  path="/sys/class/drm/card${device_id}/device/mem_info_vram_total"
+  device_path="$(gpu_card_device_path "${device_id}" || true)"
+  path="${device_path}/mem_info_vram_total"
   if [[ -r "${path}" ]]; then
     bytes="$(tr -d '[:space:]' < "${path}")"
     if [[ "${bytes}" =~ ^[0-9]+$ ]]; then
@@ -13119,6 +13576,7 @@ gpu_vram_gib_sysfs() {
 gpu_vram_bytes_sysfs() {
   local device_id="$1"
   local kind="$2"
+  local device_path
   local path
   local bytes
 
@@ -13138,7 +13596,8 @@ gpu_vram_bytes_sysfs() {
     return 0
   fi
 
-  path="/sys/class/drm/card${device_id}/device/mem_info_vram_${kind}"
+  device_path="$(gpu_card_device_path "${device_id}" || true)"
+  path="${device_path}/mem_info_vram_${kind}"
   if [[ -r "${path}" ]]; then
     bytes="$(tr -d '[:space:]' < "${path}")"
     if [[ "${bytes}" =~ ^[0-9]+$ ]]; then
@@ -13160,24 +13619,19 @@ auto_select_hip_visible_devices() {
     return 0
   fi
 
-  if ! command -v rocm-smi >/dev/null 2>&1; then
-    echo "error: HIP_VISIBLE_DEVICES=auto requires rocm-smi so ROCm device ordinals can be matched to ${GPU_TARGET_ARCH:-gfx906}." >&2
-    echo "       install rocm-smi or set HIP_VISIBLE_DEVICES explicitly, for example HIP_VISIBLE_DEVICES=0,1,2,3." >&2
-    return 1
-  fi
-
   local min_gpus="${REQUIRED_GPU_COUNT:-4}"
   local min_vram_gib="${REQUIRED_GPU_VRAM_GIB:-32}"
   local gpu_ids
   local gpu_id
   local arch
+  local did
   local vram_gib
   local old_ifs
   local -a selected_gpus=()
 
   gpu_ids="$(list_rocm_gpu_ids || true)"
   if [[ -z "${gpu_ids}" ]]; then
-    echo "error: rocm-smi did not report any GPUs; cannot auto-select a ${GPU_TARGET_ARCH:-gfx906} lane." >&2
+    echo "error: no ROCm GPUs were found through KFD topology or rocm-smi memory probing; cannot auto-select a ${GPU_TARGET_ARCH:-gfx906} lane." >&2
     return 1
   fi
 
@@ -13186,6 +13640,11 @@ auto_select_hip_visible_devices() {
 
     arch="$(gpu_arch_rocm_smi "${gpu_id}" || true)"
     if ! gpu_arch_matches_target "${arch}"; then
+      continue
+    fi
+
+    did="$(gpu_did_sysfs "${gpu_id}" || true)"
+    if ! gpu_did_matches_target "${did}"; then
       continue
     fi
 
@@ -13209,8 +13668,9 @@ auto_select_hip_visible_devices() {
     while IFS= read -r gpu_id; do
       [[ -n "${gpu_id}" ]] || continue
       arch="$(gpu_arch_rocm_smi "${gpu_id}" || echo unknown)"
+      did="$(gpu_did_sysfs "${gpu_id}" || echo unknown)"
       vram_gib="$(gpu_vram_gib_sysfs "${gpu_id}" || echo unknown)"
-      echo "       GPU[${gpu_id}]: arch=${arch} vram=${vram_gib}GiB" >&2
+      echo "       GPU[${gpu_id}]: arch=${arch} did=${did} vram=${vram_gib}GiB" >&2
     done <<< "${gpu_ids}"
     echo "       Set HIP_VISIBLE_DEVICES explicitly to override auto-selection." >&2
     return 1
@@ -13222,7 +13682,7 @@ auto_select_hip_visible_devices() {
   IFS="${old_ifs}"
   export HIP_VISIBLE_DEVICES
 
-  echo "auto-selected HIP_VISIBLE_DEVICES=${HIP_VISIBLE_DEVICES} for ${REQUIRED_GPU_MODEL_HINT:-target GPUs} (target arch ${GPU_TARGET_ARCH:-gfx906}, aliases ${GPU_TARGET_ARCH_ALIASES:-${GPU_TARGET_ARCH:-gfx906}})"
+  echo "auto-selected HIP_VISIBLE_DEVICES=${HIP_VISIBLE_DEVICES} for ${REQUIRED_GPU_MODEL_HINT:-target GPUs} (target arch ${GPU_TARGET_ARCH:-gfx906}, target DIDs ${GPU_TARGET_DIDS:-any}, VRAM checked from sysfs bytes)"
   return 0
 }
 
@@ -13244,11 +13704,9 @@ check_gpu_vram_requirements() {
   local found_count=0
   local missing_count=0
   local device_label
+  local arch
+  local did
   local vram_gib
-
-  if ! command -v rocm-smi >/dev/null 2>&1; then
-    echo "warning: rocm-smi not found; using sysfs for GPU VRAM probe only"
-  fi
 
   normalize_gpu_device_list "${HIP_VISIBLE_DEVICES}" gpu_list
   if [[ "${#gpu_list[@]}" -eq 0 ]]; then
@@ -13264,6 +13722,18 @@ check_gpu_vram_requirements() {
   for gpu_id in "${gpu_list[@]}"; do
     if (( found_count >= min_gpus )); then
       break
+    fi
+
+    arch="$(gpu_arch_rocm_smi "${gpu_id}" || true)"
+    if ! gpu_arch_matches_target "${arch}"; then
+      echo "error: ROCm device ${gpu_id} reports arch=${arch:-unknown}, but this profile requires ${GPU_TARGET_ARCH:-gfx906} (${GPU_TARGET_ARCH_ALIASES:-${GPU_TARGET_ARCH:-gfx906}})." >&2
+      return 1
+    fi
+
+    did="$(gpu_did_sysfs "${gpu_id}" || true)"
+    if ! gpu_did_matches_target "${did}"; then
+      echo "error: ROCm device ${gpu_id} reports DID=${did:-unknown}, but this profile requires GPU_TARGET_DIDS=${GPU_TARGET_DIDS}." >&2
+      return 1
     fi
 
     vram_gib="$(gpu_vram_gib_sysfs "${gpu_id}" || true)"
@@ -13290,7 +13760,7 @@ check_gpu_vram_requirements() {
     return 1
   fi
 
-  echo "GPU VRAM preflight passed for ${REQUIRED_GPU_MODEL_HINT:-target GPUs}: checking first ${found_count} GPU(s) from HIP_VISIBLE_DEVICES for >= ${min_vram_gib}GiB each"
+  echo "GPU identity/VRAM preflight passed for ${REQUIRED_GPU_MODEL_HINT:-target GPUs}: first ${found_count} GPU(s) match arch ${GPU_TARGET_ARCH:-gfx906}, DIDs ${GPU_TARGET_DIDS:-any}, and >= ${min_vram_gib}GiB VRAM"
   return 0
 }
 
@@ -13939,7 +14409,7 @@ probe_reproducible_buildx_exporter() {
     return 0
   fi
 
-  local probe_tag="${DEPLOY_IMAGE}:buildx-rewrite-probe"
+  local probe_tag="${DEPLOY_IMAGE}-buildx-rewrite-probe"
   local probe_dir="${RUN_DIR}/.repro-buildx-exporter-probe"
   local marker="${RUN_DIR}/.repro-buildx-exporter-probe.ok"
   local marker_version="buildx=v${PINNED_BUILDX_VERSION},buildkit=v${PINNED_BUILDKIT_VERSION},type=docker,dest,rewrite-timestamp=true,copy-layer-probe=1"
@@ -13991,7 +14461,7 @@ probe_reproducible_buildctl_daemonless_exporter() {
     return 0
   fi
 
-  local probe_tag="${DEPLOY_IMAGE}:buildctl-daemonless-rewrite-probe"
+  local probe_tag="${DEPLOY_IMAGE}-buildctl-daemonless-rewrite-probe"
   local probe_dir="${RUN_DIR}/.repro-buildctl-daemonless-probe"
   local probe_out="${probe_dir}/out"
   local marker="${RUN_DIR}/.repro-buildctl-daemonless-probe.ok"
@@ -14085,11 +14555,8 @@ build_image_reproducibly_with_buildctl_daemonless() {
       --progress="${BUILDKIT_PROGRESS:-plain}"
 
   if [[ "${keep_archive}" == "1" ]]; then
-    local archive_sha
     echo "reproducible docker archive: ${archive_path}"
     sha256sum "${archive_path}" | tee "${archive_path}.sha256"
-    archive_sha="$(awk '{print $1}' "${archive_path}.sha256")"
-    validate_repro_docker_archive_sha "${archive_path}" "${archive_sha}"
     if [[ "$(resolve_bool "${REPRO_DOCKER_LOAD_ARCHIVE:-1}")" == "1" && "$(resolve_bool "${BUILD_ONLY:-0}")" == "0" ]]; then
       echo "loading reproducible docker archive into active Docker daemon"
       docker load -i "${archive_path}"
@@ -14148,11 +14615,8 @@ build_image_reproducibly_with_buildx() {
   "${build_args[@]}"
 
   if [[ "$(resolve_bool "${REPRO_EXPORT_DOCKER_ARCHIVE:-1}")" == "1" ]]; then
-    local archive_sha
     echo "reproducible docker archive: ${REPRO_DOCKER_ARCHIVE_PATH}"
     sha256sum "${REPRO_DOCKER_ARCHIVE_PATH}" | tee "${REPRO_DOCKER_ARCHIVE_PATH}.sha256"
-    archive_sha="$(awk '{print $1}' "${REPRO_DOCKER_ARCHIVE_PATH}.sha256")"
-    validate_repro_docker_archive_sha "${REPRO_DOCKER_ARCHIVE_PATH}" "${archive_sha}"
     if [[ "$(resolve_bool "${REPRO_DOCKER_LOAD_ARCHIVE:-1}")" == "1" && "$(resolve_bool "${BUILD_ONLY:-0}")" == "0" ]]; then
       echo "loading reproducible docker archive into active Docker daemon"
       docker load -i "${REPRO_DOCKER_ARCHIVE_PATH}"
@@ -14370,6 +14834,8 @@ RUNTIME_ROOT="$(abs_path "${RUNTIME_ROOT}" "${RUN_DIR}")"
 MOE_CONFIG_DIR="$(abs_path "${MOE_CONFIG_DIR}" "${RUN_DIR}")"
 RUNTIME_PATCH_DIR="$(abs_path "${RUNTIME_PATCH_DIR}" "${RUN_DIR}")"
 BUNDLED_HOTFIX_DIR="$(abs_path "${BUNDLED_HOTFIX_DIR}" "${RUN_DIR}")"
+GFX906_RUNTIME_SOURCE_DIR="$(abs_path "${GFX906_RUNTIME_SOURCE_DIR:-${SCRIPT_DIR}/files/gfx906_runtime}" "${SCRIPT_DIR}")"
+GFX906_RUNTIME_BUNDLE_CONTEXT_DIR="$(abs_path "${GFX906_RUNTIME_BUNDLE_CONTEXT_DIR:-./.gfx906_runtime_bundle}" "${RUN_DIR}")"
 PATCH_SRC_PR43190_DIR="$(abs_path "${PATCH_SRC_PR43190_DIR}" "${RUN_DIR}")"
 PATCH_SRC_FASTPATH_FUSED_MOE="$(abs_path "${PATCH_SRC_FASTPATH_FUSED_MOE}" "${RUN_DIR}")"
 PATCH_SRC_PR41457="$(abs_path "${PATCH_SRC_PR41457}" "${RUN_DIR}")"
@@ -14379,6 +14845,7 @@ TRITON_ATTENTION_BACKEND_SRC_FILE="$(abs_path "${TRITON_ATTENTION_BACKEND_SRC_FI
 TRITON_ATTENTION_OP_SRC_FILE="$(abs_path "${TRITON_ATTENTION_OP_SRC_FILE}" "${RUN_DIR}")"
 QWEN36_PYTHON_SRC_DIR="$(abs_path "${QWEN36_PYTHON_SRC_DIR}" "${RUN_DIR}")"
 BUNDLE_PATCH_TARGET="${BUNDLE_PATCH_TARGET:-/opt/vllm_patch_bundle}"
+INSTALL_BUNDLED_GFX906_RUNTIME="${INSTALL_BUNDLED_GFX906_RUNTIME:-1}"
 RESTART_POLICY="${RESTART_POLICY:-no}"
 BUILD_ONLY="${BUILD_ONLY:-0}"
 USE_PREBUILT_IMAGE="${USE_PREBUILT_IMAGE:-0}"
@@ -14400,13 +14867,12 @@ REPRO_DOCKER_LOAD_ARCHIVE="${REPRO_DOCKER_LOAD_ARCHIVE:-1}"
 REPRO_DOCKER_ARCHIVE_DIR="${REPRO_DOCKER_ARCHIVE_DIR:-./.repro-docker-archives}"
 REPRO_DOCKER_ARCHIVE_NAME="${REPRO_DOCKER_ARCHIVE_NAME:-${DEPLOY_IMAGE//\//_}.docker.tar}"
 REPRO_DOCKER_ARCHIVE_PATH="${REPRO_DOCKER_ARCHIVE_PATH:-}"
-BYTE_FOR_BYTE_VALIDATION_MODE="${BYTE_FOR_BYTE_VALIDATION_MODE:-auto}"
-EXPECTED_REPRO_DOCKER_ARCHIVE_SHA256="${EXPECTED_REPRO_DOCKER_ARCHIVE_SHA256:-}"
 MIN_FREE_GIB_REPRO_DOCKER_ARCHIVE="${MIN_FREE_GIB_REPRO_DOCKER_ARCHIVE:-180}"
 HIP_VISIBLE_DEVICES="${HIP_VISIBLE_DEVICES:-auto}"
 GPU_AUTO_SELECT="${GPU_AUTO_SELECT:-1}"
 GPU_TARGET_ARCH="${GPU_TARGET_ARCH:-gfx906}"
 GPU_TARGET_ARCH_ALIASES="${GPU_TARGET_ARCH_ALIASES:-gfx906,gfx9006}"
+GPU_TARGET_DIDS="${GPU_TARGET_DIDS:-0x66a1,26273}"
 REQUIRED_GPU_COUNT="${REQUIRED_GPU_COUNT:-4}"
 REQUIRED_GPU_VRAM_GIB="${REQUIRED_GPU_VRAM_GIB:-32}"
 REQUIRED_GPU_FREE_VRAM_GIB="${REQUIRED_GPU_FREE_VRAM_GIB:-}"
@@ -14418,7 +14884,51 @@ WAIT_FOR_READY_TIMEOUT="${WAIT_FOR_READY_TIMEOUT:-3600}"
 SKIP_READY_CHECK="${SKIP_READY_CHECK:-0}"
 SKIP_TRITON_CACHE_SEED="${SKIP_TRITON_CACHE_SEED:-1}"
 TRITON_CACHE_SEED_TIMEOUT_SECONDS="${TRITON_CACHE_SEED_TIMEOUT_SECONDS:-180}"
+AUTO_RESOLVE_LOCAL_HF_SNAPSHOT="${AUTO_RESOLVE_LOCAL_HF_SNAPSHOT:-1}"
+HF_HUB_DISABLE_XET="${HF_HUB_DISABLE_XET:-1}"
+HF_HUB_DOWNLOAD_TIMEOUT="${HF_HUB_DOWNLOAD_TIMEOUT:-120}"
+HF_HUB_ETAG_TIMEOUT="${HF_HUB_ETAG_TIMEOUT:-30}"
+HF_HUB_DOWNLOAD_MAX_WORKERS="${HF_HUB_DOWNLOAD_MAX_WORKERS:-4}"
+MODEL_STAGE_RETRIES="${MODEL_STAGE_RETRIES:-6}"
+MODEL_STAGE_RETRY_SLEEP_SECONDS="${MODEL_STAGE_RETRY_SLEEP_SECONDS:-15}"
 DOCKER_REPRODUCIBLE_EXPORT_MODE="${DOCKER_REPRODUCIBLE_EXPORT_MODE:-buildctl-daemonless}"
+NCCL_MIN_NCHANNELS="${NCCL_MIN_NCHANNELS:-}"
+NCCL_NTHREADS="${NCCL_NTHREADS:-}"
+RCCL_TREES="${RCCL_TREES:-}"
+VLLM_NCCL_SO_PATH="${VLLM_NCCL_SO_PATH:-}"
+VLLM_QWEN36_MOE_TP4X2_IN_TP8="${VLLM_QWEN36_MOE_TP4X2_IN_TP8:-}"
+VLLM_QWEN36_MOE_TP4X2_SHARED="${VLLM_QWEN36_MOE_TP4X2_SHARED:-}"
+VLLM_QWEN36_MOE_TP4X2_FUSE_SHARED_ROUTED_REDUCE="${VLLM_QWEN36_MOE_TP4X2_FUSE_SHARED_ROUTED_REDUCE:-}"
+VLLM_GFX906_ROWPAR_MUTABLE_AR="${VLLM_GFX906_ROWPAR_MUTABLE_AR:-}"
+VLLM_GFX906_QWEN_MLP_INTERLEAVED_SWIGLU="${VLLM_GFX906_QWEN_MLP_INTERLEAVED_SWIGLU:-}"
+VLLM_GFX906_QWEN_MLP_INTERLEAVED_SWIGLU_STRICT="${VLLM_GFX906_QWEN_MLP_INTERLEAVED_SWIGLU_STRICT:-}"
+VLLM_GFX906_QWEN_MLP_INTERLEAVED_SWIGLU_EXT_PATH="${VLLM_GFX906_QWEN_MLP_INTERLEAVED_SWIGLU_EXT_PATH:-}"
+VLLM_GFX906_PERSISTENT_AR="${VLLM_GFX906_PERSISTENT_AR:-}"
+VLLM_GFX906_PERSISTENT_AR_STRICT="${VLLM_GFX906_PERSISTENT_AR_STRICT:-}"
+VLLM_GFX906_PERSISTENT_AR_LIB="${VLLM_GFX906_PERSISTENT_AR_LIB:-}"
+VLLM_GFX906_PERSISTENT_AR_KIND_ROUTE="${VLLM_GFX906_PERSISTENT_AR_KIND_ROUTE:-}"
+VLLM_GFX906_PERSISTENT_AR_NWARPS="${VLLM_GFX906_PERSISTENT_AR_NWARPS:-}"
+VLLM_GFX906_PERSISTENT_AR_BLOCK_THREADS="${VLLM_GFX906_PERSISTENT_AR_BLOCK_THREADS:-}"
+VLLM_GFX906_ROWPAR_BOUNDARY_CUT="${VLLM_GFX906_ROWPAR_BOUNDARY_CUT:-}"
+VLLM_GFX906_ROWPAR_BOUNDARY_MLP_SHAPES="${VLLM_GFX906_ROWPAR_BOUNDARY_MLP_SHAPES:-}"
+VLLM_GFX906_PERSISTENT_AR_PREINIT_ON_GRAPH_CAPTURE="${VLLM_GFX906_PERSISTENT_AR_PREINIT_ON_GRAPH_CAPTURE:-}"
+VLLM_GFX906_PERSISTENT_AR_SKIP_GRAPH_CAPTURE_CONTEXTS="${VLLM_GFX906_PERSISTENT_AR_SKIP_GRAPH_CAPTURE_CONTEXTS:-}"
+VLLM_GFX906_PERSISTENT_AR_MULTIROW="${VLLM_GFX906_PERSISTENT_AR_MULTIROW:-}"
+VLLM_GFX906_PERSISTENT_AR_MULTIWORK_NWARPS="${VLLM_GFX906_PERSISTENT_AR_MULTIWORK_NWARPS:-}"
+VLLM_GFX906_PERSISTENT_AR_MULTIWORK_BLOCK_THREADS="${VLLM_GFX906_PERSISTENT_AR_MULTIWORK_BLOCK_THREADS:-}"
+VLLM_GFX906_PERSISTENT_AR_LOG_LIMIT="${VLLM_GFX906_PERSISTENT_AR_LOG_LIMIT:-}"
+GFX906_PERSISTENT_AR_DEFER_WORKER="${GFX906_PERSISTENT_AR_DEFER_WORKER:-}"
+GFX906_PERSISTENT_AR_IDLE_SLEEP_ITERS="${GFX906_PERSISTENT_AR_IDLE_SLEEP_ITERS:-}"
+VLLM_GFX906_PERSISTENT_AR_CAPTURE_ONLY="${VLLM_GFX906_PERSISTENT_AR_CAPTURE_ONLY:-}"
+VLLM_GFX906_PERSISTENT_AR_CAPTURE_UNSTARTED="${VLLM_GFX906_PERSISTENT_AR_CAPTURE_UNSTARTED:-}"
+VLLM_GFX906_PERSISTENT_AR_START_AFTER_CAPTURE="${VLLM_GFX906_PERSISTENT_AR_START_AFTER_CAPTURE:-}"
+VLLM_GFX906_PERSISTENT_AR_START_AFTER_PREFILL="${VLLM_GFX906_PERSISTENT_AR_START_AFTER_PREFILL:-}"
+VLLM_GFX906_PERSISTENT_AR_START_ON_FIRST_USE="${VLLM_GFX906_PERSISTENT_AR_START_ON_FIRST_USE:-}"
+VLLM_GFX906_PERSISTENT_AR_START_AFTER_PREFILL_MIN_TOKENS="${VLLM_GFX906_PERSISTENT_AR_START_AFTER_PREFILL_MIN_TOKENS:-}"
+VLLM_GFX906_PERSISTENT_AR_START_AFTER_PREFILL_REQ_PREFIX="${VLLM_GFX906_PERSISTENT_AR_START_AFTER_PREFILL_REQ_PREFIX:-}"
+VLLM_GFX906_PERSISTENT_AR_WATCHDOG="${VLLM_GFX906_PERSISTENT_AR_WATCHDOG:-}"
+VLLM_GFX906_PERSISTENT_AR_WATCHDOG_INTERVAL="${VLLM_GFX906_PERSISTENT_AR_WATCHDOG_INTERVAL:-}"
+VLLM_GFX906_PERSISTENT_AR_WATCHDOG_MAX="${VLLM_GFX906_PERSISTENT_AR_WATCHDOG_MAX:-}"
 DEPLOY_DOCKERFILE_PATH="$(abs_path "${DOCKERFILE_PATH:-Dockerfile}" "${RUN_DIR}")"
 DEPLOY_COMPOSE_PATH="$(abs_path "${COMPOSE_PATH:-docker-compose.deploy.yml}" "${RUN_DIR}")"
 DEPLOY_ENTRYPOINT_PATH="$(abs_path "${ENTRYPOINT_PATH:-docker-entrypoint.sh}" "${RUN_DIR}")"
@@ -14442,22 +14952,6 @@ if [[ -z "${REPRO_DOCKER_ARCHIVE_PATH}" ]]; then
 else
   REPRO_DOCKER_ARCHIVE_PATH="$(abs_path "${REPRO_DOCKER_ARCHIVE_PATH}" "${RUN_DIR}")"
   REPRO_DOCKER_ARCHIVE_DIR="$(dirname "${REPRO_DOCKER_ARCHIVE_PATH}")"
-fi
-
-BYTE_FOR_BYTE_VALIDATION_MODE_NORMALIZED="${BYTE_FOR_BYTE_VALIDATION_MODE,,}"
-BYTE_FOR_BYTE_VALIDATION_REQUIRES_ARCHIVE=0
-if [[ "$(resolve_bool "${BYTE_FOR_BYTE_VALIDATION_MODE_NORMALIZED}")" == "1" ]]; then
-  BYTE_FOR_BYTE_VALIDATION_REQUIRES_ARCHIVE=1
-elif [[ "${BYTE_FOR_BYTE_VALIDATION_MODE_NORMALIZED}" == "auto" && -n "${EXPECTED_REPRO_DOCKER_ARCHIVE_SHA256}" ]]; then
-  BYTE_FOR_BYTE_VALIDATION_REQUIRES_ARCHIVE=1
-fi
-
-if [[ "${BYTE_FOR_BYTE_VALIDATION_REQUIRES_ARCHIVE}" == "1" && "$(resolve_bool "${USE_PREBUILT_IMAGE}")" != "1" ]]; then
-  if [[ "$(resolve_bool "${DOCKER_REPRODUCIBLE_BUILDX_EXPORT:-1}")" != "1" || "$(resolve_bool "${REPRO_EXPORT_DOCKER_ARCHIVE}")" != "1" ]]; then
-    echo "error: byte-for-byte archive validation requires DOCKER_REPRODUCIBLE_BUILDX_EXPORT=1 and REPRO_EXPORT_DOCKER_ARCHIVE=1 for source builds" >&2
-    echo "Set BYTE_FOR_BYTE_VALIDATION_MODE=0 only for non-canonical local deploys where release reproduction is not being claimed." >&2
-    exit 1
-  fi
 fi
 
 TRITON_CACHE_HOST="${RUNTIME_ROOT}/root/.triton"
@@ -14526,9 +15020,22 @@ elif [[ "$(resolve_bool "${DOCKER_TEMP_DATA_ROOT_ENABLED}")" == "1" ]]; then
   apply_temp_docker_data_root
 fi
 
+rm -rf "${GFX906_RUNTIME_BUNDLE_CONTEXT_DIR}"
+mkdir -p "${GFX906_RUNTIME_BUNDLE_CONTEXT_DIR}"
+if [[ "$(resolve_bool "${INSTALL_BUNDLED_GFX906_RUNTIME}")" == "1" ]]; then
+  if [[ ! -d "${GFX906_RUNTIME_SOURCE_DIR}" ]]; then
+    echo "error: missing bundled gfx906 runtime directory: ${GFX906_RUNTIME_SOURCE_DIR}" >&2
+    echo "expected this portable release bundle to include files/gfx906_runtime next to deploy.sh" >&2
+    exit 1
+  fi
+  cp -a "${GFX906_RUNTIME_SOURCE_DIR}/." "${GFX906_RUNTIME_BUNDLE_CONTEXT_DIR}/"
+fi
+find "${GFX906_RUNTIME_BUNDLE_CONTEXT_DIR}" -exec touch -h -d "@${SOURCE_DATE_EPOCH:-1764000000}" {} +
+
 write_embedded_dockerfile "${DEPLOY_DOCKERFILE_PATH}"
 write_embedded_compose "${DEPLOY_COMPOSE_PATH}"
 write_embedded_entrypoint "${DEPLOY_ENTRYPOINT_PATH}"
+chmod 0755 "${DEPLOY_ENTRYPOINT_PATH}"
 write_embedded_dockerignore "${RUN_DIR}/.dockerignore"
 
 echo "Using deploy root: ${SCRIPT_DIR}"
@@ -14584,6 +15091,27 @@ copy_if_present "${ROCM_PATCH_SRC_FILE}" "${RUNTIME_PATCH_DIR}/rocm.py"
 copy_if_present "${TRITON_ATTENTION_BACKEND_SRC_FILE}" "${RUNTIME_PATCH_DIR}/triton_attn.py"
 copy_if_present "${TRITON_ATTENTION_OP_SRC_FILE}" "${RUNTIME_PATCH_DIR}/triton_unified_attention.py"
 
+if [[ "$(resolve_bool "${INSTALL_BUNDLED_GFX906_RUNTIME}")" == "1" && -d "${GFX906_RUNTIME_SOURCE_DIR}" ]]; then
+  if [[ -d "${GFX906_RUNTIME_SOURCE_DIR}/native" ]]; then
+    rm -rf "${RUNTIME_PATCH_DIR}/native"
+    cp -a "${GFX906_RUNTIME_SOURCE_DIR}/native" "${RUNTIME_PATCH_DIR}/native"
+  fi
+
+  if [[ "${QWEN36_PROFILE}" == "dense27b_tp8_fullbar_p2pon" ]]; then
+    copy_patch "${GFX906_RUNTIME_SOURCE_DIR}/python_overlays/persistent_ar_kindroute_20260613/parallel_state.py" "${RUNTIME_PATCH_DIR}/parallel_state.py"
+    copy_patch "${GFX906_RUNTIME_SOURCE_DIR}/python_overlays/persistent_ar_kindroute_20260613/communication_op.py" "${RUNTIME_PATCH_DIR}/communication_op.py"
+    copy_patch "${GFX906_RUNTIME_SOURCE_DIR}/python_overlays/persistent_ar_kindroute_20260613/linear.py" "${RUNTIME_PATCH_DIR}/linear.py"
+    copy_patch "${GFX906_RUNTIME_SOURCE_DIR}/python_overlays/persistent_ar_kindroute_20260613/gfx906_persistent_ar.py" "${RUNTIME_PATCH_DIR}/gfx906_persistent_ar.py"
+    copy_patch "${GFX906_RUNTIME_SOURCE_DIR}/python_overlays/persistent_ar_kindroute_20260613/sitecustomize_postcapture_start.py" "${RUNTIME_PATCH_DIR}/sitecustomize_postcapture_start.py"
+    copy_patch "${GFX906_RUNTIME_SOURCE_DIR}/python_overlays/qwen2_moe_interleaved_swiglu_20260608.py" "${RUNTIME_PATCH_DIR}/qwen2_moe_interleaved_swiglu_20260608.py"
+  fi
+
+  if [[ "${QWEN36_PROFILE}" == "moe35b_tp8_fullbar_p2pon" ]]; then
+    copy_patch "${GFX906_RUNTIME_SOURCE_DIR}/moe_tp8_overlays/fused_moe_tp8.py" "${RUNTIME_PATCH_DIR}/fused_moe.py"
+    copy_patch "${GFX906_RUNTIME_SOURCE_DIR}/moe_tp8_overlays/qwen3_next_tp4x2_in_tp8.py" "${RUNTIME_PATCH_DIR}/qwen3_next.py"
+  fi
+fi
+
 rm -rf "${RUNTIME_PATCH_DIR}/qwen36-python"
 if [[ -n "${QWEN36_PYTHON_SRC_DIR:-}" ]]; then
   if [[ -d "${QWEN36_PYTHON_SRC_DIR}" ]]; then
@@ -14629,6 +15157,110 @@ if [[ ! -f "${MOE_CONFIG_DIR}/${MOE_CONFIG_BASENAME}" ]]; then
   echo "error: missing Moe config file: ${MOE_CONFIG_DIR}/${MOE_CONFIG_BASENAME}" >&2
   exit 1
 fi
+
+hf_repo_cache_slug() {
+  local repo_id="$1"
+  printf 'models--%s\n' "${repo_id//\//--}"
+}
+
+model_value_is_hf_repo_id() {
+  local value="$1"
+  [[ -n "${value}" ]] || return 1
+  [[ "${value}" == */* ]] || return 1
+  [[ "${value}" != /* ]] || return 1
+  [[ "${value}" != ./* ]] || return 1
+  [[ "${value}" != ../* ]] || return 1
+  [[ "${value}" != *:* ]] || return 1
+  return 0
+}
+
+validate_hf_snapshot_complete() {
+  local snapshot_dir="$1"
+  local index_file="${snapshot_dir}/model.safetensors.index.json"
+  local total=0
+  local missing=0
+  local shard
+  local weight_count
+
+  if [[ ! -f "${snapshot_dir}/config.json" ]]; then
+    return 1
+  fi
+
+  if [[ -f "${index_file}" ]]; then
+    while IFS= read -r shard; do
+      [[ -n "${shard}" ]] || continue
+      ((total++))
+      if [[ ! -f "${snapshot_dir}/${shard}" ]]; then
+        ((missing++))
+      fi
+    done < <(grep -aoE '"[^"]+\.(safetensors|bin)"' "${index_file}" | tr -d '"' | sort -u)
+
+    if (( total == 0 )); then
+      echo "warning: local snapshot index has no weight shards: ${index_file}" >&2
+      return 1
+    fi
+    if (( missing > 0 )); then
+      echo "warning: local snapshot is incomplete: ${snapshot_dir} (${missing}/${total} referenced shard(s) missing)" >&2
+      return 1
+    fi
+    return 0
+  fi
+
+  weight_count="$(find -L "${snapshot_dir}" -maxdepth 1 -type f \( -name '*.safetensors' -o -name '*.bin' \) 2>/dev/null | wc -l | tr -d '[:space:]')"
+  [[ "${weight_count}" =~ ^[0-9]+$ ]] || weight_count=0
+  if (( weight_count == 0 )); then
+    echo "warning: local snapshot has config.json but no local weight files: ${snapshot_dir}" >&2
+    return 1
+  fi
+  return 0
+}
+
+resolve_local_hf_snapshot_for_model() {
+  if [[ "$(resolve_bool "${AUTO_RESOLVE_LOCAL_HF_SNAPSHOT:-1}")" != "1" ]]; then
+    return 0
+  fi
+  if ! model_value_is_hf_repo_id "${MODEL:-}"; then
+    return 0
+  fi
+
+  local repo_id="${MODEL}"
+  local slug
+  local cache_dir
+  local ref
+  local snapshot_dir
+  local container_snapshot
+  local -a candidates=()
+
+  slug="$(hf_repo_cache_slug "${repo_id}")"
+  cache_dir="${HF_CACHE_DIR}/hub/${slug}"
+  if [[ ! -d "${cache_dir}/snapshots" ]]; then
+    return 0
+  fi
+
+  if [[ -f "${cache_dir}/refs/main" ]]; then
+    ref="$(tr -d '[:space:]' < "${cache_dir}/refs/main")"
+    if [[ -n "${ref}" && -d "${cache_dir}/snapshots/${ref}" ]]; then
+      candidates+=("${cache_dir}/snapshots/${ref}")
+    fi
+  fi
+
+  while IFS= read -r snapshot_dir; do
+    [[ -n "${snapshot_dir}" ]] || continue
+    candidates+=("${snapshot_dir}")
+  done < <(find "${cache_dir}/snapshots" -mindepth 1 -maxdepth 1 -type d -printf '%T@ %p\n' 2>/dev/null | sort -nr | sed -E 's/^[^ ]+ //')
+
+  for snapshot_dir in "${candidates[@]:-}"; do
+    if validate_hf_snapshot_complete "${snapshot_dir}"; then
+      container_snapshot="/root/.cache/huggingface/hub/${slug}/snapshots/$(basename "${snapshot_dir}")"
+      echo "using complete local Hugging Face snapshot for ${repo_id}: ${container_snapshot}"
+      MODEL="${container_snapshot}"
+      return 0
+    fi
+  done
+
+  echo "warning: no complete local Hugging Face snapshot found for ${repo_id} under ${cache_dir}; leaving MODEL as repo id" >&2
+  return 0
+}
 
 if [[ "${AUTO_STAGE_MODEL}" == "1" ]]; then
   if [[ -z "${MODEL_REPO_ID}" ]]; then
@@ -14694,7 +15326,6 @@ def verify_snapshot(snapshot_path: str) -> None:
       raise RuntimeError('no safetensors shards found after staging')
     print(f'verified {len(shards)} safetensors shard files', flush=True)
 
-last_error = None
 for attempt in range(1, retries + 1):
   try:
     print(f'staging {model_id} attempt {attempt}/{retries} with max_workers={max_workers}', flush=True)
@@ -14703,7 +15334,6 @@ for attempt in range(1, retries + 1):
     print(f'staged {model_id} at {path}', flush=True)
     break
   except Exception as exc:
-    last_error = exc
     print(f'warning: staging attempt {attempt}/{retries} failed: {exc}', file=sys.stderr, flush=True)
     if attempt == retries:
       raise
@@ -14713,6 +15343,8 @@ PY
     echo "using existing model cache at ${MODEL_CACHE_DIR}"
   fi
 fi
+
+resolve_local_hf_snapshot_for_model
 
 RUNTIME_ENV_FILE="${RUN_DIR}/.deploy.runtime.env"
 cat <<EOF > "${RUNTIME_ENV_FILE}"
@@ -14726,6 +15358,7 @@ GPU_MEMORY_UTILIZATION=${GPU_MEMORY_UTILIZATION}
 TOOL_CALL_PARSER=${TOOL_CALL_PARSER}
 REASONING_PARSER=${REASONING_PARSER}
 REASONING_PARSER_PREFERRED=${PREFER_REASONING_PARSER}
+QWEN36_PROFILE=${QWEN36_PROFILE}
 VLLM_DTYPE=${VLLM_DTYPE}
 VLLM_ENABLE_C1_TOPK8_MOE_FASTPATH=${VLLM_ENABLE_C1_TOPK8_MOE_FASTPATH}
 OPT_LEVEL=${OPT_LEVEL}
@@ -14734,25 +15367,58 @@ DISABLE_ASYNC_SCHEDULING=${DISABLE_ASYNC_SCHEDULING}
 NCCL_ALGO=${NCCL_ALGO}
 NCCL_PROTO=${NCCL_PROTO}
 NCCL_P2P_DISABLE=${NCCL_P2P_DISABLE}
+NCCL_MIN_NCHANNELS=${NCCL_MIN_NCHANNELS}
 NCCL_MAX_NCHANNELS=${NCCL_MAX_NCHANNELS}
+NCCL_NTHREADS=${NCCL_NTHREADS}
+RCCL_TREES=${RCCL_TREES}
+VLLM_NCCL_SO_PATH=${VLLM_NCCL_SO_PATH}
 FLASH_ATTENTION_TRITON_AMD_ENABLE=${FLASH_ATTENTION_TRITON_AMD_ENABLE}
 FLASH_ATTENTION_TRITON_AMD_REF=${FLASH_ATTENTION_TRITON_AMD_REF}
 OMP_NUM_THREADS=${OMP_NUM_THREADS}
 HIP_VISIBLE_DEVICES=${HIP_VISIBLE_DEVICES}
+LD_LIBRARY_PATH=${LD_LIBRARY_PATH:-/opt/gfx906:/rccl-overlay/install/lib:/usr/local/lib:/opt/rocm/lib:/opt/venv/lib/python3.12/site-packages/torch/lib}
+VLLM_QWEN36_MOE_TP4X2_IN_TP8=${VLLM_QWEN36_MOE_TP4X2_IN_TP8}
+VLLM_QWEN36_MOE_TP4X2_SHARED=${VLLM_QWEN36_MOE_TP4X2_SHARED}
+VLLM_QWEN36_MOE_TP4X2_FUSE_SHARED_ROUTED_REDUCE=${VLLM_QWEN36_MOE_TP4X2_FUSE_SHARED_ROUTED_REDUCE}
+VLLM_GFX906_ROWPAR_MUTABLE_AR=${VLLM_GFX906_ROWPAR_MUTABLE_AR}
+VLLM_GFX906_QWEN_MLP_INTERLEAVED_SWIGLU=${VLLM_GFX906_QWEN_MLP_INTERLEAVED_SWIGLU}
+VLLM_GFX906_QWEN_MLP_INTERLEAVED_SWIGLU_STRICT=${VLLM_GFX906_QWEN_MLP_INTERLEAVED_SWIGLU_STRICT}
+VLLM_GFX906_QWEN_MLP_INTERLEAVED_SWIGLU_EXT_PATH=${VLLM_GFX906_QWEN_MLP_INTERLEAVED_SWIGLU_EXT_PATH}
+VLLM_GFX906_PERSISTENT_AR=${VLLM_GFX906_PERSISTENT_AR}
+VLLM_GFX906_PERSISTENT_AR_STRICT=${VLLM_GFX906_PERSISTENT_AR_STRICT}
+VLLM_GFX906_PERSISTENT_AR_LIB=${VLLM_GFX906_PERSISTENT_AR_LIB}
+VLLM_GFX906_PERSISTENT_AR_KIND_ROUTE=${VLLM_GFX906_PERSISTENT_AR_KIND_ROUTE}
+VLLM_GFX906_PERSISTENT_AR_NWARPS=${VLLM_GFX906_PERSISTENT_AR_NWARPS}
+VLLM_GFX906_PERSISTENT_AR_BLOCK_THREADS=${VLLM_GFX906_PERSISTENT_AR_BLOCK_THREADS}
+VLLM_GFX906_ROWPAR_BOUNDARY_CUT=${VLLM_GFX906_ROWPAR_BOUNDARY_CUT}
+VLLM_GFX906_ROWPAR_BOUNDARY_MLP_SHAPES=${VLLM_GFX906_ROWPAR_BOUNDARY_MLP_SHAPES}
+VLLM_GFX906_PERSISTENT_AR_PREINIT_ON_GRAPH_CAPTURE=${VLLM_GFX906_PERSISTENT_AR_PREINIT_ON_GRAPH_CAPTURE}
+VLLM_GFX906_PERSISTENT_AR_SKIP_GRAPH_CAPTURE_CONTEXTS=${VLLM_GFX906_PERSISTENT_AR_SKIP_GRAPH_CAPTURE_CONTEXTS}
+VLLM_GFX906_PERSISTENT_AR_MULTIROW=${VLLM_GFX906_PERSISTENT_AR_MULTIROW}
+VLLM_GFX906_PERSISTENT_AR_MULTIWORK_NWARPS=${VLLM_GFX906_PERSISTENT_AR_MULTIWORK_NWARPS}
+VLLM_GFX906_PERSISTENT_AR_MULTIWORK_BLOCK_THREADS=${VLLM_GFX906_PERSISTENT_AR_MULTIWORK_BLOCK_THREADS}
+VLLM_GFX906_PERSISTENT_AR_LOG_LIMIT=${VLLM_GFX906_PERSISTENT_AR_LOG_LIMIT}
+GFX906_PERSISTENT_AR_DEFER_WORKER=${GFX906_PERSISTENT_AR_DEFER_WORKER}
+GFX906_PERSISTENT_AR_IDLE_SLEEP_ITERS=${GFX906_PERSISTENT_AR_IDLE_SLEEP_ITERS}
+VLLM_GFX906_PERSISTENT_AR_CAPTURE_ONLY=${VLLM_GFX906_PERSISTENT_AR_CAPTURE_ONLY}
+VLLM_GFX906_PERSISTENT_AR_CAPTURE_UNSTARTED=${VLLM_GFX906_PERSISTENT_AR_CAPTURE_UNSTARTED}
+VLLM_GFX906_PERSISTENT_AR_START_AFTER_CAPTURE=${VLLM_GFX906_PERSISTENT_AR_START_AFTER_CAPTURE}
+VLLM_GFX906_PERSISTENT_AR_START_AFTER_PREFILL=${VLLM_GFX906_PERSISTENT_AR_START_AFTER_PREFILL}
+VLLM_GFX906_PERSISTENT_AR_START_ON_FIRST_USE=${VLLM_GFX906_PERSISTENT_AR_START_ON_FIRST_USE}
+VLLM_GFX906_PERSISTENT_AR_START_AFTER_PREFILL_MIN_TOKENS=${VLLM_GFX906_PERSISTENT_AR_START_AFTER_PREFILL_MIN_TOKENS}
+VLLM_GFX906_PERSISTENT_AR_START_AFTER_PREFILL_REQ_PREFIX=${VLLM_GFX906_PERSISTENT_AR_START_AFTER_PREFILL_REQ_PREFIX}
+VLLM_GFX906_PERSISTENT_AR_WATCHDOG=${VLLM_GFX906_PERSISTENT_AR_WATCHDOG}
+VLLM_GFX906_PERSISTENT_AR_WATCHDOG_INTERVAL=${VLLM_GFX906_PERSISTENT_AR_WATCHDOG_INTERVAL}
+VLLM_GFX906_PERSISTENT_AR_WATCHDOG_MAX=${VLLM_GFX906_PERSISTENT_AR_WATCHDOG_MAX}
 GPU_AUTO_SELECT=${GPU_AUTO_SELECT}
 GPU_TARGET_ARCH=${GPU_TARGET_ARCH}
 GPU_TARGET_ARCH_ALIASES=${GPU_TARGET_ARCH_ALIASES}
+GPU_TARGET_DIDS=${GPU_TARGET_DIDS}
 REQUIRED_GPU_COUNT=${REQUIRED_GPU_COUNT}
 REQUIRED_GPU_VRAM_GIB=${REQUIRED_GPU_VRAM_GIB}
 REQUIRED_GPU_FREE_VRAM_GIB=${REQUIRED_GPU_FREE_VRAM_GIB}
 
 HF_CACHE_DIR=${HF_CACHE_DIR}
-HF_HUB_DISABLE_XET=${HF_HUB_DISABLE_XET}
-HF_HUB_DOWNLOAD_TIMEOUT=${HF_HUB_DOWNLOAD_TIMEOUT}
-HF_HUB_ETAG_TIMEOUT=${HF_HUB_ETAG_TIMEOUT}
-HF_HUB_DOWNLOAD_MAX_WORKERS=${HF_HUB_DOWNLOAD_MAX_WORKERS}
-MODEL_STAGE_RETRIES=${MODEL_STAGE_RETRIES}
-MODEL_STAGE_RETRY_SLEEP_SECONDS=${MODEL_STAGE_RETRY_SLEEP_SECONDS}
 RUNTIME_ROOT=${RUNTIME_ROOT}
 MOE_CONFIG_DIR=${MOE_CONFIG_DIR}
 VLLM_TUNED_CONFIG_FOLDER=${VLLM_TUNED_CONFIG_FOLDER}
@@ -14760,6 +15426,9 @@ RUNTIME_PATCH_DIR=${RUNTIME_PATCH_DIR}
 VLLM_PATCH_BUNDLE=${BUNDLE_PATCH_TARGET}
 BUNDLE_PATCH_TARGET=${BUNDLE_PATCH_TARGET}
 BUNDLED_HOTFIX_DIR=${BUNDLED_HOTFIX_DIR}
+GFX906_RUNTIME_SOURCE_DIR=${GFX906_RUNTIME_SOURCE_DIR}
+GFX906_RUNTIME_BUNDLE_CONTEXT_DIR=${GFX906_RUNTIME_BUNDLE_CONTEXT_DIR}
+INSTALL_BUNDLED_GFX906_RUNTIME=${INSTALL_BUNDLED_GFX906_RUNTIME}
 QWEN36_PYTHON_DIR=${QWEN36_PYTHON_DIR}
 CONTAINER_NAME=${CONTAINER_NAME}
 RESTART_POLICY=${RESTART_POLICY}
@@ -14776,15 +15445,19 @@ WAIT_FOR_READY_TIMEOUT=${WAIT_FOR_READY_TIMEOUT}
 SKIP_READY_CHECK=${SKIP_READY_CHECK}
 SKIP_TRITON_CACHE_SEED=${SKIP_TRITON_CACHE_SEED}
 TRITON_CACHE_SEED_TIMEOUT_SECONDS=${TRITON_CACHE_SEED_TIMEOUT_SECONDS}
+AUTO_RESOLVE_LOCAL_HF_SNAPSHOT=${AUTO_RESOLVE_LOCAL_HF_SNAPSHOT}
+HF_HUB_DISABLE_XET=${HF_HUB_DISABLE_XET}
+HF_HUB_DOWNLOAD_TIMEOUT=${HF_HUB_DOWNLOAD_TIMEOUT}
+HF_HUB_ETAG_TIMEOUT=${HF_HUB_ETAG_TIMEOUT}
+HF_HUB_DOWNLOAD_MAX_WORKERS=${HF_HUB_DOWNLOAD_MAX_WORKERS}
+MODEL_STAGE_RETRIES=${MODEL_STAGE_RETRIES}
+MODEL_STAGE_RETRY_SLEEP_SECONDS=${MODEL_STAGE_RETRY_SLEEP_SECONDS}
 FORCE_REBUILD=${FORCE_REBUILD}
 BUILD_ONLY=${BUILD_ONLY}
 DOCKER_REPRODUCIBLE_BUILDX_EXPORT=${DOCKER_REPRODUCIBLE_BUILDX_EXPORT}
 DOCKER_REPRODUCIBLE_EXPORT_MODE=${DOCKER_REPRODUCIBLE_EXPORT_MODE}
 DOCKER_REPRODUCIBLE_EXPORTER_PROBE=${DOCKER_REPRODUCIBLE_EXPORTER_PROBE}
 REPRO_DOCKER_LOAD_ARCHIVE=${REPRO_DOCKER_LOAD_ARCHIVE}
-REPRO_DOCKER_ARCHIVE_PATH=${REPRO_DOCKER_ARCHIVE_PATH}
-BYTE_FOR_BYTE_VALIDATION_MODE=${BYTE_FOR_BYTE_VALIDATION_MODE}
-EXPECTED_REPRO_DOCKER_ARCHIVE_SHA256=${EXPECTED_REPRO_DOCKER_ARCHIVE_SHA256}
 EOF
 
 export BUILDKIT_PROGRESS="${BUILDKIT_PROGRESS:-plain}"

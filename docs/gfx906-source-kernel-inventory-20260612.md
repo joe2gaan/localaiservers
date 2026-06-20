@@ -751,3 +751,31 @@ was tied to a source path.
     future trace contradicts it. The next high-value source direction is
     RowParallel collective-boundary/count reduction or a fundamentally different
     leaf broadcast/first-line propagation primitive.
+59. ROCm7.2 dense/MoE portable release image is now bundled in
+    `qwen36-gfx906/deploy.sh` with source/runtime artifacts under
+    `qwen36-gfx906/files/gfx906_runtime`. The final deploy script SHA256 is
+    `c8e8ef99ec39a0232f74a7bd0fe0efe0316c0e0678992a1c104eff3c05513c9a`.
+
+    The release image tag is
+    `joe2gaan/localaiservers:qwen36-gfx906-rocm72-dense-moe-runtime-archive-0a2dbd6b7f0b`.
+    Docker Hub reports manifest digest
+    `sha256:8c380e9ca48943d8617de5a2e2eaf32a26dcc2c341e4b4f4f8c45294a72b8f1e`.
+    Final deterministic export from the patched deploy path produced archive
+    SHA256 `5316c3f6202fcb77987dabbf1e14e7369441ea127efed4f6def30259a09cfcb9`
+    with OCI image manifest
+    `sha256:7dadf367ec86fe2eb1dc22fb3af3002c3514514833b52329595a26e7a80ae247`
+    and config
+    `sha256:45decd88eb7c10c0408327438e07c2a655e45cc7534f8b662e5c4089a6b88568`.
+
+    Portable performance at `MAX_MODEL_LEN=131072` with eight pre-measure
+    warmups: dense 27B TP8 on `.20` reached strict-valid `69.514` backend TPS,
+    c1_2000 `70.347`, and c1_10000 `66.069`; MoE 35B-A3B TP8 on `.30`
+    reached strict-valid `94.907`, c1_2000 `97.028`, and c1_10000 `91.290`.
+    MoE TP4 on `.30` showed warm capped performance, c1_2000 `116.146` and
+    c1_10000 `109.283`, but the uncapped strict prompt ran past 60K tokens
+    without a stop/think-close and remains a prompt/generation-validity gap.
+
+    Deploy-source note: local Hugging Face snapshot resolution now validates
+    every shard referenced by `model.safetensors.index.json` before selecting a
+    snapshot path. Incomplete caches stay on the repo id, and `AUTO_STAGE_MODEL=1`
+    uses retry plus post-download shard validation.

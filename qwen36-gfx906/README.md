@@ -1,7 +1,80 @@
-# Qwen3.6-35B-A3B Async TP4 C1 TopK8 Runner (Reproducible)
+# Qwen3.6 gfx906 ROCm7.2 Dense/MoE Runner
 
-This bundle is a deploy package for the Qwen3.6-35B-A3B async TP4 C1 topk8 reference runtime profile on `4x AMD Instinct MI50 32GB` hosts (`gfx906`).
-It is designed to run without host-specific paths and can be rebuilt from public sources plus the patch/config heredocs embedded in `deploy.sh`.
+This bundle is a deploy package for Qwen3.6 dense and MoE runtime profiles on
+AMD `gfx906` hosts. The current release supports:
+
+- `dense27b_tp8_fullbar_p2pon`
+- `moe35b_tp4_fullbar_p2pon`
+- `moe35b_tp8_fullbar_p2pon`
+
+It is designed to run without host-specific source paths. The deploy script can
+use the pushed runtime image or rebuild the image from public sources plus the
+bundled runtime overlays under `files/gfx906_runtime`.
+
+## 2026-06-20 ROCm7.2 Release
+
+Current `deploy.sh` SHA256:
+
+```text
+c8e8ef99ec39a0232f74a7bd0fe0efe0316c0e0678992a1c104eff3c05513c9a  deploy.sh
+```
+
+Default pushed image:
+
+```text
+joe2gaan/localaiservers:qwen36-gfx906-rocm72-dense-moe-runtime-archive-0a2dbd6b7f0b
+```
+
+Docker Hub manifest digest:
+
+```text
+sha256:8c380e9ca48943d8617de5a2e2eaf32a26dcc2c341e4b4f4f8c45294a72b8f1e
+```
+
+Final deterministic release-tag archive from the patched deploy path:
+
+```text
+5316c3f6202fcb77987dabbf1e14e7369441ea127efed4f6def30259a09cfcb9  finaldeploy-patched.docker.tar
+```
+
+Image identity inside that archive:
+
+```text
+manifest sha256:7dadf367ec86fe2eb1dc22fb3af3002c3514514833b52329595a26e7a80ae247
+config   sha256:45decd88eb7c10c0408327438e07c2a655e45cc7534f8b662e5c4089a6b88568
+created  2025-11-24T16:00:00Z
+layers   19
+```
+
+The final release-tag archive SHA differs from the earlier candidate archive
+because the tag metadata differs. The image manifest/config digests match the
+byte-identical cross-host candidate proof.
+
+Verified portable performance at `MAX_MODEL_LEN=131072` with eight pre-measure
+warmups:
+
+| profile | host | strict backend TPS | c1_2000 backend TPS | c1_10000 backend TPS | note |
+| --- | --- | ---: | ---: | ---: | --- |
+| `dense27b_tp8_fullbar_p2pon` | `.20` | `69.514` | `70.347` | `66.069` | strict gate valid |
+| `moe35b_tp8_fullbar_p2pon` | `.30` | `94.907` | `97.028` | `91.290` | strict gate valid |
+| `moe35b_tp4_fullbar_p2pon` | `.30` | invalid/runaway | `116.146` | `109.283` | uncapped strict prompt did not stop after >60K tokens |
+
+Use a prebuilt image:
+
+```bash
+QWEN36_PROFILE=dense27b_tp8_fullbar_p2pon \
+USE_PREBUILT_IMAGE=1 \
+PREBUILT_IMAGE_PULL=1 \
+./deploy.sh
+```
+
+Select the MoE profiles with `QWEN36_PROFILE=moe35b_tp4_fullbar_p2pon` or
+`QWEN36_PROFILE=moe35b_tp8_fullbar_p2pon`.
+
+For local model caches, `deploy.sh` validates Hugging Face snapshots before
+using a mounted snapshot path. Incomplete snapshots stay on the repo id instead
+of being selected as a broken local path. `AUTO_STAGE_MODEL=1` includes retry
+and shard-completeness validation.
 
 ## Live TPS Video
 
@@ -15,8 +88,7 @@ Click the preview image to watch the playable GitHub Pages video: https://joe2ga
 - `docker-compose.deploy.yml` (container runtime spec)
 - `Dockerfile` (reproducible image build from public base + public source repos)
 - `deploy.env` (tunable defaults)
-- `files/hotfixes/*` (bundled MoE/router patches; `deploy.sh` also embeds them)
-- `files/E=256,N=128,device_name=AMD_GFX906.json` (MoE tuning)
+- `files/gfx906_runtime/*` (bundled ROCm7.2 gfx906 runtime overlays and native libraries)
 - `smoke-test.sh` (basic health/model check)
 
 ## What it does
@@ -24,17 +96,21 @@ Click the preview image to watch the playable GitHub Pages video: https://joe2ga
 - Applies bundled patch overlays into a local runtime bundle (`./runtime/patches`).
 - Mounts tuned MoE config and caches into container paths.
 - Optionally stages model files into local `./hf_cache`.
-- Launches the reference serving command:
-  - tensor parallel `4`
-  - async scheduling enabled
+- Launches the selected reference serving profile:
+  - dense TP8, MoE TP4, or MoE TP8
+  - 131K context by default
   - `--tool-call-parser hermes`
   - `--reasoning-parser qwen3`
-  - `--dtype half`, `-O=3`, `--language-model-only`
+  - `--dtype half`, `-O=3`
   - fail-fast validation if required vLLM `_C` ops are missing, so deploy cannot silently fall back to the non-performance path
 - Waits for `GET /v1/models` before reporting deployment complete.
 - Skips Triton cache seeding by default because some Docker/containerd attach paths block after image export. First start populates the mounted runtime cache.
 
-## Public and fully reproducible image
+## Historical v0.1.0 public and fully reproducible image
+
+This section records the previous ROCm6.3/topk8 release-reproduction path. The
+current ROCm7.2 dense/MoE release tag, digest, archive identity, and performance
+numbers are listed in the 2026-06-20 release section above.
 
 The previous non-public base dependency has been replaced with a from-scratch build path:
 
@@ -72,9 +148,9 @@ The final runtime stage is split into deterministic copy layers around the large
 
 The reproducibility contract is the SHA256 of the exported Docker archive written under `./.repro-docker-archives/`. Docker Engine can report different local image IDs on different storage backends after loading the same archive, so compare the `.docker.tar.sha256` file for byte-for-byte reproduction. The live `main` deploy script defaults to `BYTE_FOR_BYTE_VALIDATION_MODE=auto`, which records the exported archive SHA and enforces a byte-for-byte target only when `EXPECTED_REPRO_DOCKER_ARCHIVE_SHA256` is set.
 
-### Byte-for-byte validation
+### Historical byte-for-byte validation
 
-Current `deploy.sh` SHA256:
+Historical v0.1.0 `deploy.sh` SHA256:
 
 ```text
 f44ab315c93f0b74ad2fc93a4c859e3d43ab558be997c7832c3aa299e655745f  deploy.sh
@@ -181,25 +257,57 @@ joe2gaan/localaiservers
 
 The Docker Hub image provides the built gfx906 runtime, not model weights. The model cache remains a mounted directory (`./hf_cache`) so pulls stay practical and users can reuse, update, or pre-stage weights independently.
 
-Currently published runtime tag:
+Currently published ROCm7.2 dense/MoE runtime tag:
+
+```text
+joe2gaan/localaiservers:qwen36-gfx906-rocm72-dense-moe-runtime-archive-0a2dbd6b7f0b
+```
+
+Currently published ROCm7.2 Docker Hub manifest digest:
+
+```text
+sha256:8c380e9ca48943d8617de5a2e2eaf32a26dcc2c341e4b4f4f8c45294a72b8f1e
+```
+
+The deterministic release-tag archive generated by the patched deploy path was
+verified at:
+
+```text
+5316c3f6202fcb77987dabbf1e14e7369441ea127efed4f6def30259a09cfcb9
+```
+
+Independent `.20`/`.30` source builds of the candidate image produced matching
+image manifest/config digests and matching candidate archive bytes:
+
+```text
+0a2dbd6b7f0b8326175d7993d06509f2bc5fe389b5bf872571b7412020e9dbb4
+```
+
+Pull the current runtime image with:
+
+```bash
+docker pull joe2gaan/localaiservers:qwen36-gfx906-rocm72-dense-moe-runtime-archive-0a2dbd6b7f0b
+```
+
+Historical v0.1.0 runtime tag:
 
 ```text
 joe2gaan/localaiservers:qwen36-gfx906-c1-topk8-runtime-archive-aa34cb675f83
 ```
 
-Currently published Docker Hub manifest digest:
+Historical v0.1.0 Docker Hub manifest digest:
 
 ```text
 sha256:f5e69ee127b766960e386e0e4eda8e26c399bd02f57c494847cb9a92ce04d8ac
 ```
 
-The source runtime archive used for the currently published Docker Hub tag was verified at:
+The source runtime archive used for the historical v0.1.0 Docker Hub tag was verified at:
 
 ```text
 aa34cb675f83ff6cade31cbbb357b1c31d793bee18da491f501d7c39fda3612a
 ```
 
-The Docker Hub tag above is the exact prebuilt image identity for the currently published runtime. The release-reproduction source-build target is the archive SHA shown above. Current `deploy.sh` builds the split-layer runtime archive directly and defaults to `BYTE_FOR_BYTE_VALIDATION_MODE=auto`; set `EXPECTED_REPRO_DOCKER_ARCHIVE_SHA256` to the release archive SHA when source-reproducing v0.1.0. A source archive SHA mismatch in that mode is an error and the build is not release-reproduction evidence. The manifest digest above is the exact Docker Hub identity for the currently published tag, and the registry config digest matches the tested local image ID: `sha256:e45309183e6f35cae6fb8f9d8d6f016253f281a5e7187e1f11a57e5e28ef5e86`.
+The historical Docker Hub tag above is the exact prebuilt image identity for the v0.1.0 runtime. The v0.1.0 release-reproduction source-build target is the archive SHA shown above. Current `deploy.sh` builds the ROCm7.2 dense/MoE runtime by default; set `EXPECTED_REPRO_DOCKER_ARCHIVE_SHA256` to the historical release archive SHA only when source-reproducing v0.1.0. A source archive SHA mismatch in that mode is an error and the build is not release-reproduction evidence. The historical manifest digest above is the exact Docker Hub identity for the v0.1.0 tag, and the registry config digest matches the tested local image ID: `sha256:e45309183e6f35cae6fb8f9d8d6f016253f281a5e7187e1f11a57e5e28ef5e86`.
 
 Publishing to the `joe2gaan/localaiservers` Docker Hub repository is maintainer-only.
 Public users should not attempt to push images to the LocalAIServers Docker Hub
@@ -207,7 +315,7 @@ namespace. The public repository intentionally does not include the private publ
 helper; public reproduction should use local builds, local archive loads, or the
 published runtime image and digest above.
 
-Pull the published runtime image with:
+Pull the historical v0.1.0 runtime image with:
 
 ```bash
 docker pull joe2gaan/localaiservers:qwen36-gfx906-c1-topk8-runtime-archive-aa34cb675f83
@@ -215,7 +323,7 @@ docker pull joe2gaan/localaiservers:qwen36-gfx906-c1-topk8-runtime-archive-aa34c
 
 For normal runtime, mount the local Hugging Face/model cache and runtime cache rather than baking weights into the image.
 
-Run from Docker Hub without rebuilding:
+Run the current ROCm7.2 dense/MoE image from Docker Hub without rebuilding:
 
 ```bash
 mkdir -p ~/qwen36-gfx906-run
@@ -225,7 +333,7 @@ curl -fsSL https://raw.githubusercontent.com/joe2gaan/localaiservers/main/qwen36
 curl -fsSL https://raw.githubusercontent.com/joe2gaan/localaiservers/main/qwen36-gfx906/run_qwen36_live_tps.py -o run_qwen36_live_tps.py
 chmod +x deploy.sh
 
-DEPLOY_IMAGE=joe2gaan/localaiservers:qwen36-gfx906-c1-topk8-runtime-archive-aa34cb675f83 \
+DEPLOY_IMAGE=joe2gaan/localaiservers:qwen36-gfx906-rocm72-dense-moe-runtime-archive-0a2dbd6b7f0b \
 DOCKER_ISOLATED_DAEMON_ENABLED=0 \
 HF_HUB_DISABLE_XET=1 \
 USE_PREBUILT_IMAGE=1 \
@@ -245,6 +353,10 @@ vLLM, retries transient shard download failures, and verifies the safetensor sha
 references before the runtime container is started.
 
 ### Manual vLLM launch after the image is built
+
+The manual command below is retained as a historical v0.1.0 TP4 launch example.
+For the current ROCm7.2 release, prefer `QWEN36_PROFILE=... ./deploy.sh` so the
+dense/MoE profile settings stay in sync with the deploy script.
 
 `deploy.sh` writes the runtime patch bundle, tuned MoE config, compose file, and cache directories before launching. If you want to launch the already-built image manually, source the isolated Docker env if it exists, then run the image with the same mounts and runtime settings:
 
@@ -269,7 +381,7 @@ docker run --rm -it \
   -v "$(pwd)/runtime/root/.triton:/root/.triton" \
   -v "$(pwd)/runtime/root/.cache/vllm:/root/.cache/vllm" \
   -v "$(pwd)/runtime/tmp/torchinductor_root:/tmp/torchinductor_root" \
-  -v "$(pwd)/runtime/vllm_tuned_moe_configs/native_gfx906_qwen36_tp4_n128_c1_parallel_variants_20260525/m8_n32_k32_w2_wave1_k1_llmm1_rpb2_naivec1_nccl_tree_ll_10k_host30:/opt/vllm_tuned_moe_configs:ro" \
+  -v "$(pwd)/runtime/vllm_tuned_moe_configs/native_gfx906_qwen36_tp4_n128_c1_parallel_variants_20260525/m8_n32_k32_w2_wave1_k1_llmm1_rpb2_naivec1_nccl_tree_ll_10k:/opt/vllm_tuned_moe_configs:ro" \
   -v "$(pwd)/runtime/patches:/opt/vllm_patch_bundle:ro" \
   -e HIP_VISIBLE_DEVICES=0,1,2,3 \
   -e MODEL=Qwen/Qwen3.6-35B-A3B \
@@ -331,15 +443,15 @@ vllm serve Qwen/Qwen3.6-35B-A3B \
   --language-model-only
 ```
 
-For the Docker Hub image, replace the final image name with:
+For the current Docker Hub image, replace the final image name with:
 
 ```text
-joe2gaan/localaiservers:qwen36-gfx906-c1-topk8-runtime-archive-aa34cb675f83
+joe2gaan/localaiservers:qwen36-gfx906-rocm72-dense-moe-runtime-archive-0a2dbd6b7f0b
 ```
 
-Use `qwen36-gfx906-c1-topk8-runtime-<deploy_sha8>` for package-version tagging and `qwen36-gfx906-c1-topk8-runtime-archive-<archive_sha12>` when the verified source archive is the thing being cited. For an exact Docker Hub image identity, cite the manifest digest. `qwen36-gfx906-c1-topk8-runtime-latest` is convenient for testing, but it is not the tag to cite for reproduced results.
+Use `qwen36-gfx906-rocm72-dense-moe-runtime-archive-<archive_sha12>` when the verified source archive is the thing being cited. For an exact Docker Hub image identity, cite the manifest digest. Floating tags are convenient for testing, but they are not the tags to cite for reproduced results.
 
-The prebuilt-image path still writes the runtime patch bundle, MoE config, compose file, entrypoint, and runtime env into the directory where `deploy.sh` is executed. It keeps Docker/containerd state under `./.d` by default, mounts model weights from `./hf_cache`, and preserves the same TP4/O3/NCCL/MoE fastpath launch contract as the source-built image.
+The prebuilt-image path still writes the runtime patch bundle, MoE config, compose file, entrypoint, and runtime env into the directory where `deploy.sh` is executed. It keeps Docker/containerd state under `./.d` by default, mounts model weights from `./hf_cache`, and preserves the selected dense/MoE profile contract from the source-built image.
 
 To verify performance after the service is ready:
 
@@ -347,7 +459,7 @@ To verify performance after the service is ready:
 python3 ./run_qwen36_live_tps.py
 ```
 
-Reference fixed-token single-request results on the validated 4x MI50 32GB gfx906 lane were:
+Historical fixed-token single-request results on the v0.1.0 4x MI50 32GB gfx906 lane were:
 
 - `c1_2000`: 101.47 TPS backend decode
 - `c1_10000`: 95.66 TPS backend decode, 95.36 client wall TPS
