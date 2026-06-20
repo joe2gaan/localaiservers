@@ -70,6 +70,8 @@ Public benefit is delivered through:
 - Docker/runtime details.
 - Reproducible benchmark methods.
 - QC and hardware verification methods.
+- Hardware QC field-check tooling:
+  [tools/gfx906-mi50-vram-qc](tools/gfx906-mi50-vram-qc/).
 - Source-kernel inventories.
 - Experiment and key-learning summaries.
 - Public documentation.
