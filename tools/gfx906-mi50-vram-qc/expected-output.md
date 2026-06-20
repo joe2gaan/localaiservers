@@ -145,6 +145,50 @@ Device 0:
 PASS: selected device checks passed.
 ```
 
+## Sanitized `.20` Validation Example
+
+This example was captured from the maintained repository tool on the `.20` GFX906
+server and sanitized before publication. It is an educational example only. It is not
+certification, warranty evidence, official AMD validation, procurement support, resale
+support, or a guarantee of AI workload performance.
+
+Device 0 30 GiB excerpt:
+
+```text
+HIP devices visible: 8
+Selected devices: 0
+
+Device 0:
+  name: AMD Instinct MI50/MI60
+  totalGlobalMem: 34342961152 bytes
+  target allocation: 30.00 GiB
+  checked words: 8053063680
+  result: PASS
+
+== Final result ==
+PASS: selected device checks passed.
+```
+
+All-device 30 GiB excerpt:
+
+```text
+HIP devices visible: 8
+Selected devices: 0 1 2 3 4 5 6 7
+
+Device 0:
+  target allocation: 30.00 GiB
+  checked words: 8053063680
+  result: PASS
+
+Device 7:
+  target allocation: 30.00 GiB
+  checked words: 8053063680
+  result: PASS
+
+== Final result ==
+PASS: selected device checks passed.
+```
+
 ## Interpreting Results
 
 `PASS` means the selected HIP device could allocate the requested transient VRAM

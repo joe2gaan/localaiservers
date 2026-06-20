@@ -1,0 +1,25 @@
+GFX906 / MI50 32GB VRAM QC Field Check
+
+Best-effort educational diagnostic for MI50 32GB / GFX906-class cards.
+This tool only allocates and verifies transient GPU memory through HIP.
+It does not flash firmware, modify BIOS/VBIOS, alter PCIe configuration,
+write to block devices, upload logs, or make certification/warranty claims.
+
+Usage:
+  ./mi50_vram_qc.sh [options]
+
+Options:
+  --target-gib <value>  Allocation size per selected device in GiB (default: 30)
+  --device <id|all>     HIP device id to test, or all devices (default: all)
+  --install-deps        Explicitly try apt dependency installation
+  --skip-dmesg          Skip kernel-log evidence collection
+  --skip-rocm-smi       Skip rocm-smi visibility output
+  --keep-build          Keep the temporary build directory
+  --help                Show this help
+
+Environment:
+  HIPCC                 Optional path to hipcc
+
+Exit status:
+  0 if all selected HIP allocation/check tests pass.
+  Nonzero if setup fails or any selected device fails.
