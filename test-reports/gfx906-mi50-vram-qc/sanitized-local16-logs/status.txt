@@ -1,0 +1,2 @@
+test_01_status=0
+test_02_status=1

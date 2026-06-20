@@ -107,6 +107,32 @@ Device 0:
 FAIL: one or more selected device checks failed.
 ```
 
+## Sanitized 16GB Negative-Control Example
+
+This example was captured from the maintained repository tool on a local 16GB
+GFX906-class card and sanitized before publication. It shows the expected behavior
+for a card that can pass a small HIP memory check but cannot satisfy the MI50 32GB
+30 GiB field-check allocation. It is educational diagnostic evidence only.
+
+```text
+HIP devices visible: 1
+Selected devices: 0
+
+Device 0:
+  name: AMD Radeon VII
+  totalGlobalMem: 17163091968 bytes
+  target allocation: 1.00 GiB
+  checked words: 268435456
+  result: PASS
+
+Device 0:
+  name: AMD Radeon VII
+  totalGlobalMem: 17163091968 bytes
+  target allocation: 30.00 GiB
+  result: FAIL
+  error: hipMalloc(32212254720 bytes) failed: hipErrorOutOfMemory: hipErrorOutOfMemory
+```
+
 ## Missing hipcc
 
 ```text
