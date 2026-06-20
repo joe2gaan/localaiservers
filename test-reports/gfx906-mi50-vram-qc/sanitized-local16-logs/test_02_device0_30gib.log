@@ -1,0 +1,90 @@
+GFX906 / MI50 32GB VRAM QC Field Check
+
+Purpose: public education and best-effort hardware verification methodology.
+Safety: allocates/checks transient GPU memory through HIP only.
+This is not certification, warranty testing, resale support, or official validation.
+
+== Tool configuration ==
+hipcc: /usr/bin/hipcc
+target allocation: 30 GiB
+device selection: 0
+
+== Firmware / device-name hints ==
+fwupdmgr not available; skipping firmware/device-name hints.
+
+== Kernel-log hints ==
+skipped by --skip-dmesg
+
+== Kernel-reported VRAM totals ==
+/sys/class/drm/card0: 17163091968 bytes (15.98 GiB)
+
+== rocm-smi visibility ==
+fchmod: Bad file descriptor
+shm_open: Invalid argument
+Exception caught: rsmi_init.
+ERROR:root:ROCm SMI returned 8 (the expected value is 0)
+
+== Build ==
+build directory: <tool-build-dir>
+<repo-tool-source>/vram_check.cpp:122:5: warning: ignoring return value of function declared with 'nodiscard' attribute [-Wunused-result]
+    hipFree(data);
+    ^~~~~~~ ~~~~
+<repo-tool-source>/vram_check.cpp:131:5: warning: ignoring return value of function declared with 'nodiscard' attribute [-Wunused-result]
+    hipFree(d_errors);
+    ^~~~~~~ ~~~~~~~~
+<repo-tool-source>/vram_check.cpp:132:5: warning: ignoring return value of function declared with 'nodiscard' attribute [-Wunused-result]
+    hipFree(data);
+    ^~~~~~~ ~~~~
+<repo-tool-source>/vram_check.cpp:162:5: warning: ignoring return value of function declared with 'nodiscard' attribute [-Wunused-result]
+    hipFree(d_errors);
+    ^~~~~~~ ~~~~~~~~
+<repo-tool-source>/vram_check.cpp:163:5: warning: ignoring return value of function declared with 'nodiscard' attribute [-Wunused-result]
+    hipFree(data);
+    ^~~~~~~ ~~~~
+<repo-tool-source>/vram_check.cpp:183:5: warning: ignoring return value of function declared with 'nodiscard' attribute [-Wunused-result]
+    hipFree(d_errors);
+    ^~~~~~~ ~~~~~~~~
+<repo-tool-source>/vram_check.cpp:184:5: warning: ignoring return value of function declared with 'nodiscard' attribute [-Wunused-result]
+    hipFree(data);
+    ^~~~~~~ ~~~~
+7 warnings generated when compiling for gfx906.
+<repo-tool-source>/vram_check.cpp:122:5: warning: ignoring return value of function declared with 'nodiscard' attribute [-Wunused-result]
+    hipFree(data);
+    ^~~~~~~ ~~~~
+<repo-tool-source>/vram_check.cpp:131:5: warning: ignoring return value of function declared with 'nodiscard' attribute [-Wunused-result]
+    hipFree(d_errors);
+    ^~~~~~~ ~~~~~~~~
+<repo-tool-source>/vram_check.cpp:132:5: warning: ignoring return value of function declared with 'nodiscard' attribute [-Wunused-result]
+    hipFree(data);
+    ^~~~~~~ ~~~~
+<repo-tool-source>/vram_check.cpp:162:5: warning: ignoring return value of function declared with 'nodiscard' attribute [-Wunused-result]
+    hipFree(d_errors);
+    ^~~~~~~ ~~~~~~~~
+<repo-tool-source>/vram_check.cpp:163:5: warning: ignoring return value of function declared with 'nodiscard' attribute [-Wunused-result]
+    hipFree(data);
+    ^~~~~~~ ~~~~
+<repo-tool-source>/vram_check.cpp:183:5: warning: ignoring return value of function declared with 'nodiscard' attribute [-Wunused-result]
+    hipFree(d_errors);
+    ^~~~~~~ ~~~~~~~~
+<repo-tool-source>/vram_check.cpp:184:5: warning: ignoring return value of function declared with 'nodiscard' attribute [-Wunused-result]
+    hipFree(data);
+    ^~~~~~~ ~~~~
+7 warnings generated when compiling for host.
+
+== HIP VRAM allocation/check ==
+KFD does not support xnack mode query.
+ROCr must assume xnack is disabled.
+HIP devices visible: 1
+Selected devices: 0
+
+Device 0:
+  name: AMD Radeon VII
+  totalGlobalMem: 17163091968 bytes
+  hipMemGetInfo free: 17163091968 bytes
+  hipMemGetInfo total: 17163091968 bytes
+  target allocation: 30.00 GiB
+  result: FAIL
+  error: hipMalloc(32212254720 bytes) failed: hipErrorOutOfMemory: hipErrorOutOfMemory
+
+== Final result ==
+FAIL: one or more selected device checks failed.

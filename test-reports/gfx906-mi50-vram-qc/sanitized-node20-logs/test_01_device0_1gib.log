@@ -1,0 +1,225 @@
+GFX906 / MI50 32GB VRAM QC Field Check
+
+Purpose: public education and best-effort hardware verification methodology.
+Safety: allocates/checks transient GPU memory through HIP only.
+This is not certification, warranty testing, resale support, or official validation.
+
+== Tool configuration ==
+hipcc: /usr/bin/hipcc
+target allocation: 1 GiB
+device selection: 0
+
+== Firmware / device-name hints ==
+Instinct
+MI50
+Vega20
+
+== Kernel-log hints ==
+skipped by --skip-dmesg
+
+== Kernel-reported VRAM totals ==
+/sys/class/drm/card1: 34342961152 bytes (31.98 GiB)
+/sys/class/drm/card2: 34342961152 bytes (31.98 GiB)
+/sys/class/drm/card3: 34342961152 bytes (31.98 GiB)
+/sys/class/drm/card4: 34342961152 bytes (31.98 GiB)
+/sys/class/drm/card5: 34342961152 bytes (31.98 GiB)
+/sys/class/drm/card6: 34342961152 bytes (31.98 GiB)
+/sys/class/drm/card7: 34342961152 bytes (31.98 GiB)
+/sys/class/drm/card8: 34342961152 bytes (31.98 GiB)
+
+== rocm-smi visibility ==
+
+
+============================ ROCm System Management Interface ============================
+====================================== Temperature =======================================
+GPU[0]		: Temperature (Sensor edge) (C): 34.0
+GPU[0]		: Temperature (Sensor junction) (C): 36.0
+GPU[0]		: Temperature (Sensor memory) (C): 37.0
+GPU[1]		: Temperature (Sensor edge) (C): 34.0
+GPU[1]		: Temperature (Sensor junction) (C): 36.0
+GPU[1]		: Temperature (Sensor memory) (C): 39.0
+GPU[2]		: Temperature (Sensor edge) (C): 35.0
+GPU[2]		: Temperature (Sensor junction) (C): 35.0
+GPU[2]		: Temperature (Sensor memory) (C): 40.0
+GPU[3]		: Temperature (Sensor edge) (C): 35.0
+GPU[3]		: Temperature (Sensor junction) (C): 37.0
+GPU[3]		: Temperature (Sensor memory) (C): 42.0
+GPU[4]		: Temperature (Sensor edge) (C): 34.0
+GPU[4]		: Temperature (Sensor junction) (C): 35.0
+GPU[4]		: Temperature (Sensor memory) (C): 38.0
+GPU[5]		: Temperature (Sensor edge) (C): 35.0
+GPU[5]		: Temperature (Sensor junction) (C): 36.0
+GPU[5]		: Temperature (Sensor memory) (C): 32.0
+GPU[6]		: Temperature (Sensor edge) (C): 35.0
+GPU[6]		: Temperature (Sensor junction) (C): 36.0
+GPU[6]		: Temperature (Sensor memory) (C): 35.0
+GPU[7]		: Temperature (Sensor edge) (C): 35.0
+GPU[7]		: Temperature (Sensor junction) (C): 36.0
+GPU[7]		: Temperature (Sensor memory) (C): 35.0
+==========================================================================================
+=================================== % time GPU is busy ===================================
+GPU[0]		: GPU use (%): 0
+GPU[1]		: GPU use (%): 0
+GPU[2]		: GPU use (%): 0
+GPU[3]		: GPU use (%): 0
+GPU[4]		: GPU use (%): 0
+GPU[5]		: GPU use (%): 0
+GPU[6]		: GPU use (%): 0
+GPU[7]		: GPU use (%): 0
+==========================================================================================
+================================== Memory Usage (Bytes) ==================================
+GPU[0]		: VRAM Total Memory (B): 34342961152
+GPU[0]		: VRAM Total Used Memory (B): 72871936
+GPU[1]		: VRAM Total Memory (B): 34342961152
+GPU[1]		: VRAM Total Used Memory (B): 10862592
+GPU[2]		: VRAM Total Memory (B): 34342961152
+GPU[2]		: VRAM Total Used Memory (B): 10862592
+GPU[3]		: VRAM Total Memory (B): 34342961152
+GPU[3]		: VRAM Total Used Memory (B): 10862592
+GPU[4]		: VRAM Total Memory (B): 34342961152
+GPU[4]		: VRAM Total Used Memory (B): 10850304
+GPU[5]		: VRAM Total Memory (B): 34342961152
+GPU[5]		: VRAM Total Used Memory (B): 10862592
+GPU[6]		: VRAM Total Memory (B): 34342961152
+GPU[6]		: VRAM Total Used Memory (B): 10862592
+GPU[7]		: VRAM Total Memory (B): 34342961152
+GPU[7]		: VRAM Total Used Memory (B): 10862592
+==========================================================================================
+====================================== Product Info ======================================
+GPU[0]		: Card Series: 		Radeon Instinct MI50 32GB
+GPU[0]		: Card Model: 		0x66a1
+GPU[0]		: Card Vendor: 		Advanced Micro Devices, Inc. [AMD/ATI]
+GPU[0]		: Card SKU: 		D1631700
+GPU[0]		: Subsystem ID: 	0x0834
+GPU[0]		: Device Rev: 		0x02
+GPU[0]		: Node ID: 		<redacted-node-id>
+GPU[0]		: GUID: 		<redacted-guid>
+GPU[0]		: GFX Version: 		gfx9006
+GPU[1]		: Card Series: 		Radeon Instinct MI50 32GB
+GPU[1]		: Card Model: 		0x66a1
+GPU[1]		: Card Vendor: 		Advanced Micro Devices, Inc. [AMD/ATI]
+GPU[1]		: Card SKU: 		D1631700
+GPU[1]		: Subsystem ID: 	0x0834
+GPU[1]		: Device Rev: 		0x02
+GPU[1]		: Node ID: 		<redacted-node-id>
+GPU[1]		: GUID: 		<redacted-guid>
+GPU[1]		: GFX Version: 		gfx9006
+GPU[2]		: Card Series: 		Radeon Instinct MI50 32GB
+GPU[2]		: Card Model: 		0x66a1
+GPU[2]		: Card Vendor: 		Advanced Micro Devices, Inc. [AMD/ATI]
+GPU[2]		: Card SKU: 		D1631700
+GPU[2]		: Subsystem ID: 	0x0834
+GPU[2]		: Device Rev: 		0x02
+GPU[2]		: Node ID: 		<redacted-node-id>
+GPU[2]		: GUID: 		<redacted-guid>
+GPU[2]		: GFX Version: 		gfx9006
+GPU[3]		: Card Series: 		Radeon Instinct MI50 32GB
+GPU[3]		: Card Model: 		0x66a1
+GPU[3]		: Card Vendor: 		Advanced Micro Devices, Inc. [AMD/ATI]
+GPU[3]		: Card SKU: 		D1631700
+GPU[3]		: Subsystem ID: 	0x0834
+GPU[3]		: Device Rev: 		0x02
+GPU[3]		: Node ID: 		<redacted-node-id>
+GPU[3]		: GUID: 		<redacted-guid>
+GPU[3]		: GFX Version: 		gfx9006
+GPU[4]		: Card Series: 		Radeon Instinct MI50 32GB
+GPU[4]		: Card Model: 		0x66a1
+GPU[4]		: Card Vendor: 		Advanced Micro Devices, Inc. [AMD/ATI]
+GPU[4]		: Card SKU: 		D1631700
+GPU[4]		: Subsystem ID: 	0x0834
+GPU[4]		: Device Rev: 		0x02
+GPU[4]		: Node ID: 		<redacted-node-id>
+GPU[4]		: GUID: 		<redacted-guid>
+GPU[4]		: GFX Version: 		gfx9006
+GPU[5]		: Card Series: 		Radeon Instinct MI50 32GB
+GPU[5]		: Card Model: 		0x66a1
+GPU[5]		: Card Vendor: 		Advanced Micro Devices, Inc. [AMD/ATI]
+GPU[5]		: Card SKU: 		D1631700
+GPU[5]		: Subsystem ID: 	0x0834
+GPU[5]		: Device Rev: 		0x02
+GPU[5]		: Node ID: 		<redacted-node-id>
+GPU[5]		: GUID: 		<redacted-guid>
+GPU[5]		: GFX Version: 		gfx9006
+GPU[6]		: Card Series: 		Radeon Instinct MI50 16GB
+GPU[6]		: Card Model: 		0x66a1
+GPU[6]		: Card Vendor: 		Advanced Micro Devices, Inc. [AMD/ATI]
+GPU[6]		: Card SKU: 		D1631700
+GPU[6]		: Subsystem ID: 	0x0834
+GPU[6]		: Device Rev: 		0x02
+GPU[6]		: Node ID: 		<redacted-node-id>
+GPU[6]		: GUID: 		<redacted-guid>
+GPU[6]		: GFX Version: 		gfx9006
+GPU[7]		: Card Series: 		Radeon Instinct MI50 16GB
+GPU[7]		: Card Model: 		0x66a1
+GPU[7]		: Card Vendor: 		Advanced Micro Devices, Inc. [AMD/ATI]
+GPU[7]		: Card SKU: 		D1631700
+GPU[7]		: Subsystem ID: 	0x0834
+GPU[7]		: Device Rev: 		0x02
+GPU[7]		: Node ID: 		<redacted-node-id>
+GPU[7]		: GUID: 		<redacted-guid>
+GPU[7]		: GFX Version: 		gfx9006
+==========================================================================================
+================================== End of ROCm SMI Log ===================================
+
+== Build ==
+build directory: <tool-build-dir>
+<remote-temp-workdir>/repo/tools/gfx906-mi50-vram-qc/vram_check.cpp:122:5: warning: ignoring return value of function declared with 'nodiscard' attribute [-Wunused-result]
+  122 |     hipFree(data);
+      |     ^~~~~~~ ~~~~
+<remote-temp-workdir>/repo/tools/gfx906-mi50-vram-qc/vram_check.cpp:131:5: warning: ignoring return value of function declared with 'nodiscard' attribute [-Wunused-result]
+  131 |     hipFree(d_errors);
+      |     ^~~~~~~ ~~~~~~~~
+<remote-temp-workdir>/repo/tools/gfx906-mi50-vram-qc/vram_check.cpp:132:5: warning: ignoring return value of function declared with 'nodiscard' attribute [-Wunused-result]
+  132 |     hipFree(data);
+      |     ^~~~~~~ ~~~~
+<remote-temp-workdir>/repo/tools/gfx906-mi50-vram-qc/vram_check.cpp:162:5: warning: ignoring return value of function declared with 'nodiscard' attribute [-Wunused-result]
+  162 |     hipFree(d_errors);
+      |     ^~~~~~~ ~~~~~~~~
+<remote-temp-workdir>/repo/tools/gfx906-mi50-vram-qc/vram_check.cpp:163:5: warning: ignoring return value of function declared with 'nodiscard' attribute [-Wunused-result]
+  163 |     hipFree(data);
+      |     ^~~~~~~ ~~~~
+<remote-temp-workdir>/repo/tools/gfx906-mi50-vram-qc/vram_check.cpp:183:5: warning: ignoring return value of function declared with 'nodiscard' attribute [-Wunused-result]
+  183 |     hipFree(d_errors);
+      |     ^~~~~~~ ~~~~~~~~
+<remote-temp-workdir>/repo/tools/gfx906-mi50-vram-qc/vram_check.cpp:184:5: warning: ignoring return value of function declared with 'nodiscard' attribute [-Wunused-result]
+  184 |     hipFree(data);
+      |     ^~~~~~~ ~~~~
+7 warnings generated when compiling for gfx906.
+<remote-temp-workdir>/repo/tools/gfx906-mi50-vram-qc/vram_check.cpp:122:5: warning: ignoring return value of function declared with 'nodiscard' attribute [-Wunused-result]
+  122 |     hipFree(data);
+      |     ^~~~~~~ ~~~~
+<remote-temp-workdir>/repo/tools/gfx906-mi50-vram-qc/vram_check.cpp:131:5: warning: ignoring return value of function declared with 'nodiscard' attribute [-Wunused-result]
+  131 |     hipFree(d_errors);
+      |     ^~~~~~~ ~~~~~~~~
+<remote-temp-workdir>/repo/tools/gfx906-mi50-vram-qc/vram_check.cpp:132:5: warning: ignoring return value of function declared with 'nodiscard' attribute [-Wunused-result]
+  132 |     hipFree(data);
+      |     ^~~~~~~ ~~~~
+<remote-temp-workdir>/repo/tools/gfx906-mi50-vram-qc/vram_check.cpp:162:5: warning: ignoring return value of function declared with 'nodiscard' attribute [-Wunused-result]
+  162 |     hipFree(d_errors);
+      |     ^~~~~~~ ~~~~~~~~
+<remote-temp-workdir>/repo/tools/gfx906-mi50-vram-qc/vram_check.cpp:163:5: warning: ignoring return value of function declared with 'nodiscard' attribute [-Wunused-result]
+  163 |     hipFree(data);
+      |     ^~~~~~~ ~~~~
+<remote-temp-workdir>/repo/tools/gfx906-mi50-vram-qc/vram_check.cpp:183:5: warning: ignoring return value of function declared with 'nodiscard' attribute [-Wunused-result]
+  183 |     hipFree(d_errors);
+      |     ^~~~~~~ ~~~~~~~~
+<remote-temp-workdir>/repo/tools/gfx906-mi50-vram-qc/vram_check.cpp:184:5: warning: ignoring return value of function declared with 'nodiscard' attribute [-Wunused-result]
+  184 |     hipFree(data);
+      |     ^~~~~~~ ~~~~
+7 warnings generated when compiling for host.
+
+== HIP VRAM allocation/check ==
+HIP devices visible: 8
+Selected devices: 0
+
+Device 0:
+  name: AMD Instinct MI50/MI60
+  totalGlobalMem: 34342961152 bytes
+  hipMemGetInfo free: 34305212416 bytes
+  hipMemGetInfo total: 34342961152 bytes
+  target allocation: 1.00 GiB
+  checked words: 268435456
+  result: PASS
+
+== Final result ==
+PASS: selected device checks passed.
