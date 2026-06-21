@@ -40,6 +40,7 @@ codex-x86_64-unknown-linux-musl-*
 communications/
 grants/
 ops/private/
+ops/private/localaiservers-v0.2.0-reddit-announcement.md
 ops/out/
 *.private.csv
 participants*.csv
