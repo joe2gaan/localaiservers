@@ -37,6 +37,8 @@ run_codex_unshare.sh
 codex-x86_64-unknown-linux-musl-*
 
 # Private local operational artifacts
+communications/
+grants/
 ops/private/
 ops/out/
 *.private.csv
