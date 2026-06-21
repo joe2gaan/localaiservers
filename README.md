@@ -31,12 +31,21 @@ The published v0.1 public artifact is the Qwen3.6 / GFX906 / MI50 TP4 runtime wo
   TPS.
 
 GitHub Releases are canonical for published release claim boundaries, and v0.1.0
-remains the older published release. Post-v0.1 ROCm7.2 Dense/MoE main-branch
-validation notes are tracked in
-[docs/rocm72-dense-moe-active-contracts-20260620.md](docs/rocm72-dense-moe-active-contracts-20260620.md);
-those values remain main-branch validation until a separate release is published.
+remains the older published release. ROCm7.2 Dense/MoE validation notes are
+tracked in
+[docs/rocm72-dense-moe-active-contracts-20260620.md](docs/rocm72-dense-moe-active-contracts-20260620.md).
 Docker Hub remains an evergreen artifact distribution channel and should not be
 treated as the latest benchmark announcement.
+
+## Published v0.2 Artifact
+
+The published v0.2 ROCm7.2 Dense/MoE artifact covers the GFX906 active-contract
+dense 27B TP8 and Qwen3.6 35B-A3B MoE validation lanes documented in
+[docs/rocm72-dense-moe-active-contracts-20260620.md](docs/rocm72-dense-moe-active-contracts-20260620.md).
+Published claim boundaries remain canonical in
+[GitHub Releases](https://github.com/joe2gaan/localaiservers/releases), while
+Docker Hub remains an evergreen artifact distribution channel rather than the
+latest benchmark announcement.
 
 Canonical technical deployment package:
 [qwen36-gfx906/README.md](qwen36-gfx906/README.md)
