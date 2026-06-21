@@ -16,7 +16,7 @@ GFX906 / MI50 32GB VRAM QC Field Check
 Best-effort educational diagnostic for MI50 32GB / GFX906-class cards.
 This tool only allocates and verifies transient GPU memory through HIP.
 It does not flash firmware, modify BIOS/VBIOS, alter PCIe configuration,
-write to block devices, upload logs, or make certification/warranty claims.
+write to block devices, upload logs, or make formal assurance claims.
 
 Usage:
   ./mi50_vram_qc.sh [options]
@@ -114,7 +114,7 @@ GFX906 / MI50 32GB VRAM QC Field Check
 
 Purpose: public education and best-effort hardware verification methodology.
 Safety: allocates/checks transient GPU memory through HIP only.
-This is not certification, warranty testing, resale support, or official validation.
+This is not a certification, warranty, formal assurance program, support contract, sales support, or official validation.
 INTRO
 
 install_deps() {

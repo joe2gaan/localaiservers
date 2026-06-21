@@ -12,8 +12,7 @@ operations context.
 - [004 - Document MI50 hardware verification methodology](004-mi50-hardware-verification-methodology.md)
 - [005 - Documentation cleanup good first issue](005-docs-cleanup-good-first-issue.md)
 - [006 - GitHub Pages docs index good first issue](006-github-pages-doc-index.md)
-- [007 - Funding documentation review](007-funding-doc-review.md)
 
 Before posting any issue, verify that it does not include private hostnames, private
-IPs, private paths, payment data, participant data, supplier data, secrets, or
-unredacted logs.
+IPs, private paths, payment data, participant data, supplier data, credential material,
+or unredacted logs.

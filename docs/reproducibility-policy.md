@@ -30,5 +30,5 @@ This policy keeps public benchmark claims narrow, inspectable, and useful.
 ## Public-Benefit Rule
 
 Benchmark claims should help readers reproduce, compare, or avoid known failure paths. A
-result that is useful only as an internal note should be labeled as diagnostic, active,
+result that is useful only as a lab note should be labeled as diagnostic, active,
 superseded, or source evidence rather than promoted.

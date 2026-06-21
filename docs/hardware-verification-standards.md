@@ -58,8 +58,9 @@ cards:
 
 [tools/gfx906-mi50-vram-qc](../tools/gfx906-mi50-vram-qc/)
 
-The tool is educational QC methodology. It is not certification, warranty,
-procurement support, resale support, or an official AMD validation.
+The tool is educational QC methodology. It is not a certification, warranty, formal
+assurance program, support contract, buying/selling workflow, or official AMD
+validation.
 
 ## Reporting Format
 

@@ -1,12 +1,11 @@
 # Controlled Air-Gapped Compute Model
 
-The LocalAIServers GFX906 cluster is not a public login or remote-access compute
-service.
+The LocalAIServers GFX906 cluster is not an interactive-use or hosted compute service.
 
 It is controlled research and verification infrastructure. It supports reproducible
 testing, hardware verification, model/runtime validation, source-kernel testing, and
-benchmark publication. Public access is provided through published outputs, not direct
-machine access.
+benchmark publication. Public value is provided through published outputs, not host
+access.
 
 This model supports offline reproducibility, physical custody of hardware, controlled
 software images, and safer validation workflows. Public benefit is delivered through

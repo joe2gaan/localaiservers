@@ -25,5 +25,5 @@ version.
 
 ## Redacted Evidence
 
-Attach logs or screenshots only after removing secrets, private paths, private host
-details, participant data, payment data, and supplier data.
+Attach logs or screenshots only after removing credential material, private paths,
+private host details, participant data, payment data, and supplier data.

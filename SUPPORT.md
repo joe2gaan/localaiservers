@@ -9,12 +9,12 @@ reports, QC methodology, and source-level GFX906 issue discussion.
 
 ## Boundaries
 
-- This is not a public cloud service.
-- This is not public remote compute.
-- This repository does not provide direct machine access.
-- This repository does not provide hardware warranty or resale support.
-- Do not post secrets, private logs, private paths, payment details, supplier details,
-  or participant data in support requests.
+- This is not a hosted cloud service.
+- This is not an interactive host service.
+- This repository does not provide host access.
+- This repository does not provide hardware support contracts or sales support.
+- Do not post credential material, private logs, private paths, payment details,
+  supplier details, or participant data in support requests.
 
 ## Best Issue Types
 

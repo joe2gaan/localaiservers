@@ -35,4 +35,4 @@ Good first issue
 ## Privacy Reminder
 
 No logs should be needed. Do not include private hostnames, private IPs, private paths,
-procurement details, or private operational notes.
+purchasing details, or private operational notes.

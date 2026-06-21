@@ -20,7 +20,7 @@ evidence expectations.
 - Documents free-VRAM checks before expensive model launches.
 - Documents smoke-test expectations.
 - Explains how to share redacted logs/screenshots.
-- Avoids publishing inventory, participant, payment, fulfillment, or private operations
+- Avoids publishing inventory, participant, payment, logistics, or private operations
   data.
 
 ## Suggested Labels

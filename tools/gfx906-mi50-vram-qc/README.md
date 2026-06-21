@@ -23,14 +23,15 @@ education, reproducibility support, and hands-on local AI learning.
 
 This tool is not:
 
-- a certification
-- a warranty
+- a certification or warranty
+- a formal assurance program
+- a support contract
 - a complete memory burn-in
 - a thermal stress test
 - an official AMD validation
 - a guarantee of AI workload performance
 - a hardware purchase recommendation
-- a procurement or resale program
+- a buying or selling workflow
 
 Passing this check means the selected device passed this limited HIP allocation
 and pattern-check run on the current host configuration. It does not prove that
@@ -129,7 +130,7 @@ See [expected-output.md](expected-output.md) for a fuller sample.
 LocalAIServers publishes this tool as part of its public hardware-verification and
 QC methodology for affordable local AI systems. The goal is to help people learn how
 to inspect, verify, and reason about local AI hardware before relying on benchmark
-or resale claims.
+or sales claims.
 
 ## Provenance
 

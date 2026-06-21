@@ -33,5 +33,5 @@ Intermediate
 
 ## Privacy Reminder
 
-Logs and screenshots must be redacted before sharing. Remove secrets, private paths,
-private host details, participant data, payment data, and supplier data.
+Logs and screenshots must be redacted before sharing. Remove credential material,
+private paths, private host details, participant data, payment data, and supplier data.

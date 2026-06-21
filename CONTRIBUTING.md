@@ -24,13 +24,13 @@ future plans. Do not claim official ROCm support or AMD endorsement.
 
 Do not commit or post:
 
-- Secrets, tokens, private keys, or credentials.
-- Participant data, payment data, banking details, shipping records, or labels.
+- Credential material, tokens, or private authentication data.
+- Participant data, payment data, financial account details, shipping records, or labels.
 - Private hostnames, private IPs, home-directory paths, or private logs.
 - Legal filing documents, filing screenshots, addresses, or tax identifiers.
-- Supplier pricing, supplier records, private procurement notes, or private operational
+- Supplier pricing, supplier records, private purchasing notes, or private operational
   records.
-- Coordinated purchasing, resale, or private-benefit access content.
+- Coordinated purchasing, sales coordination, or private-benefit access content.
 
 Redact logs and screenshots before attaching them to issues or pull requests.
 

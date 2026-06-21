@@ -5,8 +5,8 @@ Create or improve a GitHub Pages documentation index
 ## Context
 
 The repo has `.nojekyll` and a media page for the GFX906 benchmark video. A simple
-public docs index could make impact, funding, program-boundary, grant, and technical
-documentation easier to navigate from GitHub Pages.
+public docs index could make impact, QC, hardware verification, contributor, and
+technical documentation easier to navigate from GitHub Pages.
 
 ## Desired Outcome
 
@@ -15,8 +15,8 @@ existing GFX906 media page.
 
 ## Acceptance Criteria
 
-- Links to `docs/index.md`, impact, funding, program boundaries, grant concept note,
-  risk review, and `qwen36-gfx906/README.md`.
+- Links to `docs/index.md`, impact, QC methodology, hardware verification standards,
+  contributor backlog, and `qwen36-gfx906/README.md`.
 - Keeps the page plain and maintainable.
 - Does not add payment collection details or private operational details.
 - Does not make new technical claims.

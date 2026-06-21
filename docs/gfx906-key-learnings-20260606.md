@@ -1,9 +1,9 @@
 # GFX906 Key Learnings - 2026-06-06
 
-This is a sanitized public copy of the internal source note used to document
+This is a sanitized public copy of the source note used to document
 LocalAIServers GFX906 preservation work. It is published as evidence of source-level
-kernel, runtime, graph, and collective-communication investigation. Internal
-experimental terms such as "winner" or "high-water" are source-record labels;
+kernel, runtime, graph, and collective-communication investigation. Experimental
+terms such as "winner" or "high-water" are source-record labels;
 funder-facing claims should use the cautious summaries in
 [gfx906-technical-progress-summary.md](gfx906-technical-progress-summary.md),
 [gfx906-experimental-methodology.md](gfx906-experimental-methodology.md), and
@@ -48,24 +48,41 @@ Related index:
 
 ## Current Winners And Milestones
 
-- Qwen3.6-35B-A3B MoE TP4 has a promoted gfx906 winner: C1 topk8 fastpath,
-  O3, async, Tree/LL, one NCCL channel, P2P disabled, tuned MoE fastpath.
-  The validated `c1_10000` decode result is about `95-96` backend TPS.
-- Qwen3.6-27B dense TP8 has a meaningful milestone, not a gate clear. The
-  durable promoted surface is ROCm 7.2 plus mutable RowParallel, O3 async,
-  native-runtime interleaved SwiGLU, explicit balanced `RCCL_TREES`, Tree/LL,
-  P2P disabled, four NCCL channels, and the graph-safe non-resident sidecar
-  Tree/LL allreduce runtime. The current `.20` standard-envelope high-water
-  uses the multi-row sidecar capture path with a `2048/1536/1536` fixed
-  descriptor split and reaches strict c1 `62.806`, `c1_2000 63.807`, and
-  `c1_10000 60.209` backend TPS. The earlier cross-host multi-row ladder
-  reached `.20` `62.491/63.308/59.783` and `.30`
-  `62.192/62.919/59.127`; the new split did not promote on `.30` strict c1
-  (`62.098`), so this is a `.20` serving milestone rather than a cross-host
-  gate clear. It remains short of the `65` TPS gate. A corrected clean-window
-  `.20` rocprofv2 profile on the prior
-  high-water stack shows NCCL dominating aggregate filtered kernel time: NCCL
-  `59.03%`, LLGemm `17.06%`, and native-runtime interleaved SwiGLU `12.54%`.
+- As of 2026-06-20,
+  [qwen36-gfx906/README.md](../qwen36-gfx906/README.md) is the authoritative
+  latest technical source for current ROCm7.2 dense/MoE status on main.
+- Dense 27B TP8 clears the ai-info 10K gate in post-v0.1 main-branch validation.
+  The active contract is `dense27b_tp8_fullbar_p2pon` on `.20` at
+  `MAX_MODEL_LEN=131072` with eight pre-measure warmups: strict backend TPS
+  `69.514`, `c1_2000` backend TPS `70.347`, and `c1_10000` backend TPS
+  `66.069`; note `strict gate valid`.
+- Qwen3.6 35B-A3B MoE TP8 establishes the strict-valid full-BAR/P2P-on bar.
+  The active contract is `moe35b_tp8_fullbar_p2pon` on `.30` at
+  `MAX_MODEL_LEN=131072` with eight pre-measure warmups: strict backend TPS
+  `94.907`, `c1_2000` backend TPS `97.028`, and `c1_10000` backend TPS
+  `91.290`; note `strict gate valid`.
+- Qwen3.6 35B-A3B MoE TP4 remains capped-only until the strict runaway is
+  resolved. The active TP4 lane is `moe35b_tp4_fullbar_p2pon` on `.30`:
+  strict is `invalid/runaway`, `c1_2000` backend TPS is `116.146`, and
+  `c1_10000` backend TPS is `109.283`; note `uncapped strict prompt did not
+  stop after >60K tokens`.
+- The same ROCm7.2 experimental release image covers both active contracts with
+  model-specific env and overlays:
+  `joe2gaan/localaiservers:qwen36-gfx906-rocm72-dense-moe-runtime-archive-0a2dbd6b7f0b`,
+  Docker Hub manifest digest
+  `sha256:8c380e9ca48943d8617de5a2e2eaf32a26dcc2c341e4b4f4f8c45294a72b8f1e`.
+  Docker Hub remains an evergreen artifact distribution channel; TPS claims
+  should stay in GitHub Releases, repository docs, and benchmark artifacts.
+  v0.1.0 remains the older published GitHub Release boundary; these are
+  post-v0.1 main-branch validation notes until a separate release is published.
+  GitHub Releases remain canonical for published claim boundaries.
+- Platform remediation for the current full-BAR/P2P-on lane required official
+  AMD VBIOS standardization, not modified BIOS images, plus amdgpu source
+  patching. This is not a user instruction to flash cards; the public repo does
+  not redistribute BIOS binaries or imply warranty or certification.
+- Older dense source entries in this log remain useful historical source
+  evidence, but they are superseded for current dense 27B status by the
+  2026-06-20 ROCm7.2 Dense/MoE runner.
 - The latest profile of the actual non-resident sidecar winner sharpened the
   dense target again. On `.30`, run
   `qwen36_27b_sidecar_winner_rocprof_h30_20260613_004845` emitted `806,396`
@@ -1080,7 +1097,8 @@ Related index:
     `mlp_down_5120x3696` went from `0.104530` to `0.163864`. Overlap remains
     viable only for a legal coarse schedule with independent heavy work; a
     per-boundary `compute_stream`/`comm_stream` wrapper should not be promoted.
-73. ROCm 7.2 full-stack dense TP8 is a valid stack milestone, not a gate clear.
+73. ROCm 7.2 full-stack dense TP8 is a valid pre-release stack milestone,
+    later superseded by the 2026-06-20 ROCm7.2 Dense/MoE validation.
     Exact-shape `.30` microbenching compared the 6.3 reproducible stack
     (`runs/llmm1_shape_stack_compare_rocm63_repro_exactshape_host30_20260608_044440`)
     with the 7.2 experimental image
@@ -1346,7 +1364,7 @@ Decision:
 111. Corrected-shape stream overlap is rejected. After patching `run_llmm1_allreduce_overlap_microbench_20260608.sh` to pass explicit shapes, TP8 Tree/LL overlap runs on `.20` and `.30` showed explicit stream-overlap slower than serial for `attn_out_5120x768`, `gate_up_4352x5120`, and `mlp_down_5120x2176`. The old partial-overlap signal came from a stale heavy `31040x5120` gate/up assumption. Do not build a simple overlap pass for the current dense graph.
 112. Upstream AITER fused custom allreduce is compile-reachable on gfx906 but runtime-blocked by HIP IPC peer import. Probe artifacts are under `/usr/share/ollama/gfx906_aiter_probe` on `.20`, with local runners `run_aiter_custom_ar_probe_20260608.sh` and `aiter_custom_ar_multigpu_probe_20260608.py`. Probe-only source patches added `gfx906` to AITER's arch maps, guarded FP8 conversion helpers that require unavailable FP8 conversion instructions, forced the metadata buffer through the torch cached allocator, and explicitly called `hipDeviceEnablePeerAccess()` before `hipIpcOpenMemHandle()`. Single-process JIT then succeeded and `module_custom_all_reduce` returned `meta_size 5504`, but TP2 `(1,5120)` fp16 initialization still aborted on both ranks at `custom_all_reduce.cuh` `hipIpcOpenMemHandle(...) -> invalid device pointer`. Treat AITER custom allreduce / fused allreduce+RMS as blocked on the same gfx906 PCIe peer-memory substrate as the previous raw IPC probes, not on Python/vLLM wiring.
 113. Replicating dense attention `o_proj` to trade the attention RowParallel allreduce for an all-gather is rejected. New microbench `microbenches/attention_replicated_oproj_bench_20260608.py` ran on `.20` TP8 at `/usr/share/ollama/kernel_labs/attention_repl_oproj_20260608_195419` with the dense winner NCCL envelope. Graph means were: current `LLMM1(5120x768)+allreduce(1x5120)` `0.062960 ms`, `all_gather(1x768->1x6144)` alone `0.065471 ms`, replicated full `LLMM1(5120x6144)` alone `0.085702 ms`, and combined all-gather plus replicated GEMV `0.176393 ms`. This is about `2.8x` slower than the current attention boundary before accounting for the extra replicated weight memory, so do not pursue replicated attention output projection as a dense gate path.
-114. Interleaved SwiGLU serving integration is a mild exact-shape compute milestone, not a gate clear. The first Python-branch and native-op integrations both served correctly but regressed to about `25 TPS`, showing that a microbench win can be erased by graph/runtime integration cost. Moving the N==1/N>1 branch fully inside the native op recovered winner-class performance on `.20`: run `qwen36_27b_decode_tiers_rocm72_mutable_rowpar_info_async_interleaved_swiglu_native_runtime_20260608_host20_20260608_211553` produced valid strict c1 `55.719 TPS`, `c1_2000` `56.800 TPS`, and `c1_10000` `53.908 TPS`. Repeat run `qwen36_27b_decode_tiers_rocm72_mutable_rowpar_info_async_interleaved_swiglu_native_runtime_repeat2_20260608_host20_20260608_213641` produced valid strict c1 `56.214 TPS`, `c1_2000` `56.906 TPS`, and `c1_10000` `54.012 TPS`. Host `.30` repeat `qwen36_27b_decode_tiers_rocm72_mutable_rowpar_info_async_interleaved_swiglu_native_runtime_repeat_20260608_host30_20260608_213547` was lower but still near its same-family baseline: valid strict c1 `53.579 TPS`, `c1_2000` `54.249 TPS`, and `c1_10000` `51.499 TPS`. Promote only the methodology/source lesson: keep decode-shape branches out of Python/model code and make source experiments graph-stable before judging the kernel idea. The gate-relevant path remains RowParallel collective structure and scheduling.
+114. Interleaved SwiGLU serving integration is a mild pre-release exact-shape compute milestone. The first Python-branch and native-op integrations both served correctly but regressed to about `25 TPS`, showing that a microbench win can be erased by graph/runtime integration cost. Moving the N==1/N>1 branch fully inside the native op recovered winner-class performance on `.20`: run `qwen36_27b_decode_tiers_rocm72_mutable_rowpar_info_async_interleaved_swiglu_native_runtime_20260608_host20_20260608_211553` produced valid strict c1 `55.719 TPS`, `c1_2000` `56.800 TPS`, and `c1_10000` `53.908 TPS`. Repeat run `qwen36_27b_decode_tiers_rocm72_mutable_rowpar_info_async_interleaved_swiglu_native_runtime_repeat2_20260608_host20_20260608_213641` produced valid strict c1 `56.214 TPS`, `c1_2000` `56.906 TPS`, and `c1_10000` `54.012 TPS`. Host `.30` repeat `qwen36_27b_decode_tiers_rocm72_mutable_rowpar_info_async_interleaved_swiglu_native_runtime_repeat_20260608_host30_20260608_213547` was lower but still near its same-family baseline: valid strict c1 `53.579 TPS`, `c1_2000` `54.249 TPS`, and `c1_10000` `51.499 TPS`. Promote only the methodology/source lesson: keep decode-shape branches out of Python/model code and make source experiments graph-stable before judging the kernel idea. The gate-relevant path remains RowParallel collective structure and scheduling.
 115. Public RCCL send/recv composition is rejected as the gfx906 small-message collective replacement. New MEP `microbenches/rccl_p2p_allreduce_graph_bench_20260609.cpp` and runner `run_rccl_p2p_allreduce_graph_bench_20260609.sh` compared generic `ncclAllReduce`, grouped full-buffer send/recv allgather-sum, and explicit ring reduce-scatter/allgather on exact TP8 decode payloads. With the safe winner envelope `NCCL_P2P_DISABLE=1`, `.20` graph replay measured `1x5120` generic `0.049656 ms`, allgather-sum `0.207861 ms`, ring `0.203515 ms`; `1x2048` generic `0.044924 ms`, allgather-sum `0.118955 ms`, ring `0.194659 ms`. `.30` reproduced the same shape: `1x5120` generic `0.049754 ms`, allgather-sum `0.206677 ms`, ring `0.204213 ms`; `1x2048` generic `0.043924 ms`, allgather-sum `0.117044 ms`, ring `0.190827 ms`. Enabling RCCL P2P for this MEP produced HIP `invalid argument` / `invalid device pointer` failures and a stuck container, which was cleaned. Conclusion: do not replace generic RCCL allreduce with public send/recv composition for dense c1. A useful custom collective must be deeper than public P2P scheduling or must reduce the boundary count.
 116. RCCL `AllReduceWithBias` is source-valid enough to serve but remains a performance rejection on the current dense winner. The acc-enabled ROCm 7.2 overlay `rccl_overlay_721_gfx906_acc_minimal_f16f32_20260608` exports and executes `ncclAllReduceWithBias` for TP8 fp16; the C probe passes at FP16 tolerance `0.02` with max abs error `0.0150146` across `1x5120` and larger rows. Serving overlay `rccl_ar_bias_plus_mutable_rowpar_20260608` did hit the `path=rccl` custom op at decode shapes `(1,5120)`, `(2,5120)`, `(4,5120)`, etc., and strict output stayed valid. Performance regressed: `.20` full run `qwen36_27b_decode_tiers_rocm72_mutable_plus_rccl_ar_bias_fulltiers_h20_20260608_host20_20260608_1156_ar_bias_plus_mutable_fulltiers_h20` produced `c1_10000` `49.809 TPS`, and repeat `..._repeat_h20_...` produced `49.365 TPS`, versus the current `.20` mutable/interleaved winner band around `53.6-54.0 TPS`. Do not keep debugging this as a gate path unless RCCL-level profiling shows a way to make the acc path faster than generic allreduce plus existing fused consumers.
 117. `max_num_seqs=8` is rejected for the current ROCm 7.2 mutable RowParallel + interleaved SwiGLU dense winner despite a valid patient cold start. Host `.30` maxseq8 was slightly above its same-family maxseq4 repeat (`54.018` strict c1, `54.635` c1_2000, `51.917` c1_10000), so `.20` was retested with patience through O3 compile, graph capture, and uncapped strict thinking. The `.20` run `qwen36_27b_decode_tiers_rocm72_mutable_rowpar_info_async_interleaved_swiglu_maxseq8_h20_20260608_host20_20260608_222059` completed cleanly but landed at strict c1 `55.679`, c1_2000 `56.724`, and c1_10000 `53.799`, below the maxseq4 `.20` repeat `56.214` / `56.906` / `54.012`. Keep `max_num_seqs=4` in the dense decode winner envelope. `max_num_seqs=1` remains a hard config rejection on this hybrid attention/mamba stack because KV-cache profiling hits the layout ambiguity assertion for shape `[2, 2, 400, 1, 256]`.
@@ -3902,7 +3920,7 @@ Decision:
      regressing wider rows (`16x5120+`). Clean serving repeated on `.20` at
      `c1_128/c1_2000/c1_10000 = 61.252/62.236/58.780` backend TPS and on
      `.30` at `61.000/61.907/58.226`. This is the current dense decode
-     milestone but not gate clear. The `.10` repeat was valid but slower
+     milestone but not promoted for the pre-release dense gate. The `.10` repeat was valid but slower
      (`58.831/57.446/53.301`). Arbitrary 3-child/asymmetric tree strings are
      unsafe for serving: ternary and pair-aware hand trees hung direct replay
      with no rank rows and were killed. Binary pair-aware variants were exact
@@ -3997,7 +4015,7 @@ Decision:
      serving lane on binary-fan alone. Consider it only as a component inside a
      larger singlework/coalescing source patch.
 317. Combining binary-fan2 with the prior singlework/LL16/prims-inline branch
-     produces a `.30` sustained decode milestone but not a gate clear. The
+     produces a `.30` pre-release sustained decode milestone. The
      temporary patch series applied
      `rccl_721_gfx906_tree_ll_singlework_ll_lines16_primsll_inline_20260611.patch`
      plus the binary-fan insertion. Direct `.30` replay versus the prior
@@ -4183,7 +4201,7 @@ Decision:
      `0.041323/0.054149/0.084847/0.138599/0.258125/0.318109/0.497547`.
      More broadcast threads are not the answer; the default 2/2 split remains
      the local best allocation until the underlying dataflow changes.
-331. Generic4 internal unroll lowering is closed on the current high-water
+331. Generic4 in-kernel unroll lowering is closed on the current high-water
      branch. The `Generic4 -> Unroll2` after-patch built and replayed
      correctly on `.20`, but it only tied the current floor:
      `0.030703/0.037841/0.052573/0.088071/0.161042/0.196171/0.303944`
@@ -4191,7 +4209,7 @@ Decision:
      `0.030700/0.037917/0.052564/0.088060/0.160930/0.196101/0.304225`.
      The `Generic4 -> Unroll1` after-patch built and replayed correctly on
      `.30`, but it regressed the hottest row from `0.030711` to
-     `0.041794 ms`. Simple internal unroll retuning is therefore not a
+     `0.041794 ms`. Simple in-kernel unroll retuning is therefore not a
      promotion path; the remaining dense gate work must change collective
      dataflow, public collective count, or launch grouping/coalescing.
 332. Grouped RowParallel scale evidence changes the primary source target from
@@ -4224,7 +4242,7 @@ Decision:
      sidecar against the exact high-water overlay. New harness
      `rccl_devcomm_channel_probe_20260612.cpp` and runner
      `run_rccl_devcomm_channel_probe_20260612.sh` compile against the built
-     overlay's generated hipified internal headers, initialize an 8-rank
+     overlay's generated hipified RCCL headers, initialize an 8-rank
      communicator, run one exact `1x5120` fp16 allreduce, then launch a device
      kernel that reads `comm->devComm` as `ncclDevCommAndChannels`. Both `.20`
      and `.30` passed with rank/world matches, visible ring/tree metadata, and
@@ -4453,7 +4471,7 @@ Decision:
      `runs/rccl_persistent_tree_ll_worker_host20_persistent_nw4_h20_repeat_20260612_182721`,
      and
      `runs/rccl_persistent_tree_ll_worker_host30_persistent_nw4_h30_repeat_20260612_182721`.
-     This is not a dense gate clear, but it is now the first exact persistent
+     This is superseded historical dense source evidence, but it is now the first exact persistent
      collective substrate that beats the public `1x5120` graph comparator on
      the good `.20/.30` topology. The next implementation question is serving
      integration for fixed-shape RowParallel decode allreduces, not more
@@ -4701,7 +4719,7 @@ Decision:
      enqueue path, or a legal graph-level reduction-count change.
 367. Role-specializing the sidecar Tree/LL primitive by fixed tree arity is an
      exact microbench milestone but not a serving breakthrough. The throwaway
-     candidate narrowed each rank to the actual root/leaf/internal reduce and
+     candidate narrowed each rank to the actual root/leaf/depth-1 reduce and
      broadcast fan shape while keeping the promoted three-channel descriptor
      and `nWarps=4` / `block_threads=256`. Repeat graph replay improved `.20`
      from `0.0294769` to `0.0293125 ms/call` and `.30` from `0.0295417` to
@@ -5351,8 +5369,9 @@ Decision:
      complete `(channel, op_count, work_count)` groups. All steady gate-region
      launches were `work_count=1`; `work_count=8/4/2` only appeared in the
      early graph/warmup op-count ranges. This keeps the `.20`
-     `62.806/63.807/60.209` ladder as the latest meaningful high-water, but it
-     is not a gate clear. To clear dense c1 decode, source work must make the
+     `62.806/63.807/60.209` ladder as a meaningful pre-release high-water, but it
+     was later superseded by the 2026-06-20 ROCm7.2 Dense/MoE validation. At this
+     pre-release point, source work still needed to make the
      strict c1 graph issue fewer or fused steady allreduces, not merely widen a
      runtime path that the size-1 decode graph does not call.
 411. Launch-bounds specialization is a useful compiler-resource diagnostic,
@@ -5401,7 +5420,7 @@ Decision:
      target from generic descriptor tuning to attention RowParallel
      arrival/scheduling or graph-native collective boundary work.
 415. Single-call-site primitive bypass is the latest narrow `.20` high-water,
-     but not a gate clear. Added guarded sidecar bypass controls to the
+     but only as a pre-2026-06-20 narrow high-water. Added guarded sidecar bypass controls to the
      kind-route overlay so selected captured nodes can return `False` and use
      the existing PyNccl/RCCL public allreduce path while preserving the global
      launch sequence. Broad even-attention bypass is rejected (`.20` strict c1
@@ -5422,8 +5441,9 @@ Decision:
      `61.334`. The new lesson is precise: one pathological captured attention
      node can be moved without breaking O3 graph capture, but public RCCL is
      too expensive for broad, sparse top-N, or host-local singleton expansion.
-     Continue with sidecar/RCCL-boundary work on the worst attention node; the
-     dense gate remains open.
+     Continue with sidecar/RCCL-boundary work on the worst attention node; this
+     pre-release branch still had an open dense status before the later
+     2026-06-20 ROCm7.2 Dense/MoE validation.
 416. Exact alternate-descriptor routing does not explain the single-node
      `1664` win. Built exact `1792/1664/1664` sidecar variants for selected
      captured call sites and strict-smoked them after the public-bypass
@@ -5563,7 +5583,7 @@ Decision:
      active sidecar roots `{0:0, 1:2, 2:4}` with root p99 only `728` ticks,
      while leaf depth-2 and depth-3 roles owned the long run-wall cohorts.
      Logical device `7` is leaf on all active sidecar channels and dominates
-     max-run ownership, with device `6` also contributing as leaf/internal.
+     max-run ownership, with device `6` also contributing as leaf/depth-1.
      This is a source/diagnostic breakthrough because it rules out more
      root-only scheduling work. The direct sidecar leaf-up/down follow-up was
      exact and graph-safe, but rejected in serving on `.30` at `61.448`
@@ -5653,9 +5673,9 @@ Decision:
      block-level producer-ready spin-barrier fusion; any remaining fusion path
      must overlap below the current block/channel granularity or remove
      captured launch count.
-436. Targeted device-7-internal Tree/LL topology is closed as a whole-tree
+436. Targeted device-7-depth1 Tree/LL topology is closed as a whole-tree
      scheduling fix. Swapping labels in the balanced `RCCL_TREES` shape so
-     logical device `7` becomes a depth-1 internal node on active sidecar
+     logical device `7` becomes a depth-1 node on active sidecar
      channels `0-2` gave exact and fast direct component timing (`.20`
      `0.072494`, `.30` `0.070809 ms/call`), but strict public1664 serving did
      not promote: `.20` reached only `62.536` backend TPS versus the
@@ -5664,11 +5684,11 @@ Decision:
      next source work needs a lower-level sidecar primitive schedule,
      chunk/LL-line overlap, or graph-native RowParallel launch-count
      reduction.
-437. The device-7-internal wall-clock follow-up explains why that topology did
+437. The device-7-depth1 wall-clock follow-up explains why that topology did
      not promote. The corrected `.20` trace loaded `9,247,824` sidecar entries
      and `1,135,513` complete cohorts after graceful flush. Arrival p99
      improved to `888` ticks, but run-wall tail stayed high (`1008` ticks
-     p99), and max-run ownership shifted to internal-node work on devices `6`
+     p99), and max-run ownership shifted to depth-1-node work on devices `6`
      and `7` instead of vanishing. This reinforces that the gate is below
      whole-tree rank assignment: the next real source target is the sidecar
      primitive schedule, chunk/LL-line overlap, or graph-native RowParallel
@@ -6005,3 +6025,36 @@ Decision:
      `0.056179/0.055990`. Keep the normal low-then-high two-`u64` order; the
      remaining LL broadcast first-read tail needs a different Tree/LL
      primitive or RowParallel boundary/count reduction.
+468. The 2026-06-20 ROCm7.2 Dense/MoE runner supersedes the pre-release dense
+     open status. `qwen36-gfx906/README.md` records deploy script SHA256
+     `c8e8ef99ec39a0232f74a7bd0fe0efe0316c0e0678992a1c104eff3c05513c9a`,
+     pushed image
+     `joe2gaan/localaiservers:qwen36-gfx906-rocm72-dense-moe-runtime-archive-0a2dbd6b7f0b`,
+     Docker Hub manifest digest
+     `sha256:8c380e9ca48943d8617de5a2e2eaf32a26dcc2c341e4b4f4f8c45294a72b8f1e`,
+     deterministic archive SHA256
+     `5316c3f6202fcb77987dabbf1e14e7369441ea127efed4f6def30259a09cfcb9`,
+     image manifest
+     `sha256:7dadf367ec86fe2eb1dc22fb3af3002c3514514833b52329595a26e7a80ae247`,
+     config
+     `sha256:45decd88eb7c10c0408327438e07c2a655e45cc7534f8b662e5c4089a6b88568`,
+     `created 2025-11-24T16:00:00Z`, and `layers 19`. At
+     `MAX_MODEL_LEN=131072` with eight pre-measure warmups,
+     `dense27b_tp8_fullbar_p2pon` on `.20` reached strict backend TPS
+     `69.514`, `c1_2000` backend TPS `70.347`, and `c1_10000` backend TPS
+     `66.069`; note `strict gate valid`. `moe35b_tp8_fullbar_p2pon` on `.30`
+     reached strict backend TPS `94.907`, `c1_2000` backend TPS `97.028`, and
+     `c1_10000` backend TPS `91.290`; note `strict gate valid`.
+     `moe35b_tp4_fullbar_p2pon` on `.30` had strict `invalid/runaway`,
+     `c1_2000` backend TPS `116.146`, and `c1_10000` backend TPS `109.283`;
+     note `uncapped strict prompt did not stop after >60K tokens`. The same
+     ROCm7.2 experimental release image covers dense and MoE through
+     model-specific env and overlays. Docker Hub remains an evergreen artifact
+     distribution channel; TPS claims should stay in GitHub Releases,
+     repository docs, and benchmark artifacts. The full-BAR/P2P-on lane
+     required official AMD VBIOS standardization, not modified BIOS images,
+     plus amdgpu source patching. This is not a user instruction to flash
+     cards; the public repo does not redistribute BIOS binaries or imply
+     warranty or certification. v0.1.0 remains the older published GitHub Release
+     boundary; this entry is post-v0.1 main-branch validation until a separate
+     release is published.

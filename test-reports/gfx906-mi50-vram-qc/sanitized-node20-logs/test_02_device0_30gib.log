@@ -2,7 +2,7 @@ GFX906 / MI50 32GB VRAM QC Field Check
 
 Purpose: public education and best-effort hardware verification methodology.
 Safety: allocates/checks transient GPU memory through HIP only.
-This is not certification, warranty testing, resale support, or official validation.
+This is not a certification, warranty, formal assurance program, support contract, sales support, or official validation.
 
 == Tool configuration ==
 hipcc: /usr/bin/hipcc

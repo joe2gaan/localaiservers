@@ -28,5 +28,5 @@ Attach only redacted logs or screenshots.
 
 ## Notes
 
-Do not include private hostnames, private IPs, private paths, secrets, payment data,
-participant data, or supplier details.
+Do not include private hostnames, private IPs, private paths, credential material,
+payment data, participant data, or supplier details.

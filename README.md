@@ -5,7 +5,7 @@ infrastructure for locally hosted AI systems.
 
 LocalAIServers preserves affordable AI research infrastructure by maintaining a
 controlled air-gapped GFX906 compute site for benchmarking, hardware verification, and
-reproducibility work. The cluster is not a public login service. Public benefit is
+reproducibility work. The cluster is not an interactive-use service. Public benefit is
 delivered through published outputs: open-source deployment scripts, reproducible
 benchmark reports, QC methods, source-level findings, hardware verification standards,
 and educational documentation.
@@ -39,10 +39,10 @@ Stable benchmark artifact:
 ## Controlled Air-Gapped Compute Model
 
 The LocalAIServers GFX906 cluster is controlled research and verification
-infrastructure, not an open public login environment. It is used to validate hardware,
+infrastructure, not an interactive host environment. It is used to validate hardware,
 reproduce AI workloads, test source/runtime changes, and publish public outputs. This
 allows the public to benefit from the methods, code, benchmark reports, QC standards,
-and findings without requiring direct access to the cluster.
+and findings without requiring host access.
 
 See [docs/controlled-air-gapped-compute.md](docs/controlled-air-gapped-compute.md).
 
@@ -69,7 +69,10 @@ Public benefit is delivered through:
 - Deployment scripts.
 - Docker/runtime details.
 - Reproducible benchmark methods.
-- QC and hardware verification methods.
+- QC methodology:
+  [docs/qc-methodology.md](docs/qc-methodology.md).
+- Hardware verification standards:
+  [docs/hardware-verification-standards.md](docs/hardware-verification-standards.md).
 - Hardware QC field-check tooling:
   [tools/gfx906-mi50-vram-qc](tools/gfx906-mi50-vram-qc/).
 - Source-kernel inventories.
@@ -94,6 +97,21 @@ See [docs/funder-proof-index.md](docs/funder-proof-index.md) for the reviewer-or
 map of benchmark proof, canonical deployment artifacts, source-level GFX906
 preservation work, experimental methodology, QC methods, and the public-output model.
 
+## Public Proof Links
+
+- Canonical technical deployment package:
+  [qwen36-gfx906/README.md](qwen36-gfx906/README.md).
+- Published GitHub Releases:
+  [https://github.com/joe2gaan/localaiservers/releases](https://github.com/joe2gaan/localaiservers/releases).
+- Funder proof map:
+  [docs/funder-proof-index.md](docs/funder-proof-index.md).
+- QC methodology:
+  [docs/qc-methodology.md](docs/qc-methodology.md).
+- Hardware verification standards:
+  [docs/hardware-verification-standards.md](docs/hardware-verification-standards.md).
+- GFX906 / MI50 VRAM QC field-check tool:
+  [tools/gfx906-mi50-vram-qc](tools/gfx906-mi50-vram-qc/).
+
 ## How To Contribute
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).
@@ -104,18 +122,8 @@ See [CITATION.cff](CITATION.cff).
 
 ## License
 
-Code is licensed under [Apache-2.0](LICENSE). Documentation licensing still has a
-human-review placeholder at [docs/LICENSE-DOCS.md](docs/LICENSE-DOCS.md), and the
-recommended long-term documentation/data license is summarized in
-[docs/license-recommendation.md](docs/license-recommendation.md).
-
-## Funding and Program Boundaries
-
-LocalAIServers is an IRS-recognized 501(c)(3) public charity. Charitable donations support public documentation, open-source maintenance, QC methodology, benchmark reporting, reproducibility workflows, and public education around locally hosted AI systems.
-
-Donations do not provide hardware, preferential treatment, discounts, procurement access, or private benefits.
-
-See [docs/funding.md](docs/funding.md) and [docs/program-boundaries.md](docs/program-boundaries.md).
+Code is licensed under [Apache-2.0](LICENSE). Documentation licensing has a public
+notice at [docs/LICENSE-DOCS.md](docs/LICENSE-DOCS.md).
 
 ## Existing Qwen3.6 Reproducibility Instructions
 

@@ -29,7 +29,7 @@ not sufficient evidence.
 ## Visual And Physical Inspection
 
 Public reporting may describe inspection categories, but should not publish private
-sourcing or fulfillment details. Useful categories include visible damage, cooling
+sourcing or logistics details. Useful categories include visible damage, cooling
 condition, connector condition, and whether the device can be seated and powered safely.
 
 ## VRAM Detection
@@ -59,8 +59,8 @@ runtime path.
 The [GFX906 / MI50 32GB VRAM QC field-check tool](../tools/gfx906-mi50-vram-qc/)
 is a maintained example of practical public QC methodology. It checks ROCm/HIP
 visibility, kernel-reported VRAM totals, and a large transient VRAM allocation/check.
-It is an educational diagnostic, not certification, warranty evidence, procurement
-support, resale support, or an official AMD validation.
+It is an educational diagnostic, not a certification, warranty, formal assurance
+program, support contract, buying/selling workflow, or official AMD validation.
 
 ## Benchmark Reproducibility
 
@@ -84,6 +84,5 @@ information.
 
 ## Limitations
 
-QC cannot provide a warranty, guarantee future compatibility, or prove all possible
-workloads. It can reduce avoidable risk by documenting measured evidence and known
-failure classes.
+QC cannot guarantee future compatibility or prove all possible workloads. It can reduce
+avoidable risk by documenting measured evidence and known failure classes.

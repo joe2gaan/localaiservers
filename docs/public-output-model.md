@@ -1,6 +1,6 @@
 # Public Output Model
 
-LocalAIServers does not need to provide public login access to create public benefit.
+LocalAIServers does not need to provide interactive cluster access to create public benefit.
 The public benefit comes from reproducible methods, published results, source-level
 findings, and verification standards.
 
@@ -9,7 +9,7 @@ findings, and verification standards.
 Controlled infrastructure lets LocalAIServers preserve reproducibility, hardware
 custody, known software images, and repeatable validation conditions. That matters when
 the goal is to publish trustworthy methods and benchmark evidence rather than operate a
-public compute service.
+hosted compute service.
 
 ## What Outputs Are Public
 

@@ -14,17 +14,17 @@ or issue context that supports the change.
       hardware verification, or source-level GFX906 understanding.
 - [ ] Does not imply direct public machine access or public cloud hosting.
 - [ ] Does not claim official ROCm support or AMD endorsement.
-- [ ] Does not add unsupported benchmark, hardware inventory, funding, or partnership
+- [ ] Does not add unsupported benchmark, hardware inventory, or third-party endorsement
       claims.
 
 ## Privacy Check
 
-- [ ] No secrets, tokens, private keys, or credentials.
+- [ ] No credential material, tokens, or private authentication data.
 - [ ] No participant, payment, shipping, supplier, or private operational data.
 - [ ] No private hostnames, private IPs, home-directory paths, or private logs.
 - [ ] No legal filing documents, filing screenshots, addresses, or tax identifiers.
-- [ ] No donation wording that implies hardware, discounts, procurement access,
-      preferential treatment, or private benefits.
+- [ ] No wording that offers hardware, discounts, purchasing access, preferential
+      treatment, or private benefits.
 
 ## Checks Run
 

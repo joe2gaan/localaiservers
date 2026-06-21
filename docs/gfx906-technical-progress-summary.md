@@ -12,32 +12,47 @@ rejected paths, source milestones, and promotion methodology.
 ## Current Proof Points
 
 - [qwen36-gfx906/README.md](../qwen36-gfx906/README.md) documents the canonical
-  Qwen3.6-35B-A3B TP4 deployment package.
-- The canonical package includes Docker image identity, Docker Hub digest, archive
-  hashes, source pins, deploy commands, run commands, benchmark command, and
-  limitations.
+  2026-06-20 ROCm7.2 Dense/MoE runner on current main.
+- The canonical package includes Docker image identity, Docker Hub digest,
+  archive hashes, source pins, deploy commands, run commands, benchmark command,
+  active profile names, and limitations.
+- v0.1.0 remains the older published GitHub Release boundary. The dense 27B and
+  MoE values below are post-v0.1 main-branch validation notes until a separate
+  release is published. GitHub Releases remain canonical for published claim
+  boundaries.
 - [gfx906-source-kernel-inventory-20260612.md](gfx906-source-kernel-inventory-20260612.md)
   records source-level kernel, graph-runtime, RowParallel, RCCL/NCCL, MoE, dense,
   prefill, and diagnostic lanes.
 - [gfx906-key-learnings-20260606.md](gfx906-key-learnings-20260606.md) records durable
   promotion rules, rejected paths, diagnostic limitations, and current technical
   direction.
-- The source inventory reports that the MoE 35B TP4 publication gate is cleared for the
-  C1 topk8 MoE fastpath stack, with the exact public runtime documented separately in
-  the canonical deployment package.
-- The dense 27B gate remains open. The source record describes the current dense work as
-  a RowParallel / RCCL or NCCL collective-boundary problem, especially around MLP/down
-  and repeated `1x5120` allreduce behavior.
-- The current documented dense source high-water is the graph-safe non-resident
-  sidecar Tree/LL allreduce runtime plus exact public-RCCL fallback for captured
-  attention `call_site=1664`, using the `2048/1536/1536` sidecar descriptor split. The
-  source inventory reports this as a serving milestone and current source high-water,
-  not a dense gate clear.
-- Current dense profiles are described as NCCL/RCCL dominated, with source notes
-  separating source milestones, serving milestones, active lanes, and rejected paths.
-- Earlier singlework/LL16/prims-inline RCCL work remains important source evidence, but
-  it is no longer the current best dense readout when compared with the latest
-  sidecar/public1664 source record.
+- The same ROCm7.2 experimental release image covers both active contracts with
+  model-specific env and overlays:
+  `joe2gaan/localaiservers:qwen36-gfx906-rocm72-dense-moe-runtime-archive-0a2dbd6b7f0b`,
+  Docker Hub manifest digest
+  `sha256:8c380e9ca48943d8617de5a2e2eaf32a26dcc2c341e4b4f4f8c45294a72b8f1e`.
+  Docker Hub remains an evergreen artifact distribution channel; TPS claims
+  should stay in GitHub Releases, repository docs, and benchmark artifacts.
+- Dense 27B TP8 clears the ai-info 10K gate in post-v0.1 validation at
+  `MAX_MODEL_LEN=131072` with eight pre-measure warmups: strict backend TPS
+  `69.514`, `c1_2000` backend TPS `70.347`, and `c1_10000` backend TPS
+  `66.069`; note `strict gate valid`.
+- Qwen3.6 35B-A3B MoE TP8 establishes the current full-BAR/P2P-on bar at
+  `MAX_MODEL_LEN=131072` with eight pre-measure warmups: strict backend TPS
+  `94.907`, `c1_2000` backend TPS `97.028`, and `c1_10000` backend TPS
+  `91.290`; note `strict gate valid`.
+- Qwen3.6 35B-A3B MoE TP4 remains valuable as a capped warm-performance lane:
+  strict is `invalid/runaway`, `c1_2000` backend TPS is `116.146`, and
+  `c1_10000` backend TPS is `109.283`; note `uncapped strict prompt did not
+  stop after >60K tokens`.
+- Platform remediation for the current full-BAR/P2P-on lane required official
+  AMD VBIOS standardization, not modified BIOS images, plus amdgpu source
+  patching. This is not a user instruction to flash cards; the public repo does
+  not redistribute BIOS binaries or imply warranty or certification.
+- Earlier singlework/LL16/prims-inline RCCL, RowParallel, sidecar Tree/LL, and
+  call-site routing work remains important source evidence, but those entries
+  are superseded for current dense 27B status by the 2026-06-20 ROCm7.2
+  Dense/MoE runner.
 - Negative results are preserved as reusable public evidence so other community
   builders do not repeat already-tested paths.
 
@@ -57,16 +72,16 @@ trustworthy.
 
 Current roadmap direction from the source inventory and key-learning record:
 
-- Dense 27B work remains focused on RowParallel collective-boundary reduction or
-  acceleration, including non-resident sidecar work, public-RCCL fallback at selected
-  captured call sites, RCCL/Tree/LL source work, call-site routing, and graph-native
-  boundary changes.
-- MoE work should protect and document the cleared TP4 publication path while testing
-  source changes that reduce communication count without changing semantics.
+- Dense 27B work should now protect the post-v0.1 gate-clear path, keep the
+  `MAX_MODEL_LEN=131072` serving contract intact, and continue source cleanup
+  around RowParallel, sidecar Tree/LL, RCCL/Tree/LL, call-site routing, and
+  graph-native boundary changes.
+- MoE work should protect the strict-valid TP8 full-BAR/P2P-on bar and keep TP4
+  labeled as capped-only until the uncapped strict runaway behavior is resolved.
 - Prefill and concurrency work should remain separate from single-request c1 decode
   claims.
 - Consumer-only cleanup is useful as component evidence but is not treated as a
-  gate-clear path by itself.
+  release-promotion path by itself.
 - Grouped or coalesced collectives are useful lower-bound evidence but are not treated
   as legal serving results unless graph semantics support them.
 - Promotion evidence should come from optimized serving paths with backend vLLM metric

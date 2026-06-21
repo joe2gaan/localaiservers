@@ -1,8 +1,8 @@
 # Code of Conduct
 
 LocalAIServers aims to keep public collaboration respectful, technical, and useful for
-students, educators, independent researchers, community builders, donors, and grant
-reviewers.
+students, educators, independent researchers, community builders, technical reviewers,
+and contributors.
 
 ## Expected Behavior
 
@@ -15,10 +15,10 @@ reviewers.
 ## Unacceptable Behavior
 
 - Harassment, threats, personal attacks, or discriminatory language.
-- Posting secrets, participant data, payment data, private host details, private logs,
-  or personal information.
-- Presenting private benefits, hardware access, or program participation as donation
-  rewards.
+- Posting credential material, participant data, payment data, private host details,
+  private logs, or personal information.
+- Offering private benefits, hardware access, or program participation through public
+  collaboration channels.
 - Repeatedly derailing technical or public-benefit discussions.
 
 ## Enforcement

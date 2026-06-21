@@ -7,7 +7,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Do not include secrets, private hostnames, private IPs, payment data, participant data, supplier data, or unredacted logs.
+        Do not include credential material, private hostnames, private IPs, payment data, participant data, supplier data, or unredacted logs.
   - type: textarea
     id: summary
     attributes:
@@ -41,6 +41,6 @@ body:
     id: logs
     attributes:
       label: Redacted logs or screenshots
-      description: Attach only after removing secrets and private data.
+      description: Attach only after removing credential material and private data.
     validations:
       required: false

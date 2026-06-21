@@ -3,7 +3,7 @@
 LocalAIServers is an IRS-recognized 501(c)(3) public charity focused on public education
 around locally hosted AI servers. The public work in this repository helps people learn
 how local AI infrastructure is deployed, verified, benchmarked, and maintained without
-requiring enterprise budgets.
+requiring enterprise-scale infrastructure.
 
 ## Public Education
 
@@ -54,7 +54,6 @@ help separate hardware issues, runtime issues, and documentation gaps.
 
 ## Open-Source Maintenance
 
-Donations and grants can support maintenance of deployment notes, issue triage,
-documentation cleanup, benchmark templates, QC methodology, and public education
-material. Maintenance work should stay public-benefit focused and avoid private
-operational data.
+Open-source maintenance includes deployment notes, issue triage, documentation cleanup,
+benchmark templates, QC methodology, and public education material. Maintenance work
+should stay public-benefit focused and avoid private operational data.

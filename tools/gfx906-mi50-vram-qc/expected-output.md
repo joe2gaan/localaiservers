@@ -11,7 +11,7 @@ GFX906 / MI50 32GB VRAM QC Field Check
 
 Purpose: public education and best-effort hardware verification methodology.
 Safety: allocates/checks transient GPU memory through HIP only.
-This is not certification, warranty testing, resale support, or official validation.
+This is not a certification, warranty, formal assurance program, support contract, sales support, or official validation.
 
 == Tool configuration ==
 hipcc: /opt/rocm/bin/hipcc
@@ -54,7 +54,7 @@ GFX906 / MI50 32GB VRAM QC Field Check
 
 Purpose: public education and best-effort hardware verification methodology.
 Safety: allocates/checks transient GPU memory through HIP only.
-This is not certification, warranty testing, resale support, or official validation.
+This is not a certification, warranty, formal assurance program, support contract, sales support, or official validation.
 
 == Tool configuration ==
 hipcc: /opt/rocm/bin/hipcc
@@ -175,8 +175,8 @@ PASS: selected device checks passed.
 
 This example was captured from the maintained repository tool on the `.20` GFX906
 server and sanitized before publication. It is an educational example only. It is not
-certification, warranty evidence, official AMD validation, procurement support, resale
-support, or a guarantee of AI workload performance.
+a formal assurance program, support contract, official AMD validation, buying/selling
+workflow, or a guarantee of AI workload performance.
 
 Device 0 30 GiB excerpt:
 
@@ -224,6 +224,6 @@ region and pass a deterministic fill/check pass during this run.
 causes include insufficient free VRAM, missing ROCm/HIP setup, driver instability,
 device reset, or memory errors.
 
-This output is educational diagnostic evidence only. It is not certification,
-warranty evidence, official AMD validation, a purchase recommendation, or proof of
-AI workload performance.
+This output is educational diagnostic evidence only. It is not a certification, warranty, formal assurance
+program, support contract, official AMD validation, buying/selling workflow, or proof
+of AI workload performance.

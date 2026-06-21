@@ -7,7 +7,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Do not include secrets, private hostnames, private IPs, payment data, participant data, supplier data, or unredacted logs.
+        Do not include credential material, private hostnames, private IPs, payment data, participant data, supplier data, or unredacted logs.
   - type: input
     id: page
     attributes:

@@ -4,8 +4,8 @@ Docs cleanup: typos, broken links, and wording consistency
 
 ## Context
 
-The repository now has public-benefit, funding, program-boundary, grant, communication,
-and technical runtime docs. Small cleanup contributions can improve readability and
+The repository now has public-benefit, communication, contributor, and technical runtime
+docs. Small cleanup contributions can improve readability and
 credibility.
 
 ## Desired Outcome

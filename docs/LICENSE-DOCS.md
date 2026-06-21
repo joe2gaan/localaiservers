@@ -1,10 +1,10 @@
-# Documentation License - Human Review Needed
+# Documentation License Notice
 
 The project intends for documentation in this repository to be reusable with attribution
 under a CC-BY-4.0-style license.
 
-This file is a plain-language placeholder for human legal review. It is not a substitute
-for the official Creative Commons legal code.
+This file is a plain-language public notice. It is not a substitute for the official
+Creative Commons legal code.
 
 ## Intended Documentation Permission
 
@@ -20,8 +20,8 @@ Suggested attribution:
 Based on LocalAIServers documentation, https://github.com/joe2gaan/localaiservers
 ```
 
-## Human Review Item
+## Future License File
 
-Before relying on this file as the final documentation license, replace it with a
-reviewed documentation license notice or a link to the official Creative Commons
-Attribution 4.0 International license text.
+A future repository update may replace this notice with a dedicated documentation
+license file or a link to the official Creative Commons Attribution 4.0 International
+license text.
