@@ -19,33 +19,29 @@ and educational documentation.
 - Hardware verification and QC methodology.
 - Educational documentation for locally hosted AI systems.
 
-## Published v0.1 Artifact
+## Published Releases
 
-The published v0.1 public artifact is the Qwen3.6 / GFX906 / MI50 TP4 runtime work:
+GitHub Releases are canonical for published release claim boundaries. Docker Hub
+remains an evergreen artifact distribution channel and should not be treated as
+the latest benchmark announcement. The canonical deployment and reproducibility
+package is [qwen36-gfx906/README.md](qwen36-gfx906/README.md).
 
-- Hardware target: 4x AMD Instinct MI50 32GB / GFX906.
-- Model: `Qwen/Qwen3.6-35B-A3B`.
-- Runtime: reproducible Docker/vLLM/ROCm deployment package.
-- Public benchmark summary: sustained 90+ TPS backend decode on the documented
-  fixed-token long-decode run, with a shorter fixed-token backend decode result over 100
-  TPS.
+- `v0.1.0-gfx906-qwen36-mi50`
+  - Qwen3.6 / GFX906 / MI50 TP4 reproducibility artifact.
+  - 90+ TPS sustained 10K backend decode publication baseline.
+  - Canonical reproduction package:
+    [qwen36-gfx906/README.md](qwen36-gfx906/README.md).
 
-GitHub Releases are canonical for published release claim boundaries, and v0.1.0
-remains the older published release. ROCm7.2 Dense/MoE validation notes are
-tracked in
-[docs/rocm72-dense-moe-active-contracts-20260620.md](docs/rocm72-dense-moe-active-contracts-20260620.md).
-Docker Hub remains an evergreen artifact distribution channel and should not be
-treated as the latest benchmark announcement.
-
-## Published v0.2 Artifact
-
-The published v0.2 ROCm7.2 Dense/MoE artifact covers the GFX906 active-contract
-dense 27B TP8 and Qwen3.6 35B-A3B MoE validation lanes documented in
-[docs/rocm72-dense-moe-active-contracts-20260620.md](docs/rocm72-dense-moe-active-contracts-20260620.md).
-Published claim boundaries remain canonical in
-[GitHub Releases](https://github.com/joe2gaan/localaiservers/releases), while
-Docker Hub remains an evergreen artifact distribution channel rather than the
-latest benchmark announcement.
+- `v0.2.0-gfx906-rocm72-dense-moe`
+  - ROCm7.2 Dense/MoE GFX906 active-contract release.
+  - Dense 27B TP8 clears the ai-info 10K gate at `66.069` backend TPS on
+    `c1_10000`.
+  - MoE TP8 strict-valid bar: `94.907` strict, `97.028` `c1_2000`, and
+    `91.290` `c1_10000` backend TPS.
+  - MoE TP4 has capped fixed-token results but is not a strict-valid
+    publication claim because of the uncapped strict prompt caveat.
+  - Active-contract notes:
+    [docs/rocm72-dense-moe-active-contracts-20260620.md](docs/rocm72-dense-moe-active-contracts-20260620.md).
 
 Canonical technical deployment package:
 [qwen36-gfx906/README.md](qwen36-gfx906/README.md)
@@ -144,10 +140,13 @@ See [CITATION.cff](CITATION.cff).
 Code is licensed under [Apache-2.0](LICENSE). Documentation licensing has a public
 notice at [docs/LICENSE-DOCS.md](docs/LICENSE-DOCS.md).
 
-## Existing Qwen3.6 Reproducibility Instructions
+## Canonical v0.1 Reproduction Instructions
 
 The canonical deployment package is [qwen36-gfx906/README.md](qwen36-gfx906/README.md).
-The root README preserves the existing quick-start instructions below for continuity.
+These commands preserve the published v0.1.0 TP4 runtime reproduction path. For
+v0.2.0 ROCm7.2 Dense/MoE release boundaries, use
+[GitHub Releases](https://github.com/joe2gaan/localaiservers/releases) and the
+[ROCm7.2 active-contract notes](docs/rocm72-dense-moe-active-contracts-20260620.md).
 
 The published v0.1 runtime target is:
 
