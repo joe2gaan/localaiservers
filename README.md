@@ -19,9 +19,9 @@ and educational documentation.
 - Hardware verification and QC methodology.
 - Educational documentation for locally hosted AI systems.
 
-## Current Flagship Artifact
+## Published v0.1 Artifact
 
-The current flagship public artifact is the Qwen3.6 / GFX906 / MI50 TP4 runtime work:
+The published v0.1 public artifact is the Qwen3.6 / GFX906 / MI50 TP4 runtime work:
 
 - Hardware target: 4x AMD Instinct MI50 32GB / GFX906.
 - Model: `Qwen/Qwen3.6-35B-A3B`.
@@ -29,6 +29,14 @@ The current flagship public artifact is the Qwen3.6 / GFX906 / MI50 TP4 runtime 
 - Public benchmark summary: sustained 90+ TPS backend decode on the documented
   fixed-token long-decode run, with a shorter fixed-token backend decode result over 100
   TPS.
+
+GitHub Releases are canonical for published release claim boundaries, and v0.1.0
+remains the older published release. Post-v0.1 ROCm7.2 Dense/MoE main-branch
+validation notes are tracked in
+[docs/rocm72-dense-moe-active-contracts-20260620.md](docs/rocm72-dense-moe-active-contracts-20260620.md);
+those values remain main-branch validation until a separate release is published.
+Docker Hub remains an evergreen artifact distribution channel and should not be
+treated as the latest benchmark announcement.
 
 Canonical technical deployment package:
 [qwen36-gfx906/README.md](qwen36-gfx906/README.md)
@@ -105,6 +113,8 @@ preservation work, experimental methodology, QC methods, and the public-output m
   [https://github.com/joe2gaan/localaiservers/releases](https://github.com/joe2gaan/localaiservers/releases).
 - Funder proof map:
   [docs/funder-proof-index.md](docs/funder-proof-index.md).
+- ROCm7.2 Dense/MoE active-contract notes:
+  [docs/rocm72-dense-moe-active-contracts-20260620.md](docs/rocm72-dense-moe-active-contracts-20260620.md).
 - QC methodology:
   [docs/qc-methodology.md](docs/qc-methodology.md).
 - Hardware verification standards:
@@ -130,7 +140,7 @@ notice at [docs/LICENSE-DOCS.md](docs/LICENSE-DOCS.md).
 The canonical deployment package is [qwen36-gfx906/README.md](qwen36-gfx906/README.md).
 The root README preserves the existing quick-start instructions below for continuity.
 
-The current public runtime target is:
+The published v0.1 runtime target is:
 
 ```text
 Model: Qwen/Qwen3.6-35B-A3B
