@@ -58,12 +58,13 @@ warmups:
 | --- | ---: | --- | ---: | ---: | ---: | --- |
 | `dense27b_tp8_fullbar_p2pon` | 8 | `.20` | `69.514` | `70.347` | `66.069` | strict gate valid |
 | `moe35b_tp8_fullbar_p2pon` | 8 | `.30` | `94.907` | `97.028` | `91.290` | strict gate valid |
-| `moe35b_tp4_fullbar_p2pon` | 4 | `.30` | invalid/runaway | `116.146` | `109.283` | uncapped strict prompt did not stop after >60K tokens |
+| `moe35b_tp4_fullbar_p2pon` | 4 | `.30` | initial caveat corrected below | `116.146` | `109.283` | release-time fixed-token result; post-v0.2 strict repeatability passed |
 
 Dense 27B TP8 therefore clears the ai-info 10K gate at the published v0.2.0
 release boundary. MoE TP8 is the current strict-valid Qwen3.6 35B-A3B
-full-BAR/P2P-on bar. MoE TP4 remains capped-only at the v0.2.0 release boundary
-because the release-time strict caveat was not promoted through a release update.
+full-BAR/P2P-on bar. The MoE TP4 release-time fixed-token result remains
+`109.283` c1_10000 backend TPS, and the follow-up below corrects the earlier
+strict-runaway caveat.
 
 ## Post-v0.2 TP4 Strict Repeatability Follow-Up
 
@@ -78,8 +79,7 @@ TP4 strict runaway did not reproduce in the follow-up study under the native
 - `.30` fixed sanity: c1_2000 `115.770`, c1_10000 `108.950`.
 
 This is post-v0.2 validation evidence. It does not rewrite the v0.2.0 release
-boundary. Formal release claims should change only through a separate
-docs/release update.
+boundary. No code, Docker image, tag, or runtime artifact changed.
 
 ## Platform Preconditions
 

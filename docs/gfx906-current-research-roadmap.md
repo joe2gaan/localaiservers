@@ -2,7 +2,8 @@
 
 ## Dense 27B Status
 
-Dense 27B clears the ai-info 10K gate in post-v0.1 main-branch validation.
+Dense 27B clears the ai-info 10K gate at the published v0.2.0 ROCm7.2
+Dense/MoE release boundary.
 
 [qwen36-gfx906/README.md](../qwen36-gfx906/README.md) is the authoritative latest
 technical source. It records the 2026-06-20 ROCm7.2 Dense/MoE runner at
@@ -11,9 +12,9 @@ technical source. It records the 2026-06-20 ROCm7.2 Dense/MoE runner at
 backend TPS `70.347`, and `c1_10000` backend TPS `66.069`; note `strict gate
 valid`.
 
-v0.1.0 remains the older published GitHub Release boundary. These dense 27B numbers
-are post-v0.1 main-branch validation notes until a separate release is published.
-GitHub Releases remain canonical for published claim boundaries.
+v0.1.0 remains the older published GitHub Release boundary. v0.2.0 is the
+published ROCm7.2 Dense/MoE release boundary. GitHub Releases remain canonical
+for published claim boundaries.
 
 The next dense work is to protect this usable 128K-context contract, improve margin,
 and keep reducing RowParallel / RCCL / NCCL collective-boundary cost without breaking
@@ -29,10 +30,13 @@ The current TP8 active contract is `moe35b_tp8_fullbar_p2pon` on `.30` at
 `c1_2000` backend TPS `97.028`, and `c1_10000` backend TPS `91.290`; note `strict
 gate valid`.
 
-The TP4 lane is `moe35b_tp4_fullbar_p2pon` on `.30`: strict is `invalid/runaway`,
-`c1_2000` backend TPS is `116.146`, and `c1_10000` backend TPS is `109.283`; note
-`uncapped strict prompt did not stop after >60K tokens`. Treat TP4 as capped-only
-until a strict-valid run is produced.
+The TP4 lane is `moe35b_tp4_fullbar_p2pon` on `.30`: the v0.2.0 release-time
+fixed-token result is `c1_2000` backend TPS `116.146` and `c1_10000` backend
+TPS `109.283`. A follow-up post-v0.2 repeatability study found that the earlier
+TP4 strict runaway did not reproduce: `6/6` strict repeats passed across `.20`
+and `.30`, all with `finish_reason=stop` and `qwen_gate_valid=true`, with
+strict backend TPS from `113.196` to `115.995`. No code, Docker image, tag, or
+runtime artifact changed.
 
 The same ROCm7.2 experimental release image covers dense and MoE with model-specific
 env and overlays:
