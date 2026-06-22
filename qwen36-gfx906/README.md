@@ -57,7 +57,18 @@ warmups:
 | --- | --- | ---: | ---: | ---: | --- |
 | `dense27b_tp8_fullbar_p2pon` | `.20` | `69.514` | `70.347` | `66.069` | strict gate valid |
 | `moe35b_tp8_fullbar_p2pon` | `.30` | `94.907` | `97.028` | `91.290` | strict gate valid |
-| `moe35b_tp4_fullbar_p2pon` | `.30` | invalid/runaway | `116.146` | `109.283` | uncapped strict prompt did not stop after >60K tokens |
+| `moe35b_tp4_fullbar_p2pon` | `.30` | corrected post-v0.2: `113.196`-`115.995` repeatability range | `116.146` | `109.283` | initial strict caveat did not reproduce in follow-up |
+
+The MoE TP8 fixed-token values above are release-time measured points, not
+repeatability floors. A 2026-06-22 public deploy reproduction check reproduced
+the MoE TP8 strict-valid bar on `.20`, while the fixed-token tiers repeated
+lower than the release-time high point.
+
+Post-v0.2 TP4 correction: a follow-up repeatability study using the same
+published image and native `moe35b_tp4_fullbar_p2pon` profile passed `6/6`
+strict repeats across `.20` and `.30`, with every run ending
+`finish_reason=stop` and `qwen_gate_valid=true`. No code, Docker image, model
+package, tag, or runtime artifact changed.
 
 Use a prebuilt image:
 
@@ -458,16 +469,17 @@ To verify performance after the service is ready:
 ```bash
 ./smoke-test.sh
 
-WARMUP_REQUESTS=8 \
-WARMUP_TOKENS=2000 \
-CASES=c1_2000:2000,c1_10000:10000 \
-python3 ./run_qwen36_live_tps.py
+./run_v02_profile_benchmark.sh
 ```
 
-The TPS harness auto-detects the served model from `/v1/models`, so the same command
-works for `dense27b_tp8_fullbar_p2pon`, `moe35b_tp8_fullbar_p2pon`, and
-`moe35b_tp4_fullbar_p2pon`. Historical fixed-token single-request results on the
-v0.1.0 4x MI50 32GB gfx906 lane were:
+The v0.2 profile benchmark runs eight 2000-token pre-measure warmups, the
+uncapped `c1_128` strict prompt, `c1_2000`, and `c1_10000` through the bundled
+begin-think proxy. It works for `dense27b_tp8_fullbar_p2pon`,
+`moe35b_tp8_fullbar_p2pon`, and `moe35b_tp4_fullbar_p2pon`.
+
+The older `run_qwen36_live_tps.py` helper is retained for legacy fixed-token
+checks. Historical fixed-token single-request results on the v0.1.0 4x MI50
+32GB gfx906 lane were:
 
 - `c1_2000`: 101.47 TPS backend decode
 - `c1_10000`: 95.66 TPS backend decode, 95.36 client wall TPS

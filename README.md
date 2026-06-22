@@ -50,6 +50,14 @@ active-contract release.
 TPS is `94.907`. MoE TP4 `109.283` is a capped fixed-token `c1_10000` result,
 not a strict TPS value.
 
+2026-06-22 public deploy reproduction note: the current public deploy path
+reproduced the Dense TP8 10K gate clear, reproduced the corrected MoE TP4
+strict/fixed-token band, and reproduced the MoE TP8 strict-valid bar on `.20`.
+MoE TP8 fixed-token tiers repeated lower than the release-time high point, so
+those fixed-token values should be read as measured release points rather than
+repeatability floors. The report is in
+[test-reports/qwen36-gfx906-v02-reproduction-20260622/](test-reports/qwen36-gfx906-v02-reproduction-20260622/).
+
 Post-v0.2 validation note: a follow-up MoE TP4 strict repeatability study
 passed `6/6` strict repeats across `.20` and `.30` under the native
 `moe35b_tp4_fullbar_p2pon` release profile, with strict backend TPS from
@@ -211,15 +219,15 @@ After readiness:
 ```bash
 ./smoke-test.sh
 
-WARMUP_REQUESTS=8 \
-WARMUP_TOKENS=2000 \
-CASES=c1_2000:2000,c1_10000:10000 \
-python3 ./run_qwen36_live_tps.py
+./run_v02_profile_benchmark.sh
 ```
 
-The TPS harness auto-detects the served model from `/v1/models`, so the same command
-works for dense and MoE profiles. Use GitHub Releases as the published claim
-boundary when comparing local measurements to release numbers.
+The v0.2 profile benchmark runs the release scorer path: eight 2000-token
+pre-measure warmups, the uncapped `c1_128` strict prompt, `c1_2000`, and
+`c1_10000` through the bundled begin-think proxy. Use GitHub Releases as the
+published claim boundary when comparing local measurements to release numbers.
+The older `run_qwen36_live_tps.py` helper remains available for legacy
+fixed-token checks, but it is not the v0.2 release scorer.
 
 ## Canonical v0.1 Reproduction Instructions
 
