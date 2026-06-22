@@ -180,9 +180,16 @@ Use a full checkout for the v0.2 ROCm7.2 Dense/MoE deploy path. The current
 `deploy.sh` is not enough for the v0.2 runtime.
 
 ```bash
-git clone --depth 1 https://github.com/joe2gaan/localaiservers.git
-cd localaiservers/qwen36-gfx906
+git clone https://github.com/joe2gaan/localaiservers.git
+cd localaiservers
+git checkout 5529a438ffb7f1d80e5bd8f7f1d3edf7c8be08c6
+cd qwen36-gfx906
 ```
+
+The commit above is the corrected public reproduction package pinned by the
+v0.2 release body. It contains the `run_v02_profile_benchmark.sh` scorer path,
+the bundled begin-think proxy, and the 2026-06-22 reproduction report. The
+immutable v0.2 release tag and Docker image identity remain unchanged.
 
 Choose one published v0.2 profile:
 
