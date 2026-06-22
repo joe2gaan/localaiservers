@@ -1,12 +1,12 @@
 # ROCm7.2 Dense/MoE Active Contracts - 2026-06-20
 
-This document records the post-v0.1 main-branch validation contracts copied from
+This document records the ROCm7.2 Dense/MoE active contracts copied from
 [qwen36-gfx906/README.md](../qwen36-gfx906/README.md), which is the
 authoritative latest technical source for the ROCm7.2 Dense/MoE runner.
 
-v0.1.0 remains the older published GitHub Release boundary. These values are
-post-v0.1 main-branch validation notes until a separate release is published.
-GitHub Releases remain canonical for published claim boundaries.
+v0.1.0 remains the older published GitHub Release boundary. The dense and MoE
+active-contract values below are covered by the published v0.2.0 release
+boundary. GitHub Releases remain canonical for published claim boundaries.
 
 ## Image Identity
 
@@ -60,9 +60,26 @@ warmups:
 | `moe35b_tp8_fullbar_p2pon` | 8 | `.30` | `94.907` | `97.028` | `91.290` | strict gate valid |
 | `moe35b_tp4_fullbar_p2pon` | 4 | `.30` | invalid/runaway | `116.146` | `109.283` | uncapped strict prompt did not stop after >60K tokens |
 
-Dense 27B TP8 therefore clears the ai-info 10K gate in post-v0.1 validation.
-MoE TP8 is the current strict-valid Qwen3.6 35B-A3B full-BAR/P2P-on bar. MoE
-TP4 remains capped-only until the strict runaway behavior is resolved.
+Dense 27B TP8 therefore clears the ai-info 10K gate at the published v0.2.0
+release boundary. MoE TP8 is the current strict-valid Qwen3.6 35B-A3B
+full-BAR/P2P-on bar. MoE TP4 remains capped-only at the v0.2.0 release boundary
+because the release-time strict caveat was not promoted through a release update.
+
+## Post-v0.2 TP4 Strict Repeatability Follow-Up
+
+TP4 strict runaway did not reproduce in the follow-up study under the native
+`moe35b_tp4_fullbar_p2pon` release profile.
+
+- `6/6` strict repeats passed across `.20` and `.30`.
+- All repeats finished with `finish_reason=stop`.
+- All repeats had `qwen_gate_valid=true`.
+- Strict backend TPS range: `113.196` to `115.995`.
+- `.20` fixed sanity: c1_2000 `116.787`, c1_10000 `109.622`.
+- `.30` fixed sanity: c1_2000 `115.770`, c1_10000 `108.950`.
+
+This is post-v0.2 validation evidence. It does not rewrite the v0.2.0 release
+boundary. Formal release claims should change only through a separate
+docs/release update.
 
 ## Platform Preconditions
 
