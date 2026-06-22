@@ -218,7 +218,7 @@ patch amdgpu, flash firmware, or change host settings:
 
 The host amdgpu source patch required by the full-BAR/P2P-on lane is not bundled
 in v0.2.1. The standardized full-BAR GFX906 VBIOS revision recorded for the
-public v0.2 host-platform record is `113-D1631711-100`. See
+public v0.2 host-platform record is `113-D1631700-111`. See
 [docs/gfx906-host-platform-prereqs-v02.md](docs/gfx906-host-platform-prereqs-v02.md).
 
 Choose one published v0.2 profile:

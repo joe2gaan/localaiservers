@@ -39,7 +39,7 @@ The preflight checks visible full-BAR/P2P host state without patching amdgpu,
 flashing firmware, changing kernel settings, or starting workloads. The host
 amdgpu source patch required by the full-BAR/P2P-on lane is not bundled in
 v0.2.1. The standardized full-BAR GFX906 VBIOS revision recorded for the public
-v0.2 host-platform record is `113-D1631711-100`; see
+v0.2 host-platform record is `113-D1631700-111`; see
 [docs/gfx906-host-platform-prereqs-v02.md](../docs/gfx906-host-platform-prereqs-v02.md).
 
 ## 2026-06-20 ROCm7.2 Release

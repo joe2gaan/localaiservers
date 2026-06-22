@@ -21,7 +21,7 @@ For comparable v0.2 reproduction runs, the selected host should have:
 - P2P/topology state visible to ROCm.
 - Official AMD VBIOS standardization where needed. The standardized full-BAR
   GFX906 VBIOS revision recorded for the public v0.2 host-platform record is
-  `113-D1631711-100`.
+  `113-D1631700-111`.
 - The site-local amdgpu host source patch required by the full-BAR/P2P-on lane.
 
 ## GPU BIOS / VBIOS Revision
@@ -30,18 +30,25 @@ The exact public GPU VBIOS revision used for the standardized full-BAR GFX906
 platform state is:
 
 ```text
-113-D1631711-100
+113-D1631700-111
 ```
 
 This value is a VBIOS revision string, not a card serial number. Do not publish
 per-card serial numbers, private inventory labels, or BIOS/VBIOS binaries in
 this repository.
 
+The external MI50 32GB VBIOS matrix maintained by evilJazz also records
+`113-D1631700-111` as a ReBAR / 32 GiB BAR-capable AMD MI50 32GB VBIOS and
+distinguishes it from `113-D1631711-100`, which is documented there as
+non-ReBAR / 16 GiB BAR-visible. That external reference is a VBIOS matrix, not
+part of this release package:
+<https://gist.github.com/evilJazz/14a4c82a67f2c52a6bb5f9cea02f5e13>
+
 The public preflight script checks for this revision through `rocm-smi
 --showvbios` when ROCm-SMI can initialize on the host:
 
 ```bash
-EXPECTED_GPU_VBIOS=113-D1631711-100 ./check_host_platform_prereqs.sh
+EXPECTED_GPU_VBIOS=113-D1631700-111 ./check_host_platform_prereqs.sh
 ```
 
 If a future host uses a different official AMD VBIOS revision, record the exact

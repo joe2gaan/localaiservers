@@ -3618,7 +3618,7 @@ Decision:
      compute-usable under the corrected explicit DRI contract. Live inventory
      on `2026-06-11T19:56:17-04:00` showed ROCm-SMI `card1-card8` as DID
      `0x66a1` with `34342961152` bytes VRAM and VBIOS
-     `113-D1631711-100`; product strings for two cards still say `16GB`, so
+     `113-D1631700-111`; product strings for two cards still say `16GB`, so
      keep using VRAM/DID rather than product names. Inside the ROCm 7.2 image,
      exposing `/dev/dri/card0`, `/dev/dri/card2-8`, and
      `/dev/dri/renderD129-136` produced `torch.cuda.device_count()==8`, all
