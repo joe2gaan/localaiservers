@@ -8,6 +8,18 @@ v0.1.0 remains the older published GitHub Release boundary. The dense and MoE
 active-contract values below are covered by the published v0.2.0 release
 boundary. GitHub Releases remain canonical for published claim boundaries.
 
+For the simplest public reproduction checkout, use the v0.2.1 reproduction
+package tag:
+
+```bash
+git clone --depth 1 --branch v0.2.1-gfx906-rocm72-dense-moe-repro https://github.com/joe2gaan/localaiservers.git
+cd localaiservers/qwen36-gfx906
+```
+
+v0.2.1 does not change the v0.2.0 Docker image, model package, runtime
+artifact, benchmark values, or release boundary. It packages the corrected
+public reproduction docs/scripts and the 2026-06-22 reproduction report.
+
 ## Image Identity
 
 Current `deploy.sh` SHA256:

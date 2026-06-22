@@ -11,6 +11,21 @@ It is designed to run without host-specific source paths. The deploy script can
 use the pushed runtime image or rebuild the image from public sources plus the
 bundled runtime overlays under `files/gfx906_runtime`.
 
+## Easiest Reproduction Checkout
+
+Use the v0.2.1 reproduction-package tag when reproducing the v0.2 ROCm7.2
+Dense/MoE results:
+
+```bash
+git clone --depth 1 --branch v0.2.1-gfx906-rocm72-dense-moe-repro https://github.com/joe2gaan/localaiservers.git
+cd localaiservers/qwen36-gfx906
+```
+
+This tag contains the corrected public reproduction docs, the
+`run_v02_profile_benchmark.sh` scorer path, the bundled begin-think proxy, and
+the 2026-06-22 reproduction report. It does not change the v0.2.0 Docker image,
+model package, runtime artifact, or benchmark release boundary.
+
 ## 2026-06-20 ROCm7.2 Release
 
 Current `deploy.sh` SHA256:
