@@ -165,6 +165,62 @@ See [CITATION.cff](CITATION.cff).
 Code is licensed under [Apache-2.0](LICENSE). Documentation licensing has a public
 notice at [docs/LICENSE-DOCS.md](docs/LICENSE-DOCS.md).
 
+## Latest v0.2 Deployment Quickstart
+
+Use a full checkout for the v0.2 ROCm7.2 Dense/MoE deploy path. The current
+`deploy.sh` needs the bundled files under `qwen36-gfx906/files/`; downloading only
+`deploy.sh` is not enough for the v0.2 runtime.
+
+```bash
+git clone --depth 1 https://github.com/joe2gaan/localaiservers.git
+cd localaiservers/qwen36-gfx906
+```
+
+Choose one published v0.2 profile:
+
+```bash
+# Dense 27B TP8 full-BAR/P2P-on
+export QWEN36_PROFILE=dense27b_tp8_fullbar_p2pon
+
+# MoE TP8 full-BAR/P2P-on
+# export QWEN36_PROFILE=moe35b_tp8_fullbar_p2pon
+
+# MoE TP4 full-BAR/P2P-on
+# export QWEN36_PROFILE=moe35b_tp4_fullbar_p2pon
+```
+
+Deploy the published v0.2 image:
+
+```bash
+DEPLOY_IMAGE=joe2gaan/localaiservers:qwen36-gfx906-rocm72-dense-moe-runtime-archive-0a2dbd6b7f0b \
+DOCKER_ISOLATED_DAEMON_ENABLED=0 \
+HF_HUB_DISABLE_XET=1 \
+USE_PREBUILT_IMAGE=1 \
+PREBUILT_IMAGE_PULL=1 \
+AUTO_STAGE_MODEL=1 \
+./deploy.sh
+```
+
+If the host Docker root is intentionally managed and the image/model cache already
+has enough space, `SKIP_DISK_SPACE_CHECK=1` can be added. If the Docker root is too
+small for normal operation, use the isolated Docker mode documented in
+[qwen36-gfx906/README.md](qwen36-gfx906/README.md).
+
+After readiness:
+
+```bash
+./smoke-test.sh
+
+WARMUP_REQUESTS=8 \
+WARMUP_TOKENS=2000 \
+CASES=c1_2000:2000,c1_10000:10000 \
+python3 ./run_qwen36_live_tps.py
+```
+
+The TPS harness auto-detects the served model from `/v1/models`, so the same command
+works for dense and MoE profiles. Use GitHub Releases as the published claim
+boundary when comparing local measurements to release numbers.
+
 ## Canonical v0.1 Reproduction Instructions
 
 The canonical deployment package is [qwen36-gfx906/README.md](qwen36-gfx906/README.md).

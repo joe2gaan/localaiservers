@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import json
+import os
 import re
 import sys
 import threading
@@ -8,13 +9,36 @@ import urllib.error
 import urllib.request
 
 
-API_BASE = "http://127.0.0.1:8001"
-MODEL = "Qwen/Qwen3.6-35B-A3B"
-CASES = [
-    ("c1_128", 128),
-    ("c1_2000", 2000),
-    ("c1_10000", 10000),
-]
+API_BASE = os.environ.get("API_BASE", "http://127.0.0.1:8001")
+MODEL = os.environ.get("MODEL", "")
+METRIC_MODEL = os.environ.get("METRIC_MODEL", "")
+PROMPT_TEXT = os.environ.get(
+    "PROMPT_TEXT",
+    "Throughput benchmark. Continue generating plain neutral benchmark prose. "
+    "Do not summarize and do not stop early.\n\n",
+)
+PROMPT_REPEAT = int(os.environ.get("PROMPT_REPEAT", "1"))
+WARMUP_REQUESTS = int(os.environ.get("WARMUP_REQUESTS", "0"))
+WARMUP_TOKENS = int(os.environ.get("WARMUP_TOKENS", "2000"))
+
+
+def parse_cases():
+    raw = os.environ.get("CASES", "c1_128:128,c1_2000:2000,c1_10000:10000")
+    cases = []
+    for item in raw.split(","):
+        item = item.strip()
+        if not item:
+            continue
+        if ":" not in item:
+            raise ValueError(f"invalid CASES item, expected label:tokens: {item}")
+        label, tokens = item.split(":", 1)
+        cases.append((label.strip(), int(tokens.strip())))
+    if not cases:
+        raise ValueError("CASES did not contain any benchmark cases")
+    return cases
+
+
+CASES = parse_cases()
 
 
 def http_get(path, timeout=10):
@@ -22,10 +46,24 @@ def http_get(path, timeout=10):
         return response.read().decode("utf-8", errors="replace")
 
 
+def detect_model():
+    data = json.loads(http_get("/v1/models", timeout=10))
+    models = data.get("data") or []
+    if not models:
+        raise RuntimeError("no models returned by /v1/models")
+    return models[0]["id"]
+
+
 def metric_value(name, text=None):
     if text is None:
         text = http_get("/metrics", timeout=10)
-    pattern = re.compile(r"^" + re.escape(name) + r"\{[^}]*model_name=\"Qwen/Qwen3\.6-35B-A3B\"[^}]*\}\s+([-+0-9.eE]+)$")
+    pattern = re.compile(
+        r"^"
+        + re.escape(name)
+        + r"\{[^}]*model_name=\""
+        + re.escape(METRIC_MODEL)
+        + r"\"[^}]*\}\s+([-+0-9.eE]+)$"
+    )
     total = 0.0
     found = False
     for line in text.splitlines():
@@ -64,7 +102,7 @@ def post_stream(body):
 
 
 def wait_idle():
-    for _ in range(120):
+    for _ in range(300):
         text = http_get("/metrics", timeout=10)
         running = metric_value("vllm:num_requests_running", text)
         waiting = metric_value("vllm:num_requests_waiting", text)
@@ -123,10 +161,7 @@ def run_case(label, target_tokens):
 
     body = {
         "model": MODEL,
-        "prompt": (
-            "Throughput benchmark. Continue generating plain neutral benchmark prose. "
-            "Do not summarize and do not stop early.\n\n"
-        ),
+        "prompt": PROMPT_TEXT * PROMPT_REPEAT,
         "temperature": 0.8,
         "top_p": 0.95,
         "stream": True,
@@ -208,9 +243,20 @@ def run_case(label, target_tokens):
 
 
 def main():
-    print("Qwen3.6-35B-A3B single-request TPS video harness", flush=True)
-    print("Cases from reddit draft: c1_128, c1_2000, c1_10000", flush=True)
+    global MODEL, METRIC_MODEL
+    if not MODEL:
+        MODEL = detect_model()
+    if not METRIC_MODEL:
+        METRIC_MODEL = MODEL
+
+    print("Qwen3.6 single-request TPS harness", flush=True)
+    print(f"model={MODEL} metric_model={METRIC_MODEL} api_base={API_BASE}", flush=True)
+    print(f"cases={CASES}", flush=True)
+    print(f"warmup_requests={WARMUP_REQUESTS} warmup_tokens={WARMUP_TOKENS} prompt_repeat={PROMPT_REPEAT}", flush=True)
     print("This is a fixed-token TPS harness: max_tokens=min_tokens and ignore_eos=true.", flush=True)
+    for idx in range(1, WARMUP_REQUESTS + 1):
+        run_case(f"warmup_{idx}", WARMUP_TOKENS)
+        time.sleep(2)
     for label, target_tokens in CASES:
         run_case(label, target_tokens)
         time.sleep(5)

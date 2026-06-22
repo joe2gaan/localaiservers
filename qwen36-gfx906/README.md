@@ -326,12 +326,8 @@ For normal runtime, mount the local Hugging Face/model cache and runtime cache r
 Run the current ROCm7.2 dense/MoE image from Docker Hub without rebuilding:
 
 ```bash
-mkdir -p ~/qwen36-gfx906-run
-cd ~/qwen36-gfx906-run
-
-curl -fsSL https://raw.githubusercontent.com/joe2gaan/localaiservers/main/qwen36-gfx906/deploy.sh -o deploy.sh
-curl -fsSL https://raw.githubusercontent.com/joe2gaan/localaiservers/main/qwen36-gfx906/run_qwen36_live_tps.py -o run_qwen36_live_tps.py
-chmod +x deploy.sh
+git clone --depth 1 https://github.com/joe2gaan/localaiservers.git
+cd localaiservers/qwen36-gfx906
 
 DEPLOY_IMAGE=joe2gaan/localaiservers:qwen36-gfx906-rocm72-dense-moe-runtime-archive-0a2dbd6b7f0b \
 DOCKER_ISOLATED_DAEMON_ENABLED=0 \
@@ -341,6 +337,10 @@ PREBUILT_IMAGE_PULL=1 \
 AUTO_STAGE_MODEL=1 \
 ./deploy.sh
 ```
+
+Use a full checkout for the v0.2 ROCm7.2 Dense/MoE deploy path. The current
+`deploy.sh` installs bundled runtime files from `qwen36-gfx906/files/`; downloading
+only `deploy.sh` is not enough for this release path.
 
 `DOCKER_ISOLATED_DAEMON_ENABLED=0` uses the host Docker daemon for the prebuilt image
 path. Use this path on hosts where the user is in the Docker group but does not have
@@ -456,10 +456,18 @@ The prebuilt-image path still writes the runtime patch bundle, MoE config, compo
 To verify performance after the service is ready:
 
 ```bash
+./smoke-test.sh
+
+WARMUP_REQUESTS=8 \
+WARMUP_TOKENS=2000 \
+CASES=c1_2000:2000,c1_10000:10000 \
 python3 ./run_qwen36_live_tps.py
 ```
 
-Historical fixed-token single-request results on the v0.1.0 4x MI50 32GB gfx906 lane were:
+The TPS harness auto-detects the served model from `/v1/models`, so the same command
+works for `dense27b_tp8_fullbar_p2pon`, `moe35b_tp8_fullbar_p2pon`, and
+`moe35b_tp4_fullbar_p2pon`. Historical fixed-token single-request results on the
+v0.1.0 4x MI50 32GB gfx906 lane were:
 
 - `c1_2000`: 101.47 TPS backend decode
 - `c1_10000`: 95.66 TPS backend decode, 95.36 client wall TPS
