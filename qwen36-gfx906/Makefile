@@ -1,4 +1,4 @@
-.PHONY: help build run down logs status clean dist-clean check-space check-gpu
+.PHONY: help build run down logs status clean dist-clean check-space check-gpu check-host
 
 SHELL := /bin/sh
 BUNDLE_COMPOSE := docker-compose.deploy.yml
@@ -22,6 +22,7 @@ help:
 	@echo "  dist-clean         - removes local caches and mounted runtime/model cache dirs."
 	@echo "  check-space        - print docker root and disk usage report."
 	@echo "  check-gpu          - run GPU VRAM preflight check only."
+	@echo "  check-host         - run read-only v0.2 host platform prerequisite check."
 
 build:
 	@if [ -f "$(RUNTIME_ENV)" ]; then \
@@ -79,6 +80,9 @@ check-gpu:
 	SKIP_DISK_SPACE_CHECK=1 \
 	CHECK_GPU_ONLY=1 \
 	./deploy.sh
+
+check-host:
+	./check_host_platform_prereqs.sh
 
 clean:
 	@rm -f .deploy.runtime.env .deploy.daemon.json.backup

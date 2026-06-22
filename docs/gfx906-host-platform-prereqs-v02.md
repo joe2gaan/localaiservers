@@ -1,0 +1,134 @@
+# GFX906 Host Platform Prerequisites for v0.2
+
+This note describes the host-side platform state expected by the ROCm7.2
+Dense/MoE v0.2 reproduction package.
+
+The v0.2 Docker image, model package, runtime overlays, and benchmark scorer are
+public. The host platform work is separate: the published numbers were measured
+on prepared GFX906 hosts with full-BAR/P2P-on platform state.
+
+## Required Host State
+
+For comparable v0.2 reproduction runs, the selected host should have:
+
+- Enough `gfx906` GPUs for the selected profile:
+  - `dense27b_tp8_fullbar_p2pon`: 8 GPUs.
+  - `moe35b_tp8_fullbar_p2pon`: 8 GPUs.
+  - `moe35b_tp4_fullbar_p2pon`: 4 GPUs.
+- Full-BAR exposure for the selected GPUs. For MI50 32GB-class cards, the
+  practical check is a largest visible PCI BAR of at least 32 GiB per selected
+  GPU.
+- P2P/topology state visible to ROCm.
+- Official AMD VBIOS standardization where needed. The standardized full-BAR
+  GFX906 VBIOS revision recorded for the public v0.2 host-platform record is
+  `113-D1631711-100`.
+- The site-local amdgpu host source patch required by the full-BAR/P2P-on lane.
+
+## GPU BIOS / VBIOS Revision
+
+The exact public GPU VBIOS revision used for the standardized full-BAR GFX906
+platform state is:
+
+```text
+113-D1631711-100
+```
+
+This value is a VBIOS revision string, not a card serial number. Do not publish
+per-card serial numbers, private inventory labels, or BIOS/VBIOS binaries in
+this repository.
+
+The public preflight script checks for this revision through `rocm-smi
+--showvbios` when ROCm-SMI can initialize on the host:
+
+```bash
+EXPECTED_GPU_VBIOS=113-D1631711-100 ./check_host_platform_prereqs.sh
+```
+
+If a future host uses a different official AMD VBIOS revision, record the exact
+public revision string here before comparing that host with the v0.2 published
+numbers.
+
+## What Is Not Bundled
+
+The v0.2.1 public reproduction package does not bundle:
+
+- BIOS or VBIOS binaries.
+- Host amdgpu source patches.
+- DKMS packages.
+- Linux kernel packages.
+- Instructions to flash cards or modify firmware.
+
+As of v0.2.1, the exact host amdgpu patch diff, patch hash, and source base are
+not public in this repository. Treat the host amdgpu patch as a required
+platform prerequisite until it is published separately.
+
+## Read-Only Preflight
+
+Run the host platform preflight before deploying:
+
+```bash
+git clone https://github.com/joe2gaan/localaiservers.git
+cd localaiservers/qwen36-gfx906
+
+export QWEN36_PROFILE=dense27b_tp8_fullbar_p2pon
+./check_host_platform_prereqs.sh
+```
+
+The existing `v0.2.1-gfx906-rocm72-dense-moe-repro` tag remains the named
+reproduction package for the 2026-06-22 script/report state, but this preflight
+helper was added after that tag. Use current `main` or a later reproduction tag
+when you need the helper in the checkout.
+
+For MoE TP4:
+
+```bash
+export QWEN36_PROFILE=moe35b_tp4_fullbar_p2pon
+./check_host_platform_prereqs.sh
+```
+
+For MoE TP8:
+
+```bash
+export QWEN36_PROFILE=moe35b_tp8_fullbar_p2pon
+./check_host_platform_prereqs.sh
+```
+
+The script is read-only. It does not patch amdgpu, flash firmware, change
+kernel settings, start containers, or run model workloads.
+
+## Interpreting Results
+
+A passing preflight means the host exposes the basic platform signals expected
+by the v0.2 reproduction package:
+
+- `amdgpu` is loaded.
+- The expected number of likely `gfx906` PCI devices is visible.
+- Each selected device appears to expose a large enough PCI BAR.
+- ROCm/KFD topology checks are available where host tools expose them.
+- ROCm-SMI can report the expected standardized VBIOS revision, if ROCm-SMI is
+  available and can initialize on the host.
+
+A passing preflight is not a performance guarantee. It does not prove that every
+GFX906 system will reproduce the same numbers.
+
+A failing preflight means local measurements should not be compared with the
+published v0.2 numbers until the host platform state is corrected.
+
+## Current Reproduction Boundary
+
+The public v0.2.1 reproduction package uses the same v0.2.0 Docker image:
+
+```text
+joe2gaan/localaiservers:qwen36-gfx906-rocm72-dense-moe-runtime-archive-0a2dbd6b7f0b
+```
+
+Docker Hub manifest digest:
+
+```text
+sha256:8c380e9ca48943d8617de5a2e2eaf32a26dcc2c341e4b4f4f8c45294a72b8f1e
+```
+
+The host platform prerequisite is outside that image. The release does not
+provide public compute access, hardware, procurement support, resale support,
+warranty, certification, official AMD validation, compensation, or professional
+services.

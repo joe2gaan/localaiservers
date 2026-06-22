@@ -13,18 +13,34 @@ bundled runtime overlays under `files/gfx906_runtime`.
 
 ## Easiest Reproduction Checkout
 
-Use the v0.2.1 reproduction-package tag when reproducing the v0.2 ROCm7.2
-Dense/MoE results:
+Use current `main` for the latest v0.2 ROCm7.2 Dense/MoE deployment
+instructions, host preflight helper, and prerequisite disclosures. The existing
+`v0.2.1-gfx906-rocm72-dense-moe-repro` tag remains the named reproduction
+package for the 2026-06-22 script/report state; the host preflight helper was
+added after that tag.
 
 ```bash
-git clone --depth 1 --branch v0.2.1-gfx906-rocm72-dense-moe-repro https://github.com/joe2gaan/localaiservers.git
+git clone https://github.com/joe2gaan/localaiservers.git
 cd localaiservers/qwen36-gfx906
 ```
 
-This tag contains the corrected public reproduction docs, the
+This checkout contains the corrected public reproduction docs, the
 `run_v02_profile_benchmark.sh` scorer path, the bundled begin-think proxy, and
 the 2026-06-22 reproduction report. It does not change the v0.2.0 Docker image,
-model package, runtime artifact, or benchmark release boundary.
+model package, runtime artifact, benchmark values, or release boundary.
+
+Before deployment, run the read-only host platform preflight:
+
+```bash
+./check_host_platform_prereqs.sh
+```
+
+The preflight checks visible full-BAR/P2P host state without patching amdgpu,
+flashing firmware, changing kernel settings, or starting workloads. The host
+amdgpu source patch required by the full-BAR/P2P-on lane is not bundled in
+v0.2.1. The standardized full-BAR GFX906 VBIOS revision recorded for the public
+v0.2 host-platform record is `113-D1631711-100`; see
+[docs/gfx906-host-platform-prereqs-v02.md](../docs/gfx906-host-platform-prereqs-v02.md).
 
 ## 2026-06-20 ROCm7.2 Release
 

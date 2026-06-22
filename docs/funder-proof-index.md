@@ -18,6 +18,9 @@ GFX906 Preservation & Public AI Research Infrastructure
 - [Key learnings](gfx906-key-learnings-20260606.md)
 - [Technical progress summary](gfx906-technical-progress-summary.md)
 - [ROCm7.2 Dense/MoE active contracts](rocm72-dense-moe-active-contracts-20260620.md)
+- [GFX906 v0.2 host platform prerequisites](gfx906-host-platform-prereqs-v02.md)
+  records the standardized full-BAR GFX906 VBIOS revision used for the public
+  v0.2 host-platform record and the non-bundled amdgpu patch prerequisite.
 - v0.2.1 ROCm7.2 Dense/MoE reproduction-package release:
   [`releases/v0.2.1-gfx906-rocm72-dense-moe-repro.md`](../releases/v0.2.1-gfx906-rocm72-dense-moe-repro.md)
 - Post-v0.2 MoE TP4 strict repeatability report:

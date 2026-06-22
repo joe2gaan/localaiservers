@@ -191,19 +191,35 @@ notice at [docs/LICENSE-DOCS.md](docs/LICENSE-DOCS.md).
 
 ## Reproduce v0.2 Results
 
-Use the v0.2.1 reproduction-package tag for the v0.2 ROCm7.2 Dense/MoE deploy
-path. The `deploy.sh` script needs the bundled files under
+Use current `main` for the latest v0.2 ROCm7.2 Dense/MoE deployment
+instructions, host preflight helper, and prerequisite disclosures. The existing
+`v0.2.1-gfx906-rocm72-dense-moe-repro` tag remains the named reproduction
+package for the 2026-06-22 script/report state; the host preflight helper was
+added after that tag. The `deploy.sh` script needs the bundled files under
 `qwen36-gfx906/files/`; downloading only `deploy.sh` is not enough for the
 v0.2 runtime.
 
 ```bash
-git clone --depth 1 --branch v0.2.1-gfx906-rocm72-dense-moe-repro https://github.com/joe2gaan/localaiservers.git
+git clone https://github.com/joe2gaan/localaiservers.git
 cd localaiservers/qwen36-gfx906
 ```
 
 This checkout contains the `run_v02_profile_benchmark.sh` scorer path, the
 bundled begin-think proxy, and the 2026-06-22 reproduction report. The v0.2.0
 benchmark release tag and Docker image identity remain unchanged.
+
+Before deployment, run the read-only host platform preflight. It checks the
+visible full-BAR/P2P host state needed for comparable results, but it does not
+patch amdgpu, flash firmware, or change host settings:
+
+```bash
+./check_host_platform_prereqs.sh
+```
+
+The host amdgpu source patch required by the full-BAR/P2P-on lane is not bundled
+in v0.2.1. The standardized full-BAR GFX906 VBIOS revision recorded for the
+public v0.2 host-platform record is `113-D1631711-100`. See
+[docs/gfx906-host-platform-prereqs-v02.md](docs/gfx906-host-platform-prereqs-v02.md).
 
 Choose one published v0.2 profile:
 
