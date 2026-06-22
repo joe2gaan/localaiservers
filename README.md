@@ -49,6 +49,13 @@ active-contract release.
 `91.290` is the MoE TP8 `c1_10000` backend TPS; the MoE TP8 strict backend
 TPS is `94.907`. MoE TP4 is capped-only and is not strict-valid.
 
+Post-v0.2 validation note: a follow-up MoE TP4 strict repeatability study
+passed `6/6` strict repeats across `.20` and `.30` under the native
+`moe35b_tp4_fullbar_p2pon` release profile, with strict backend TPS from
+`113.196` to `115.995`. This is post-v0.2 validation evidence and does not
+change the published v0.2.0 release boundary. The report is in
+[test-reports/qwen36-gfx906-moe-tp4-strict-runaway/](test-reports/qwen36-gfx906-moe-tp4-strict-runaway/).
+
 `MAX_MODEL_LEN=131072` is preserved for the v0.2 active contracts. The same
 ROCm7.2 image covers the dense and MoE active contracts with model-specific
 environment settings and overlays.

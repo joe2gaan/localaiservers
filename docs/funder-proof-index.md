@@ -18,6 +18,8 @@ GFX906 Preservation & Public AI Research Infrastructure
 - [Key learnings](gfx906-key-learnings-20260606.md)
 - [Technical progress summary](gfx906-technical-progress-summary.md)
 - [ROCm7.2 Dense/MoE active contracts](rocm72-dense-moe-active-contracts-20260620.md)
+- Post-v0.2 MoE TP4 strict repeatability report:
+  [`test-reports/qwen36-gfx906-moe-tp4-strict-runaway/`](../test-reports/qwen36-gfx906-moe-tp4-strict-runaway/)
 - [Experimental methodology](gfx906-experimental-methodology.md)
 - [Current GFX906 research roadmap](gfx906-current-research-roadmap.md)
 - [Controlled air-gapped compute model](controlled-air-gapped-compute.md)
@@ -45,7 +47,7 @@ and reproducibility workflows.
   hashes, commands, benchmark method, and limitations.
 - The benchmark folder packages the Qwen3.6 / GFX906 / MI50 TP4 artifact as a stable
   proof point while linking back to the canonical deployment package.
-- Current main additionally records post-v0.1 ROCm7.2 dense/MoE validation:
+- The published v0.2.0 release records ROCm7.2 dense/MoE validation:
   Dense 27B TP8 clears the ai-info 10K gate at `MAX_MODEL_LEN=131072`, and
   Qwen3.6 35B-A3B MoE TP8 establishes a strict-valid full-BAR/P2P-on bar.
 - The source inventory and key learnings show source-level kernel/runtime maintenance,
@@ -53,8 +55,8 @@ and reproducibility workflows.
 - The experimental methodology records strict promotion rules for optimized serving
   paths, backend metrics, correctness, profiles, and decode ladders.
 - The technical progress summary separates the older published v0.1.0 release boundary
-  from post-v0.1 main-branch validation. GitHub Releases remain canonical for
-  published claim boundaries.
+  from the published v0.2.0 ROCm7.2 Dense/MoE boundary. GitHub Releases remain
+  canonical for published claim boundaries.
 - The same ROCm7.2 experimental release image covers dense and MoE active contracts
   with model-specific env and overlays. Platform remediation for the full-BAR/P2P-on
   lane required official AMD VBIOS standardization, not modified BIOS images, plus
