@@ -26,22 +26,38 @@ remains an evergreen artifact distribution channel and should not be treated as
 the latest benchmark announcement. The canonical deployment and reproducibility
 package is [qwen36-gfx906/README.md](qwen36-gfx906/README.md).
 
-- `v0.1.0-gfx906-qwen36-mi50`
-  - Qwen3.6 / GFX906 / MI50 TP4 reproducibility artifact.
-  - 90+ TPS sustained 10K backend decode publication baseline.
-  - Canonical reproduction package:
-    [qwen36-gfx906/README.md](qwen36-gfx906/README.md).
+### v0.1.0 Historical Published Artifact
 
-- `v0.2.0-gfx906-rocm72-dense-moe`
-  - ROCm7.2 Dense/MoE GFX906 active-contract release.
-  - Dense 27B TP8 clears the ai-info 10K gate at `66.069` backend TPS on
-    `c1_10000`.
-  - MoE TP8 strict-valid bar: `94.907` strict, `97.028` `c1_2000`, and
-    `91.290` `c1_10000` backend TPS.
-  - MoE TP4 has capped fixed-token results but is not a strict-valid
-    publication claim because of the uncapped strict prompt caveat.
-  - Active-contract notes:
-    [docs/rocm72-dense-moe-active-contracts-20260620.md](docs/rocm72-dense-moe-active-contracts-20260620.md).
+`v0.1.0-gfx906-qwen36-mi50` is the Qwen3.6 / GFX906 / MI50 TP4 reproducibility
+artifact. It remains the historical 90+ TPS sustained 10K backend decode
+publication baseline, not the latest ROCm7.2 Dense/MoE result.
+
+Canonical reproduction package:
+[qwen36-gfx906/README.md](qwen36-gfx906/README.md).
+
+### v0.2.0 Published ROCm7.2 Dense/MoE Artifact
+
+`v0.2.0-gfx906-rocm72-dense-moe` is the current ROCm7.2 Dense/MoE GFX906
+active-contract release.
+
+| Release | Profile | Strict backend TPS | `c1_2000` backend TPS | `c1_10000` backend TPS | Status |
+| --- | --- | ---: | ---: | ---: | --- |
+| v0.2.0 | Dense 27B TP8 full-BAR/P2P-on | 69.514 | 70.347 | 66.069 | strict-valid; ai-info 10K gate cleared |
+| v0.2.0 | Qwen3.6 35B-A3B MoE TP8 full-BAR/P2P-on | 94.907 | 97.028 | 91.290 | strict-valid MoE publication bar |
+| v0.2.0 | Qwen3.6 35B-A3B MoE TP4 full-BAR/P2P-on | invalid/runaway | 116.146 | 109.283 | capped fixed-token only; not strict-valid |
+
+`91.290` is the MoE TP8 `c1_10000` backend TPS; the MoE TP8 strict backend
+TPS is `94.907`. MoE TP4 is capped-only and is not strict-valid.
+
+`MAX_MODEL_LEN=131072` is preserved for the v0.2 active contracts. The same
+ROCm7.2 image covers the dense and MoE active contracts with model-specific
+environment settings and overlays.
+
+Active-contract details:
+[docs/rocm72-dense-moe-active-contracts-20260620.md](docs/rocm72-dense-moe-active-contracts-20260620.md).
+
+Full release notes:
+[https://github.com/joe2gaan/localaiservers/releases](https://github.com/joe2gaan/localaiservers/releases).
 
 Canonical technical deployment package:
 [qwen36-gfx906/README.md](qwen36-gfx906/README.md)
@@ -143,10 +159,12 @@ notice at [docs/LICENSE-DOCS.md](docs/LICENSE-DOCS.md).
 ## Canonical v0.1 Reproduction Instructions
 
 The canonical deployment package is [qwen36-gfx906/README.md](qwen36-gfx906/README.md).
-These commands preserve the published v0.1.0 TP4 runtime reproduction path. For
-v0.2.0 ROCm7.2 Dense/MoE release boundaries, use
-[GitHub Releases](https://github.com/joe2gaan/localaiservers/releases) and the
+These commands preserve the published v0.1.0 TP4 runtime reproduction path. The
+latest published v0.2.0 Dense/MoE TPS values are summarized in Published Releases
+above and in the
 [ROCm7.2 active-contract notes](docs/rocm72-dense-moe-active-contracts-20260620.md).
+This v0.1 section is retained for historical reproducibility and should not be
+read as the latest TPS summary.
 
 The published v0.1 runtime target is:
 
@@ -239,9 +257,10 @@ MI50 32GB lane:
 c1_10000: 90+ TPS sustained backend decode publication baseline
 ```
 
-The canonical Qwen3.6 README also preserves a newer 95+ TPS 10K validation result for
-the same runtime lane. That result is not part of the v0.1.0 publication release and
-should be cited only after a separate release publishes it:
+The canonical Qwen3.6 README also preserves a newer 95+ TPS 10K validation
+result for the same runtime lane. That result is not part of the v0.1.0
+publication release. Use GitHub Releases for published claim boundaries and the
+Published Releases section above for the latest v0.2.0 Dense/MoE TPS summary:
 
 ```text
 c1_2000:  101.47 TPS backend decode
