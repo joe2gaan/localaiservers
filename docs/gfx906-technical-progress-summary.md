@@ -16,10 +16,9 @@ rejected paths, source milestones, and promotion methodology.
 - The canonical package includes Docker image identity, Docker Hub digest,
   archive hashes, source pins, deploy commands, run commands, benchmark command,
   active profile names, and limitations.
-- v0.1.0 remains the older published GitHub Release boundary. The dense 27B and
-  MoE values below are post-v0.1 main-branch validation notes until a separate
-  release is published. GitHub Releases remain canonical for published claim
-  boundaries.
+- v0.1.0 remains the older published GitHub Release boundary. v0.2.0 is the
+  published ROCm7.2 Dense/MoE release boundary. GitHub Releases remain canonical
+  for published claim boundaries.
 - [gfx906-source-kernel-inventory-20260612.md](gfx906-source-kernel-inventory-20260612.md)
   records source-level kernel, graph-runtime, RowParallel, RCCL/NCCL, MoE, dense,
   prefill, and diagnostic lanes.
@@ -33,18 +32,21 @@ rejected paths, source milestones, and promotion methodology.
   `sha256:8c380e9ca48943d8617de5a2e2eaf32a26dcc2c341e4b4f4f8c45294a72b8f1e`.
   Docker Hub remains an evergreen artifact distribution channel; TPS claims
   should stay in GitHub Releases, repository docs, and benchmark artifacts.
-- Dense 27B TP8 clears the ai-info 10K gate in post-v0.1 validation at
-  `MAX_MODEL_LEN=131072` with eight pre-measure warmups: strict backend TPS
+- Dense 27B TP8 clears the ai-info 10K gate at the published v0.2.0 release
+  boundary with `MAX_MODEL_LEN=131072` and eight pre-measure warmups: strict backend TPS
   `69.514`, `c1_2000` backend TPS `70.347`, and `c1_10000` backend TPS
   `66.069`; note `strict gate valid`.
 - Qwen3.6 35B-A3B MoE TP8 establishes the current full-BAR/P2P-on bar at
   `MAX_MODEL_LEN=131072` with eight pre-measure warmups: strict backend TPS
   `94.907`, `c1_2000` backend TPS `97.028`, and `c1_10000` backend TPS
   `91.290`; note `strict gate valid`.
-- Qwen3.6 35B-A3B MoE TP4 remains valuable as a capped warm-performance lane:
-  strict is `invalid/runaway`, `c1_2000` backend TPS is `116.146`, and
-  `c1_10000` backend TPS is `109.283`; note `uncapped strict prompt did not
-  stop after >60K tokens`.
+- Qwen3.6 35B-A3B MoE TP4 has release-time fixed-token performance of
+  `c1_2000` backend TPS `116.146` and `c1_10000` backend TPS `109.283`. A
+  post-v0.2 repeatability study found that the earlier TP4 strict runaway did
+  not reproduce: `6/6` strict repeats passed across `.20` and `.30`, all with
+  `finish_reason=stop` and `qwen_gate_valid=true`, with strict backend TPS from
+  `113.196` to `115.995`. No code, Docker image, tag, model package, or runtime
+  artifact changed.
 - Platform remediation for the current full-BAR/P2P-on lane required official
   AMD VBIOS standardization, not modified BIOS images, plus amdgpu source
   patching. This is not a user instruction to flash cards; the public repo does
@@ -72,7 +74,7 @@ trustworthy.
 
 Current roadmap direction from the source inventory and key-learning record:
 
-- Dense 27B work should now protect the post-v0.1 gate-clear path, keep the
+- Dense 27B work should now protect the v0.2.0 gate-clear path, keep the
   `MAX_MODEL_LEN=131072` serving contract intact, and continue source cleanup
   around RowParallel, sidecar Tree/LL, RCCL/Tree/LL, call-site routing, and
   graph-native boundary changes.

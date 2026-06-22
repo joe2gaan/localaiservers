@@ -29,13 +29,12 @@ was tied to a source path.
 
 - As of 2026-06-20,
   [qwen36-gfx906/README.md](../qwen36-gfx906/README.md) is the authoritative
-  latest technical source. Dense 27B now clears the ai-info 10K gate in
-  post-v0.1 main-branch validation at `MAX_MODEL_LEN=131072` with eight
+  latest technical source. Dense 27B clears the ai-info 10K gate at the
+  published v0.2.0 release boundary with `MAX_MODEL_LEN=131072` and eight
   pre-measure warmups.
-- v0.1.0 remains the older published GitHub Release boundary. The ROCm7.2
-  dense/MoE numbers below are post-v0.1 main-branch validation notes until a
-  separate release is published. GitHub Releases remain canonical for published
-  claim boundaries.
+- v0.1.0 remains the older published GitHub Release boundary. v0.2.0 is the
+  published ROCm7.2 Dense/MoE release boundary. GitHub Releases remain canonical
+  for published claim boundaries.
 - The same ROCm7.2 experimental release image covers both active contracts with
   model-specific env and overlay selection:
   `joe2gaan/localaiservers:qwen36-gfx906-rocm72-dense-moe-runtime-archive-0a2dbd6b7f0b`,
@@ -48,10 +47,13 @@ was tied to a source path.
   `66.069`; note `strict gate valid`.
 - Qwen3.6 35B-A3B MoE full-BAR/P2P-on portable performance on `.30`: TP8
   strict backend TPS `94.907`, `c1_2000` backend TPS `97.028`, `c1_10000`
-  backend TPS `91.290`; note `strict gate valid`. TP4 strict is
-  `invalid/runaway`, with `c1_2000` backend TPS `116.146` and `c1_10000`
-  backend TPS `109.283`; note `uncapped strict prompt did not stop after >60K
-  tokens`.
+  backend TPS `91.290`; note `strict gate valid`. TP4 release-time fixed-token
+  performance is `c1_2000` backend TPS `116.146` and `c1_10000` backend TPS
+  `109.283`. A post-v0.2 repeatability study found that the earlier TP4 strict
+  runaway did not reproduce: `6/6` strict repeats passed across `.20` and `.30`,
+  all with `finish_reason=stop` and `qwen_gate_valid=true`, with strict backend
+  TPS from `113.196` to `115.995`. No code, Docker image, tag, model package, or
+  runtime artifact changed.
 - Platform remediation for the full-BAR/P2P-on lane required official AMD VBIOS
   standardization, not modified BIOS images, plus amdgpu source patching. The
   source inventory should keep this hardware/software precondition separate
