@@ -18,6 +18,8 @@ GFX906 Preservation & Public AI Research Infrastructure
 - [Key learnings](gfx906-key-learnings-20260606.md)
 - [Technical progress summary](gfx906-technical-progress-summary.md)
 - [ROCm7.2 Dense/MoE active contracts](rocm72-dense-moe-active-contracts-20260620.md)
+- v0.2.1 ROCm7.2 Dense/MoE reproduction-package release:
+  [`releases/v0.2.1-gfx906-rocm72-dense-moe-repro.md`](../releases/v0.2.1-gfx906-rocm72-dense-moe-repro.md)
 - Post-v0.2 MoE TP4 strict repeatability report:
   [`test-reports/qwen36-gfx906-moe-tp4-strict-runaway/`](../test-reports/qwen36-gfx906-moe-tp4-strict-runaway/)
 - [Experimental methodology](gfx906-experimental-methodology.md)

@@ -35,10 +35,26 @@ publication baseline, not the latest ROCm7.2 Dense/MoE result.
 Canonical reproduction package:
 [qwen36-gfx906/README.md](qwen36-gfx906/README.md).
 
+### v0.2.1 Reproduction Package
+
+`v0.2.1-gfx906-rocm72-dense-moe-repro` is the easiest checkout for reproducing
+the published ROCm7.2 Dense/MoE measurements. It does not change the Docker
+image, model package, runtime artifact, benchmark values, or v0.2.0 release
+boundary. It packages the corrected public reproduction docs, the v0.2 scorer,
+the bundled begin-think proxy, and the 2026-06-22 reproduction report.
+
+Use this tag for reproduction:
+
+```bash
+git clone --depth 1 --branch v0.2.1-gfx906-rocm72-dense-moe-repro https://github.com/joe2gaan/localaiservers.git
+cd localaiservers/qwen36-gfx906
+```
+
 ### v0.2.0 Published ROCm7.2 Dense/MoE Artifact
 
-`v0.2.0-gfx906-rocm72-dense-moe` is the current ROCm7.2 Dense/MoE GFX906
-active-contract release.
+`v0.2.0-gfx906-rocm72-dense-moe` is the ROCm7.2 Dense/MoE GFX906
+active-contract benchmark release. Use the v0.2.1 reproduction-package tag
+above when you want the simplest source checkout for reproducing the results.
 
 | Release | Profile | Strict backend TPS | `c1_2000` backend TPS | `c1_10000` backend TPS | Status |
 | --- | --- | ---: | ---: | ---: | --- |
@@ -173,23 +189,21 @@ See [CITATION.cff](CITATION.cff).
 Code is licensed under [Apache-2.0](LICENSE). Documentation licensing has a public
 notice at [docs/LICENSE-DOCS.md](docs/LICENSE-DOCS.md).
 
-## Latest v0.2 Deployment Quickstart
+## Reproduce v0.2 Results
 
-Use a full checkout for the v0.2 ROCm7.2 Dense/MoE deploy path. The current
-`deploy.sh` needs the bundled files under `qwen36-gfx906/files/`; downloading only
-`deploy.sh` is not enough for the v0.2 runtime.
+Use the v0.2.1 reproduction-package tag for the v0.2 ROCm7.2 Dense/MoE deploy
+path. The `deploy.sh` script needs the bundled files under
+`qwen36-gfx906/files/`; downloading only `deploy.sh` is not enough for the
+v0.2 runtime.
 
 ```bash
-git clone https://github.com/joe2gaan/localaiservers.git
-cd localaiservers
-git checkout 5529a438ffb7f1d80e5bd8f7f1d3edf7c8be08c6
-cd qwen36-gfx906
+git clone --depth 1 --branch v0.2.1-gfx906-rocm72-dense-moe-repro https://github.com/joe2gaan/localaiservers.git
+cd localaiservers/qwen36-gfx906
 ```
 
-The commit above is the corrected public reproduction package pinned by the
-v0.2 release body. It contains the `run_v02_profile_benchmark.sh` scorer path,
-the bundled begin-think proxy, and the 2026-06-22 reproduction report. The
-immutable v0.2 release tag and Docker image identity remain unchanged.
+This checkout contains the `run_v02_profile_benchmark.sh` scorer path, the
+bundled begin-think proxy, and the 2026-06-22 reproduction report. The v0.2.0
+benchmark release tag and Docker image identity remain unchanged.
 
 Choose one published v0.2 profile:
 
