@@ -102,11 +102,17 @@ using a mounted snapshot path. Incomplete snapshots stay on the repo id instead
 of being selected as a broken local path. `AUTO_STAGE_MODEL=1` includes retry
 and shard-completeness validation.
 
-## Live TPS Video
+## Historical Live TPS Video
+
+This video is a historical v0.1-era demonstration and is not the current
+ROCm7.2 Dense/MoE reproduction evidence. Use the v0.2.1 reproduction-package
+release, `run_v02_profile_benchmark.sh`, and the linked reproduction reports
+for current published v0.2 results.
 
 [![Qwen3.6-35B-A3B gfx906 live TPS video preview](media/qwen36_ref20_machiavelli_100_to_1000_tps_preview.jpg)](https://joe2gaan.github.io/localaiservers/qwen36-gfx906/media/)
 
-Click the preview image to watch the playable GitHub Pages video: https://joe2gaan.github.io/localaiservers/qwen36-gfx906/media/
+Click the preview image to watch the archived GitHub Pages video:
+https://joe2gaan.github.io/localaiservers/qwen36-gfx906/media/
 
 ## What this bundle contains
 
