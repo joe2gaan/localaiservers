@@ -76,8 +76,11 @@ Current roadmap direction from the source inventory and key-learning record:
   `MAX_MODEL_LEN=131072` serving contract intact, and continue source cleanup
   around RowParallel, sidecar Tree/LL, RCCL/Tree/LL, call-site routing, and
   graph-native boundary changes.
-- MoE work should protect the strict-valid TP8 full-BAR/P2P-on bar and keep TP4
-  labeled as capped-only until the uncapped strict runaway behavior is resolved.
+- MoE work should protect the strict-valid TP8 full-BAR/P2P-on bar and preserve
+  the corrected post-v0.2 TP4 repeatability evidence: the release-time TP4
+  fixed-token result remains `109.283` c1_10000 backend TPS, and a follow-up
+  study found that the earlier TP4 strict runaway did not reproduce across
+  `6/6` strict repeats.
 - Prefill and concurrency work should remain separate from single-request c1 decode
   claims.
 - Consumer-only cleanup is useful as component evidence but is not treated as a

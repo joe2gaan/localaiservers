@@ -61,11 +61,14 @@ Related index:
   `MAX_MODEL_LEN=131072` with eight pre-measure warmups: strict backend TPS
   `94.907`, `c1_2000` backend TPS `97.028`, and `c1_10000` backend TPS
   `91.290`; note `strict gate valid`.
-- Qwen3.6 35B-A3B MoE TP4 remains capped-only until the strict runaway is
-  resolved. The active TP4 lane is `moe35b_tp4_fullbar_p2pon` on `.30`:
-  strict is `invalid/runaway`, `c1_2000` backend TPS is `116.146`, and
-  `c1_10000` backend TPS is `109.283`; note `uncapped strict prompt did not
-  stop after >60K tokens`.
+- Qwen3.6 35B-A3B MoE TP4 has a corrected post-v0.2 repeatability note. The
+  active TP4 lane is `moe35b_tp4_fullbar_p2pon` on `.30`: the v0.2.0
+  release-time fixed-token result is `c1_2000` backend TPS `116.146` and
+  `c1_10000` backend TPS `109.283`. A follow-up study found that the earlier
+  TP4 strict runaway did not reproduce: `6/6` strict repeats passed across
+  `.20` and `.30`, all with `finish_reason=stop` and `qwen_gate_valid=true`,
+  with strict backend TPS from `113.196` to `115.995`. No code, Docker image,
+  tag, or runtime artifact changed.
 - The same ROCm7.2 experimental release image covers both active contracts with
   model-specific env and overlays:
   `joe2gaan/localaiservers:qwen36-gfx906-rocm72-dense-moe-runtime-archive-0a2dbd6b7f0b`,
@@ -6045,9 +6048,11 @@ Decision:
      `66.069`; note `strict gate valid`. `moe35b_tp8_fullbar_p2pon` on `.30`
      reached strict backend TPS `94.907`, `c1_2000` backend TPS `97.028`, and
      `c1_10000` backend TPS `91.290`; note `strict gate valid`.
-     `moe35b_tp4_fullbar_p2pon` on `.30` had strict `invalid/runaway`,
-     `c1_2000` backend TPS `116.146`, and `c1_10000` backend TPS `109.283`;
-     note `uncapped strict prompt did not stop after >60K tokens`. The same
+     `moe35b_tp4_fullbar_p2pon` on `.30` had release-time fixed-token
+     `c1_2000` backend TPS `116.146` and `c1_10000` backend TPS `109.283`;
+     a post-v0.2 repeatability study then found that the earlier TP4 strict
+     runaway did not reproduce, with `6/6` strict repeats passing across `.20`
+     and `.30` at strict backend TPS `113.196` to `115.995`. The same
      ROCm7.2 experimental release image covers dense and MoE through
      model-specific env and overlays. Docker Hub remains an evergreen artifact
      distribution channel; TPS claims should stay in GitHub Releases,
@@ -6056,5 +6061,4 @@ Decision:
      plus amdgpu source patching. This is not a user instruction to flash
      cards; the public repo does not redistribute BIOS binaries or imply
      warranty or certification. v0.1.0 remains the older published GitHub Release
-     boundary; this entry is post-v0.1 main-branch validation until a separate
-     release is published.
+     boundary; v0.2.0 is the published ROCm7.2 Dense/MoE release boundary.

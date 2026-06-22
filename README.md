@@ -44,16 +44,18 @@ active-contract release.
 | --- | --- | ---: | ---: | ---: | --- |
 | v0.2.0 | Dense 27B TP8 full-BAR/P2P-on | 69.514 | 70.347 | 66.069 | strict-valid; ai-info 10K gate cleared |
 | v0.2.0 | Qwen3.6 35B-A3B MoE TP8 full-BAR/P2P-on | 94.907 | 97.028 | 91.290 | strict-valid MoE publication bar |
-| v0.2.0 | Qwen3.6 35B-A3B MoE TP4 full-BAR/P2P-on | invalid/runaway | 116.146 | 109.283 | capped fixed-token only; not strict-valid |
+| v0.2.0 | Qwen3.6 35B-A3B MoE TP4 full-BAR/P2P-on | initial caveat corrected below | 116.146 | 109.283 | release-time fixed-token result; post-v0.2 strict repeatability passed |
 
 `91.290` is the MoE TP8 `c1_10000` backend TPS; the MoE TP8 strict backend
-TPS is `94.907`. MoE TP4 is capped-only and is not strict-valid.
+TPS is `94.907`. MoE TP4 `109.283` is a capped fixed-token `c1_10000` result,
+not a strict TPS value.
 
 Post-v0.2 validation note: a follow-up MoE TP4 strict repeatability study
 passed `6/6` strict repeats across `.20` and `.30` under the native
 `moe35b_tp4_fullbar_p2pon` release profile, with strict backend TPS from
-`113.196` to `115.995`. This is post-v0.2 validation evidence and does not
-change the published v0.2.0 release boundary. The report is in
+`113.196` to `115.995`. This correction found that the earlier TP4 strict
+runaway did not reproduce; no code, Docker image, tag, or runtime artifact
+changed. The report is in
 [test-reports/qwen36-gfx906-moe-tp4-strict-runaway/](test-reports/qwen36-gfx906-moe-tp4-strict-runaway/).
 
 `MAX_MODEL_LEN=131072` is preserved for the v0.2 active contracts. The same
