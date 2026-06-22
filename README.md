@@ -264,16 +264,10 @@ MI50 32GB lane:
 c1_10000: 90+ TPS sustained backend decode publication baseline
 ```
 
-The canonical Qwen3.6 README also preserves a newer 95+ TPS 10K validation
-result for the same runtime lane. That result is not part of the v0.1.0
-publication release. Use GitHub Releases for published claim boundaries and the
-Published Releases section above for the latest v0.2.0 Dense/MoE TPS summary:
-
-```text
-c1_2000:  101.47 TPS backend decode
-c1_10000:  95.66 TPS backend decode
-c1_10000:  95.36 client wall TPS
-```
+Earlier interim TP4 validation numbers are superseded in the root README by the
+published release table above. Use GitHub Releases for published claim boundaries
+and the Published Releases section above for the latest v0.2.0 Dense/MoE TPS
+summary.
 
 See [qwen36-gfx906/README.md](qwen36-gfx906/README.md) for the full deployment and
 reproduction notes, including build pins, Docker archive hashes, runtime defaults, disk
