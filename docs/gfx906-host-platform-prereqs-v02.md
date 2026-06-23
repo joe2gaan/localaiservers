@@ -23,6 +23,8 @@ For comparable v0.2 reproduction runs, the selected host should have:
   GFX906 VBIOS revision recorded for the public v0.2 host-platform record is
   `113-D1631700-111`.
 - The site-local amdgpu host source patch required by the full-BAR/P2P-on lane.
+  Reconstructed patch evidence is published for source review, but the public
+  reproduction package still does not bundle or apply a host amdgpu patch.
 
 ## GPU BIOS / VBIOS Revision
 
@@ -60,14 +62,25 @@ numbers.
 The v0.2.1 public reproduction package does not bundle:
 
 - BIOS or VBIOS binaries.
-- Host amdgpu source patches.
+- A host amdgpu patch installer or binary package.
 - DKMS packages.
 - Linux kernel packages.
 - Instructions to flash cards or modify firmware.
 
-As of v0.2.1, the exact host amdgpu patch diff, patch hash, and source base are
-not public in this repository. Treat the host amdgpu patch as a required
-platform prerequisite until it is published separately.
+The public repository now includes reconstructed amdgpu patch evidence for
+source review:
+
+- Reconstruction note:
+  [`docs/gfx906-amdgpu-fullbar-p2p-reconstruction-20260619.md`](gfx906-amdgpu-fullbar-p2p-reconstruction-20260619.md)
+- Reconstructed patch:
+  [`patches/gfx906-amdgpu-fullbar-p2p-reconstructed-20260619.patch`](../patches/gfx906-amdgpu-fullbar-p2p-reconstructed-20260619.patch)
+- Reconstructed patch SHA-256:
+  `04149c2944f322476b5cf272d18a27bd796cb6ffc169ac2a2d2f0b1162ce0f8e`
+
+The original standalone patch file and exact clean source base have not yet
+been recovered. Treat the host amdgpu patch as a required platform prerequisite
+until the patch is validated against an exact source checkout and published as a
+proper host patch package.
 
 ## Read-Only Preflight
 

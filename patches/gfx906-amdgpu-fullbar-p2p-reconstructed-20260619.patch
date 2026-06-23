@@ -1,0 +1,140 @@
+# Reconstructed GFX906 full-BAR/P2P amdgpu patch evidence.
+#
+# Provenance:
+# - Reconstructed from the 2026-06-19 dry-run target list and local ROCm 7.2
+#   amdgpu source snapshots.
+# - Original standalone patch file has not been recovered.
+# - The amdgpu.h hunk is reconstructed from the dry-run target list and the
+#   pcie_p2p symbol use visible in recovered source state.
+# - Validate against a clean, exact source checkout before using this as a
+#   build input.
+#
+# This file is not an installation instruction and is not an official AMD patch.
+
+diff --git a/amd/amdgpu/amdgpu.h b/amd/amdgpu/amdgpu.h
+--- a/amd/amdgpu/amdgpu.h
++++ b/amd/amdgpu/amdgpu.h
+@@
+ extern int amdgpu_mtype_local;
++extern bool pcie_p2p;
+
+diff --git a/amd/amdgpu/amdgpu_drv.c b/amd/amdgpu/amdgpu_drv.c
+--- a/amd/amdgpu/amdgpu_drv.c
++++ b/amd/amdgpu/amdgpu_drv.c
+@@ -889,6 +889,14 @@ int amdgpu_mtype_local;
+ MODULE_PARM_DESC(mtype_local, "MTYPE for local memory (0 = MTYPE_RW (default), 1 = MTYPE_NC, 2 = MTYPE_CC)");
+ module_param_named_unsafe(mtype_local, amdgpu_mtype_local, int, 0444);
+
++/**
++ * DOC: pcie_p2p (bool)
++ * Enable PCIe P2P (requires large-BAR). Default value: true (on)
++ */
++bool pcie_p2p = true;
++module_param(pcie_p2p, bool, 0444);
++MODULE_PARM_DESC(pcie_p2p, "Enable PCIe P2P (requires large-BAR). (N = off, Y = on(default))");
++
+ /**
+  * DOC: dcfeaturemask (uint)
+  * Override display features enabled. See enum DC_FEATURE_MASK in drivers/gpu/drm/amd/include/amd_shared.h.
+diff --git a/amd/amdgpu/amdgpu_device.c b/amd/amdgpu/amdgpu_device.c
+--- a/amd/amdgpu/amdgpu_device.c
++++ b/amd/amdgpu/amdgpu_device.c
+@@ -5612,28 +5612,50 @@ int amdgpu_device_baco_exit(struct drm_device *dev)
+  * Return true if @peer_adev can access (DMA) @adev through the PCIe
+  * BAR, i.e. @adev is "large BAR" and the BAR matches the DMA mask of
+  * @peer_adev.
++ *
++ * @note: CONFIG_HSA_AMD_P2P indicates support for P2P DMA mappings. Query
++ * P2PDMA distance only if the kernel has all the prerequisites for P2P DMA
++ * support. Otherwise fall back to the less reliable legacy P2P support to
++ * avoid regressions.
++ *
+  */
+ bool amdgpu_device_is_peer_accessible(struct amdgpu_device *adev,
+                                       struct amdgpu_device *peer_adev)
+ {
++        bool p2p_access = true;
++        bool p2p_addressable = false;
++        bool is_large_bar = adev->gmc.visible_vram_size &&
++                adev->gmc.real_vram_size == adev->gmc.visible_vram_size;
++
+ #ifdef CONFIG_HSA_AMD_P2P
+-        uint64_t address_mask = peer_adev->dev->dma_mask ?
+-                ~*peer_adev->dev->dma_mask : ~((1ULL << 32) - 1);
+-        resource_size_t aper_limit =
+-                adev->gmc.aper_base + adev->gmc.aper_size - 1;
+-        bool p2p_access =
++        p2p_access =
+                 !adev->gmc.xgmi.connected_to_cpu &&
+                 !(pci_p2pdma_distance(adev->pdev, peer_adev->dev, false) < 0);
+-
+-        return pcie_p2p && p2p_access && (adev->gmc.visible_vram_size &&
+-                adev->gmc.real_vram_size == adev->gmc.visible_vram_size &&
+-                !(adev->gmc.aper_base & address_mask ||
+-                  aper_limit & address_mask));
+-#else
+-        return false;
++        if (!p2p_access)
++                dev_info(adev->dev, "PCIe P2P access from peer device %s is not supported by the chipset\n",
++                        pci_name(peer_adev->pdev));
++        p2p_addressable = amdgpu_device_check_iommu_remap(peer_adev);
+ #endif
++
++        if (!p2p_addressable) {
++                uint64_t address_mask = peer_adev->dev->dma_mask ?
++                        ~*peer_adev->dev->dma_mask : ~((1ULL << 32) - 1);
++                resource_size_t aper_limit =
++                        adev->gmc.aper_base + adev->gmc.aper_size - 1;
++
++                p2p_addressable = !(adev->gmc.aper_base & address_mask ||
++                                     aper_limit & address_mask);
++        }
++        return pcie_p2p && is_large_bar && p2p_access && p2p_addressable;
+ }
+
+ int amdgpu_device_baco_enter(struct drm_device *dev)
+diff --git a/amd/amdgpu/amdgpu_amdkfd_gpuvm.c b/amd/amdgpu/amdgpu_amdkfd_gpuvm.c
+--- a/amd/amdgpu/amdgpu_amdkfd_gpuvm.c
++++ b/amd/amdgpu/amdgpu_amdkfd_gpuvm.c
+@@ -80,6 +80,25 @@ static bool kfd_mem_is_attached(struct amdgpu_vm *avm,
+         return false;
+ }
+
++/**
++ * reuse_dmamap() - Check whether adev can share the original
++ * userptr BO
++ *
++ * If both adev and bo_adev are in direct mapping or
++ * in the same iommu group, they can share the original BO.
++ *
++ * @adev: Device to which can or cannot share the original BO
++ * @bo_adev: Device to which allocated BO belongs to
++ *
++ * Return: returns true if adev can share original userptr BO,
++ * false otherwise.
++ */
++static bool reuse_dmamap(struct amdgpu_device *adev, struct amdgpu_device *bo_adev)
++{
++        return (adev->ram_is_direct_mapped && bo_adev->ram_is_direct_mapped) ||
++                        (adev->dev->iommu_group == bo_adev->dev->iommu_group);
++}
++
+ /* Set memory usage limits. Current, limits are
+  *  System (TTM + userptr) memory - 15/16th System RAM
+  *  TTM memory - 3/8th System RAM
+@@ -842,11 +861,12 @@ static int kfd_mem_attach(struct amdgpu_device *adev, struct kgd_mem *mem,
+                          va + bo_size, vm);
+
+                 if ((adev == bo_adev && !(mem->alloc_flags & KFD_IOC_ALLOC_MEM_FLAGS_MMIO_REMAP)) ||
+-                    (amdgpu_ttm_tt_get_usermm(mem->bo->tbo.ttm) && adev->ram_is_direct_mapped) ||
++                    (amdgpu_ttm_tt_get_usermm(mem->bo->tbo.ttm) && reuse_dmamap(adev, bo_adev)) ||
++                    (mem->domain == AMDGPU_GEM_DOMAIN_GTT && reuse_dmamap(adev, bo_adev)) ||
+                     same_hive) {
+                         /* Mappings on the local GPU, or VRAM mappings in the
+-                         * local hive, or userptr mapping IOMMU direct map mode
+-                         * share the original BO
++                         * local hive, or userptr, or GTT mapping can reuse dma map
++                         * address space share the original BO
+                          */
+                         attachment[i]->type = KFD_MEM_ATT_SHARED;
+                         bo[i] = mem->bo;

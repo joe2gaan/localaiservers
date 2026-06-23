@@ -21,6 +21,9 @@ GFX906 Preservation & Public AI Research Infrastructure
 - [GFX906 v0.2 host platform prerequisites](gfx906-host-platform-prereqs-v02.md)
   records the standardized full-BAR GFX906 VBIOS revision used for the public
   v0.2 host-platform record and the non-bundled amdgpu patch prerequisite.
+- [Reconstructed GFX906 amdgpu full-BAR/P2P patch evidence](gfx906-amdgpu-fullbar-p2p-reconstruction-20260619.md)
+  records the recovered source-level patch evidence and remaining validation
+  gaps for the host amdgpu prerequisite.
 - v0.2.1 ROCm7.2 Dense/MoE reproduction-package release:
   [`releases/v0.2.1-gfx906-rocm72-dense-moe-repro.md`](../releases/v0.2.1-gfx906-rocm72-dense-moe-repro.md)
 - Post-v0.2 MoE TP4 strict repeatability report:
