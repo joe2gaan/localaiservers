@@ -22,9 +22,10 @@ For comparable v0.2 reproduction runs, the selected host should have:
 - Official AMD VBIOS standardization where needed. The standardized full-BAR
   GFX906 VBIOS revision recorded for the public v0.2 host-platform record is
   `113-D1631700-111`.
-- The site-local amdgpu host source patch required by the full-BAR/P2P-on lane.
-  Reconstructed patch evidence is published for source review, but the public
-  reproduction package still does not bundle or apply a host amdgpu patch.
+- Host amdgpu source state matching the pinned `ROCm/ROCK-Kernel-Driver`
+  `rocm-7.2.1` source lock recorded below. Reconstructed patch evidence is
+  published for source review, but the public reproduction package still does
+  not bundle or apply a host amdgpu patch.
 
 ## GPU BIOS / VBIOS Revision
 
@@ -67,20 +68,23 @@ The v0.2.1 public reproduction package does not bundle:
 - Linux kernel packages.
 - Instructions to flash cards or modify firmware.
 
-The public repository now includes reconstructed amdgpu patch evidence for
-source review:
+The public repository now includes a pinned amdgpu source-state lock and
+reconstructed patch evidence for source review:
 
 - Reconstruction note:
   [`docs/gfx906-amdgpu-fullbar-p2p-reconstruction-20260619.md`](gfx906-amdgpu-fullbar-p2p-reconstruction-20260619.md)
+- Locked source: `ROCm/ROCK-Kernel-Driver` tag `rocm-7.2.1`, peeled commit
+  `d2762fd86fce89f0b32614aeca806a548c7f6993`
 - Reconstructed patch:
   [`patches/gfx906-amdgpu-fullbar-p2p-reconstructed-20260619.patch`](../patches/gfx906-amdgpu-fullbar-p2p-reconstructed-20260619.patch)
 - Reconstructed patch SHA-256:
-  `04149c2944f322476b5cf272d18a27bd796cb6ffc169ac2a2d2f0b1162ce0f8e`
+  `7e08477b0160c0487d0fd24746ee26a577d70990edd537ae45a916b76d4ef4a1`
 
-The original standalone patch file and exact clean source base have not yet
-been recovered. Treat the host amdgpu patch as a required platform prerequisite
-until the patch is validated against an exact source checkout and published as a
-proper host patch package.
+The original standalone patch file has not yet been recovered. The recovered
+`.c` files match the locked official source state; treat that source state as
+the host amdgpu prerequisite until a proper host module package is published.
+Do not apply the reconstructed patch to the locked source without checking
+whether the relevant hunks are already present.
 
 ## Read-Only Preflight
 

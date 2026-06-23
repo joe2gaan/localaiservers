@@ -9,6 +9,13 @@
 # - Validate against a clean, exact source checkout before using this as a
 #   build input.
 #
+# Source lock update:
+# - The recovered .c files match ROCm/ROCK-Kernel-Driver tag rocm-7.2.1,
+#   peeled commit d2762fd86fce89f0b32614aeca806a548c7f6993.
+# - The official rocm-7.2.1 amdgpu.h contains the pcie_p2p declaration.
+# - Do not apply this patch to rocm-7.2.1 without first checking whether the
+#   relevant hunks are already present.
+#
 # This file is not an installation instruction and is not an official AMD patch.
 
 diff --git a/amd/amdgpu/amdgpu.h b/amd/amdgpu/amdgpu.h

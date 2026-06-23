@@ -216,11 +216,11 @@ patch amdgpu, flash firmware, or change host settings:
 ./check_host_platform_prereqs.sh
 ```
 
-The host amdgpu source patch required by the full-BAR/P2P-on lane is not bundled
+The host amdgpu source state required by the full-BAR/P2P-on lane is not bundled
 in v0.2.1. The standardized full-BAR GFX906 VBIOS revision recorded for the
-public v0.2 host-platform record is `113-D1631700-111`. Reconstructed amdgpu
-patch evidence is linked from the host-prerequisite note for source review, but
-it is not a bundled installer or host patch package. See
+public v0.2 host-platform record is `113-D1631700-111`. The recovered amdgpu
+state is pinned to `ROCm/ROCK-Kernel-Driver` tag `rocm-7.2.1` for source
+review, but it is not a bundled installer or host module package. See
 [docs/gfx906-host-platform-prereqs-v02.md](docs/gfx906-host-platform-prereqs-v02.md).
 
 Choose one published v0.2 profile:
