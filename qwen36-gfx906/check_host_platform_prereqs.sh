@@ -181,9 +181,10 @@ else
 fi
 
 echo
-echo "Host amdgpu patch status:"
-echo "- The v0.2.1 public repo does not bundle the host amdgpu source patch."
-echo "- This preflight cannot prove the exact amdgpu patch hash or source base."
+echo "Host amdgpu source-state status:"
+echo "- The v0.2.1 public repo does not bundle a host amdgpu module package."
+echo "- The recovered source state is pinned in docs to ROCm/ROCK-Kernel-Driver rocm-7.2.1."
+echo "- This preflight cannot build, install, or prove the exact host module state."
 echo "- Treat a failing full-BAR/P2P preflight as not comparable with the published v0.2 numbers."
 echo "- Expected standardized GPU VBIOS revision: ${EXPECTED_GPU_VBIOS}."
 

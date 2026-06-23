@@ -109,7 +109,8 @@ The roadmap should produce public-benefit outputs rather than private access cla
 
 - Maintain the public source-kernel inventory.
 - Maintain the public key-learnings record.
-- Maintain the post-v0.1 active-contract record.
+- Maintain the published v0.2 active-contract record and v0.2.1 reproduction
+  record.
 - Publish benchmark methodology updates.
 - Publish QC methodology updates.
 - Formalize benchmark artifacts.

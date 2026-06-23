@@ -76,9 +76,10 @@ Related index:
   `sha256:8c380e9ca48943d8617de5a2e2eaf32a26dcc2c341e4b4f4f8c45294a72b8f1e`.
   Docker Hub remains an evergreen artifact distribution channel; TPS claims
   should stay in GitHub Releases, repository docs, and benchmark artifacts.
-  v0.1.0 remains the older published GitHub Release boundary; these are
-  post-v0.1 main-branch validation notes until a separate release is published.
-  GitHub Releases remain canonical for published claim boundaries.
+  v0.1.0 remains the older published GitHub Release boundary. v0.2.0 is the
+  published ROCm7.2 Dense/MoE benchmark release boundary, and v0.2.1 is the
+  reproduction-package release. GitHub Releases remain canonical for published
+  claim boundaries.
 - Platform remediation for the current full-BAR/P2P-on lane required official
   AMD VBIOS standardization, not modified BIOS images, plus amdgpu source
   patching. This is not a user instruction to flash cards; the public repo does

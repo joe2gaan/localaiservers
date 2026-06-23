@@ -730,9 +730,12 @@ was tied to a source path.
     warmups: dense 27B TP8 on `.20` reached strict-valid `69.514` backend TPS,
     c1_2000 `70.347`, and c1_10000 `66.069`; MoE 35B-A3B TP8 on `.30`
     reached strict-valid `94.907`, c1_2000 `97.028`, and c1_10000 `91.290`.
-    MoE TP4 on `.30` showed warm capped performance, c1_2000 `116.146` and
-    c1_10000 `109.283`, but the uncapped strict prompt ran past 60K tokens
-    without a stop/think-close and remains a prompt/generation-validity gap.
+    MoE TP4 on `.30` has a release-time fixed-token result, c1_2000 `116.146`
+    and c1_10000 `109.283`. The earlier strict-runaway caveat has a post-v0.2
+    correction: the native TP4 profile passed `6/6` strict repeats across `.20`
+    and `.30`, all with `finish_reason=stop` and `qwen_gate_valid=true`, with
+    strict backend TPS from `113.196` to `115.995`. No code, Docker image, tag,
+    model package, or runtime artifact changed.
 
     Deploy-source note: local Hugging Face snapshot resolution now validates
     every shard referenced by `model.safetensors.index.json` before selecting a
