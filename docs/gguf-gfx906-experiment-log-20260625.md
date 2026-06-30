@@ -18857,3 +18857,87 @@ stronger than runtime success from a local working directory. The release tag
 must contain the scripts, profile files, overlays, and release notes needed for
 a user to start from a clean checkout before public asset URL verification and
 full serving replay can be meaningful.
+
+## GGUF-357 - Local Proof Commit Clean Checkout Gate
+
+### Setup
+
+- Date: 2026-06-30 UTC.
+- Scope: test whether the vNext package is self-contained once the current
+  release-note, profile, overlay, launcher, verifier, and experiment-log files
+  are committed to a local proof branch.
+- Local proof branch: `vnext-local-repro-package-proof`.
+- Package proof commit: `04c2c51`.
+- The branch was re-cloned and rechecked after this log entry was added.
+- Method:
+  - clone the local proof branch into a temporary clean checkout;
+  - check that the vNext release note, profile directory, overlays, launcher,
+    benchmark runner, readiness verifier, and experiment log exist;
+  - run `./verify_vnext_serviceability.sh`;
+  - run `./verify_vnext_contract_matrix.sh`;
+  - run `./verify_vnext_release_asset_urls.sh` without a local override;
+  - rerun the same asset URL gate against the maintainer-only local asset
+    mirror with `ALLOW_LOCAL_ASSET_PREFLIGHT=1`.
+
+### Result
+
+The clean checkout of the current local proof tip contained the required vNext
+package files:
+
+```text
+present releases/draft-vnext-gfx906-rocm72-gguf-hf-repro.md
+present qwen36-gfx906/verify_vnext_release_readiness.sh
+present qwen36-gfx906/vnext_repro_launcher.sh
+present qwen36-gfx906/run_vnext_profile_benchmark.sh
+present qwen36-gfx906/profiles/vnext
+present qwen36-gfx906/overlays
+present docs/gguf-gfx906-experiment-log-20260625.md
+```
+
+The clean-checkout package passed both lightweight gates:
+
+```text
+vNext developer serviceability check passed
+vNext contract matrix passed
+```
+
+The public GitHub Release URL gate still failed without a published vNext
+asset set:
+
+```text
+error: release asset URL did not resolve: Qwen3.6-27B-text-config-eosfix.tar.gz
+```
+
+The same clean-checkout gate passed against the maintainer-only local asset
+mirror and verified all `69` expected asset URLs/files for the internal replay
+tag.
+
+Both validation lanes were idle at the GPU level during this check, but neither
+exposed the large model/asset staging roots needed for another five-profile
+serving replay without restaging large assets first.
+
+### Promote / Reject
+
+Promote:
+
+- the local proof commit as a valid tree-content proof for the vNext package;
+- the serviceability and contract-matrix gates as clean-checkout checks, not
+  dirty-worktree-only checks;
+- the release-note requirement that final public replay must use real GitHub
+  Release asset URLs with no local override.
+
+Reject:
+
+- calling the goal complete from the local proof commit alone;
+- treating `ALLOW_LOCAL_ASSET_PREFLIGHT=1` as a public reproduction path;
+- rerunning the full serving ladder before the final public tag and asset URLs
+  exist, unless the model/asset staging roots are deliberately restored for a
+  targeted validation replay.
+
+### Reason
+
+The package is now self-contained at the Git tree level in a local proof
+commit, which closes the earlier clean-checkout visibility gap. The remaining
+release-note accuracy blocker is publication state: the final vNext tag and
+GitHub Release assets must exist, then the same readiness path must be replayed
+without local asset overrides and with `RUN_SERVING_BENCHMARKS=1`.
