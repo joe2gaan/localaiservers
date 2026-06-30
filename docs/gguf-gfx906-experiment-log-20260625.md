@@ -19012,3 +19012,53 @@ The repeat proves that the runtime path and instructions are not a one-off lane
 success. The remaining blocker is publication state, not launch behavior: the
 stand-alone vNext tag and public GitHub Release assets must exist, and the same
 readiness path must pass without local asset overrides.
+
+## GGUF-359 - Public vNext Asset Availability Recheck
+
+### Setup
+
+- Date: 2026-06-30 UTC.
+- Scope: recheck current public GitHub state before attempting another final
+  release-note replay.
+- Remote inspection path:
+  - read-only HTTPS tag lookup for vNext/GGUF/repro-like tags;
+  - read-only GitHub Releases API listing;
+  - `./verify_vnext_release_asset_urls.sh
+    v0.2.1-gfx906-rocm72-dense-moe-repro` from `qwen36-gfx906/`.
+
+### Result
+
+The public repository currently exposes the existing `v0.2.1` reproduction
+package release, plus the older `v0.2.0` and `v0.1.0` releases. No stand-alone
+vNext/GGUF release tag is present in the public tag listing.
+
+The vNext asset URL verifier failed against the existing public `v0.2.1` tag:
+
+```text
+error: release asset URL did not resolve: Qwen3.6-27B-text-config-eosfix.tar.gz
+```
+
+### Promote / Reject
+
+Promote:
+
+- the release-note requirement that the final public replay must use a
+  stand-alone vNext tag and the full expected GGUF release-asset set;
+- the URL verifier as the correct early failure before any expensive serving
+  replay.
+
+Reject:
+
+- treating the current public `v0.2.1` release as the vNext asset source;
+- rerunning the full serving ladder as final public proof before the vNext tag
+  and release assets exist;
+- changing runtime scripts or benchmark instructions because of a publication
+  state failure.
+
+### Reason
+
+The current public-state failure matches the release-note boundary. The local
+clean-checkout serving replay has already validated launch behavior with a
+maintainer-only asset mirror, but final public reproduction remains blocked
+until the stand-alone vNext release assets are published and the URL gate passes
+without `ALLOW_LOCAL_ASSET_PREFLIGHT=1`.
