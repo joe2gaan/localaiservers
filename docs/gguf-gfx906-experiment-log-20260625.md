@@ -18941,3 +18941,74 @@ commit, which closes the earlier clean-checkout visibility gap. The remaining
 release-note accuracy blocker is publication state: the final vNext tag and
 GitHub Release assets must exist, then the same readiness path must be replayed
 without local asset overrides and with `RUN_SERVING_BENCHMARKS=1`.
+
+## GGUF-358 - Clean Checkout Full Serving Replay Repeatability
+
+### Setup
+
+- Date: 2026-06-30 UTC.
+- Host: `.30`.
+- Scope: repeat the vNext release-note deployment path from a clean checkout of
+  the local proof commit with `RUN_SERVING_BENCHMARKS=1`.
+- Runtime image:
+  `joe2gaan/localaiservers:qwen36-gfx906-rocm72-dense-moe-runtime-archive-0a2dbd6b7f0b`.
+- Public-shape inputs:
+  - GGUF assets staged from a local file-backed release-asset mirror;
+  - HF model inputs staged from the public-input layout used by the vNext
+    wrappers;
+  - `ALLOW_LOCAL_ASSET_PREFLIGHT=1` because final public release URLs do not
+    exist yet.
+- Benchmark ladder per profile:
+  - normal pre-measure warmups;
+  - `c1_128_strict`;
+  - `c1_2000`;
+  - `c1_10000`.
+- Launch behavior: one profile at a time through the generated `vllm serve`
+  wrapper. The begin-think proxy was used only by the Qwen benchmark harness,
+  not as the normal serving interface.
+
+### Result
+
+The wrapper completed with `readiness_rc=0`, ended with
+`vNext full release reproduction path completed`, and produced benchmark
+summaries for all five profiles.
+
+| Profile | Strict backend TPS | c1_2000 backend TPS | c1_10000 backend TPS | Strict gate |
+| --- | ---: | ---: | ---: | --- |
+| `gguf-dense27b-tp8` | 70.097 | 71.081 | 66.543 | True |
+| `gguf-moe35b-tp4` | 118.948 | 120.961 | 113.684 | True |
+| `hf-dense27b-tp8` | 70.306 | 71.254 | 66.796 | True |
+| `hf-moe35b-tp4` | 114.557 | 113.436 | 108.044 | True |
+| `hf-moe35b-tp8` | 115.509 | 116.704 | 109.754 | True |
+
+The normal `vllm serve` endpoint came up for each profile. The replay confirmed
+that normal inference is available directly through the OpenAI-compatible vLLM
+endpoint and that the begin-think proxy is benchmark-harness-only.
+
+### Promote / Reject
+
+Promote:
+
+- the current release-note sequence as repeatable from a clean checkout when
+  model inputs and release-shaped assets are present;
+- the generated wrappers as normal `vllm serve` launchers for GGUF and HF
+  profiles;
+- the benchmark ladder ordering: warmups, strict, `c1_2000`, then `c1_10000`;
+- using a validation band instead of exact TPS equality for repeat runs, while
+  still requiring strict rows to pass the Qwen gate and Dense c1_10000 to clear
+  the 65 TPS gate.
+
+Reject:
+
+- calling this final public reproduction because it still used
+  `ALLOW_LOCAL_ASSET_PREFLIGHT=1` and a local file-backed asset mirror;
+- treating minor TPS drift between successful repeats as a release-note failure;
+- making the begin-think proxy part of ordinary inference instructions;
+- updating v0.2.0 or v0.2.1 claims from this vNext release-candidate replay.
+
+### Reason
+
+The repeat proves that the runtime path and instructions are not a one-off lane
+success. The remaining blocker is publication state, not launch behavior: the
+stand-alone vNext tag and public GitHub Release assets must exist, and the same
+readiness path must pass without local asset overrides.

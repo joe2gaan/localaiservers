@@ -659,6 +659,18 @@ Current validation status:
   evidence because it used maintainer local simulated release assets; final
   public reproduction requires the same replay from the stand-alone vNext tag
   and public GitHub Release asset URLs.
+- A second `.30` clean-checkout serving replay from the local proof commit
+  repeated the same documented flow and completed all five generated
+  `vllm serve` profiles. Results were: GGUF Dense TP8 strict `70.097`,
+  c1_2000 `71.081`, c1_10000 `66.543`; GGUF MoE TP4 strict `118.948`,
+  c1_2000 `120.961`, c1_10000 `113.684`; HF Dense TP8 strict `70.306`,
+  c1_2000 `71.254`, c1_10000 `66.796`; HF MoE TP4 strict `114.557`,
+  c1_2000 `113.436`, c1_10000 `108.044`; and HF MoE TP8 strict `115.509`,
+  c1_2000 `116.704`, c1_10000 `109.754`. Exact TPS equality with a single
+  evidence row is not required for reproduction; the pass condition is the full
+  readiness wrapper completing, strict rows passing the Qwen gate, Dense
+  c1_10000 clearing 65 TPS, and each profile staying in the observed validation
+  band for the selected lane.
 - Intentional model-format and HF/GGUF env-leak mismatches fail closed.
 
 Release-readiness work that remains before public promotion:

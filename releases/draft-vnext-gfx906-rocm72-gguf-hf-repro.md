@@ -266,6 +266,9 @@ Before publication, confirm:
   `LOCAL_RUNTIME_ROOT/vnext-launch-runs/...`;
 - every strict row is `qwen_gate_valid=true`;
 - Dense 27B `c1_10000` clears the 65 TPS ai-info gate;
+- benchmark TPS lands in the observed validation band for the selected lane;
+  exact TPS equality with any single evidence row below is not required because
+  strict output length and run-to-run scheduling can vary;
 - generated launch artifacts and benchmark summaries are archived or copied
   only after sanitizing local paths and host details; and
 - no v0.2.0 or v0.2.1 release claim is updated by the vNext replay.
@@ -471,6 +474,20 @@ used.
 | HF FP16 | Dense 27B TP8 full-BAR/P2P-on | `.30` | `70.474` | `71.326` | `66.810` | strict-valid; ai-info 10K gate cleared |
 | HF FP16 | Qwen3.6 35B-A3B MoE TP4 full-BAR/P2P-on | `.30` | `115.592` | `116.062` | `109.240` | strict-valid |
 | HF FP16 | Qwen3.6 35B-A3B MoE TP8 full-BAR/P2P-on | `.30` | `114.652` | `115.895` | `109.001` | strict-valid |
+
+A second `.30` clean-checkout serving replay from the local proof commit
+followed the same release-note flow, again with local simulated release assets
+because final public vNext release assets do not exist yet. It completed all
+five generated `vllm serve` profiles and produced the following repeated
+evidence:
+
+| Format | Profile | Host | Strict backend TPS | `c1_2000` backend TPS | `c1_10000` backend TPS | Status |
+| --- | --- | --- | ---: | ---: | ---: | --- |
+| GGUF F16 | Dense 27B TP8 full-BAR/P2P-on | `.30` | `70.097` | `71.081` | `66.543` | strict-valid; ai-info 10K gate cleared |
+| GGUF F16 | Qwen3.6 35B-A3B MoE TP4 full-BAR/P2P-on | `.30` | `118.948` | `120.961` | `113.684` | strict-valid |
+| HF FP16 | Dense 27B TP8 full-BAR/P2P-on | `.30` | `70.306` | `71.254` | `66.796` | strict-valid; ai-info 10K gate cleared |
+| HF FP16 | Qwen3.6 35B-A3B MoE TP4 full-BAR/P2P-on | `.30` | `114.557` | `113.436` | `108.044` | strict-valid |
+| HF FP16 | Qwen3.6 35B-A3B MoE TP8 full-BAR/P2P-on | `.30` | `115.509` | `116.704` | `109.754` | strict-valid |
 
 The readiness wrapper ended with:
 
