@@ -123,9 +123,11 @@ verify_release_note_locks() {
     require_lock_text "$release_note" "check_host_platform_prereqs.sh" "host platform preflight"
     require_lock_text "$release_note" "Container-internal paths such as" "container-internal path boundary"
     require_lock_text "$release_note" "HOST_MODEL_ROOT" "generated docker wrapper host root"
-    require_lock_text "$release_note" "Final publication still requires the public GGUF asset gate" "final-publication boundary"
-    require_lock_text "$release_note" "final GitHub Release asset URLs before publication" "final-public-asset gate"
-    require_lock_text "$release_note" "replace those links with the final vNext release tag" "final-link publication gate"
+    require_lock_text "$release_note" "Public reproduction" "public-reproduction boundary"
+    require_lock_text "$release_note" "public GGUF asset gate" "public-reproduction boundary"
+    require_lock_text "$release_note" "vnext-gfx906-rocm72-gguf-hf-repro" "final-public-asset gate"
+    require_lock_text "$release_note" "GitHub Release asset URLs" "final-public-asset gate"
+    require_lock_text "$release_note" "blob/vnext-gfx906-rocm72-gguf-hf-repro" "final-link tag pin"
     require_lock_text "$release_note" "--no-same-owner" "text-config tar ownership portability disclosure"
     require_lock_text "$release_note" "regular GGUF file already exists" "final GGUF reuse disclosure"
     require_lock_text "$release_note" "split parts again" "final GGUF reuse disclosure"
@@ -186,7 +188,7 @@ verify_profile_doc_locks() {
     [ -f "$profile_doc" ] || die "profile README missing: $profile_doc"
 
     for lock in \
-        "future stand-alone vNext release package" \
+        "stand-alone vNext release package" \
         "not a patch, addendum, or silent replacement" \
         "reproducible from its own release tag" \
         "tables, and claim boundary" \

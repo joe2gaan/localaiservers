@@ -1,7 +1,7 @@
 # vNext Reproduction Launcher Profiles
 
 This directory contains contract profiles for the vNext reproduction launcher.
-The launcher is experimental scaffolding for a future stand-alone vNext release package.
+The launcher is scaffolding for the stand-alone vNext release package.
 vNext is not a patch, addendum, or silent replacement for the published v0.2.1
 reproduction package; v0.2.1 remains a historical control while vNext must be
 reproducible from its own release tag, public assets, instructions, validation
@@ -195,8 +195,8 @@ manifest rows and rejects part names with paths, parent-directory traversal, or
 extra fields before download. It also rejects placeholder release tags, unsafe
 model roots such as `/` or `/home`, and unapproved `file://` asset bases before
 attempting any download.
-Before publishing, run the public asset gate against the final release tag and
-an empty or intentionally selected model root:
+Run the public asset gate against this release tag and an empty or intentionally
+selected model root:
 
 ```sh
 cd qwen36-gfx906
@@ -657,8 +657,8 @@ Current validation status:
   c1_2000 `116.062`, c1_10000 `109.240`; and HF MoE TP8 strict `114.652`,
   c1_2000 `115.895`, c1_10000 `109.001`. This is still release-candidate
   evidence because it used maintainer local simulated release assets; final
-  public reproduction requires the same replay from the stand-alone vNext tag
-  and public GitHub Release asset URLs.
+  public reproduction requires the same replay from the
+  `vnext-gfx906-rocm72-gguf-hf-repro` tag and public GitHub Release asset URLs.
 - A second `.30` clean-checkout serving replay from the local proof commit
   repeated the same documented flow and completed all five generated
   `vllm serve` profiles. Results were: GGUF Dense TP8 strict `70.097`,

@@ -1,13 +1,11 @@
-# Draft vNext GFX906 ROCm7.2 GGUF/HF Stand-Alone Contract Reproduction Package
+# vnext-gfx906-rocm72-gguf-hf-repro - GFX906 ROCm7.2 GGUF/HF Stand-Alone Contract Reproduction Package
 
-> Draft wording for owner review. No tag or GitHub Release has been created.
-> Before publishing, replace `main` links with the final release tag or pinned
-> release commit.
+Release tag: `vnext-gfx906-rocm72-gguf-hf-repro`
 
 ## Release Boundary
 
-This draft describes a future stand-alone vNext reproduction-package release
-for the GFX906 / MI50 ROCm7.2 Dense/MoE work.
+This release describes the stand-alone vNext reproduction-package release for
+the GFX906 / MI50 ROCm7.2 Dense/MoE work.
 
 vNext is not a patch, addendum, or silent replacement for the published
 v0.2.0/v0.2.1 release boundaries. It is a separate release package with its own
@@ -48,8 +46,8 @@ This release must be reproducible on a user's own qualifying GFX906 host. It
 must not depend on LocalAIServers internal hosts, internal mount paths, or
 unpublished model files.
 
-Portability is a release gate, not a best-effort note. Before this draft can
-be published, a clean-room run must start from only these public inputs:
+Portability is a release gate, not a best-effort note. A clean-room run must
+start from only these public inputs:
 
 - a fresh clone of the tagged repository checkout;
 - the pinned public Docker image and digest listed in this release;
@@ -123,20 +121,10 @@ assembled-file hash.
 | Dense tokenizer | Public Hugging Face repo `Qwen/Qwen3.6-27B` pinned with `TOKENIZER_REVISION=6a9e13bd6fc8f0983b9b99948120bc37f49c13e9` | n/a |
 | MoE tokenizer | Public Hugging Face repo `Qwen/Qwen3.6-35B-A3B` pinned with `TOKENIZER_REVISION=995ad96eacd98c81ed38be0c5b274b04031597b0` | n/a |
 
-If the split release assets, part manifests, dense text-config asset, and
-public pinned MoE tokenizer path are not present, this section must be replaced
-by a locked public conversion and config-generation recipe before publication.
-Otherwise the GGUF profile results remain validation evidence only and this
-draft must not be published as a portable GGUF reproduction package.
-
-Current blocker for this draft: the full Dense and MoE F16 GGUF files and the
-Dense text-config/tokenizer archive identified above have local hash-locked
-validation evidence, but they are not public reproduction inputs until they are
-attached to the final standalone GitHub Release. Do not publish the GGUF Dense
-result as a portable claim until `Qwen3.6-27B-text-config-eosfix.tar.gz` is
-attached to the release with the locked hash, or this section is replaced by
-exact public commands that generate the same config/tokenizer directory and
-hashes from the pinned `Qwen/Qwen3.6-27B` revision.
+The split release assets, part manifests, dense text-config asset, and public
+pinned tokenizer paths are the public GGUF reproduction inputs for this package.
+If any of these assets are missing from the GitHub Release, the public asset URL
+gate must fail before benchmark launch.
 
 A local reconstruction attempt from the pinned public `Qwen/Qwen3.6-27B`
 `config.json` did not reproduce the locked Dense text-config hash under the
@@ -148,9 +136,9 @@ then documented as the vNext stand-alone release input.
 
 Earlier `file://` staged audits, clean-room simulations, and fixture hash
 substitutions are useful maintainer checks for the split-asset mechanics, but
-they do not satisfy this public reproduction requirement. Treat those audits as
-release-candidate evidence only until the final public assets or generation
-recipe are published and rerun.
+they do not satisfy this public reproduction requirement. Public reproduction
+requires the GitHub Release assets for `vnext-gfx906-rocm72-gguf-hf-repro` and a
+replay without local asset overrides.
 
 Public GGUF repositories that provide BF16 or quantized variants are useful for
 source comparison, but they are not interchangeable with the F16 GGUF artifacts
@@ -317,16 +305,9 @@ benchmark ladder used for promotion.
 ## Validated Profile Results
 
 The following values are clean contract-run evidence from the vNext launcher
-path. They are draft release-candidate values until this package is tagged and
-published. GGUF values also require the public artifact or conversion path in
-the Public Reproducibility Requirement section to be completed before they can
-be treated as portable reproduction claims.
-
-Do not cite the GGUF rows below as final public reproduction claims until the
-final standalone vNext release assets exist, the Dense text-config archive is a
-published release asset or replaced by a public generation recipe, and the
-documented readiness flow is rerun against the published tag with
-`RUN_SERVING_BENCHMARKS=1`.
+path. Public reproduction of these values requires the GitHub Release assets,
+public HF inputs, qualifying full-BAR/P2P-on host state, and the documented
+readiness flow with `RUN_SERVING_BENCHMARKS=1`.
 
 | Format | Profile | Host | Strict backend TPS | `c1_2000` backend TPS | `c1_10000` backend TPS | Status |
 | --- | --- | --- | ---: | ---: | ---: | --- |
@@ -477,9 +458,8 @@ used.
 
 A second `.30` clean-checkout serving replay from the local proof commit
 followed the same release-note flow, again with local simulated release assets
-because final public vNext release assets do not exist yet. It completed all
-five generated `vllm serve` profiles and produced the following repeated
-evidence:
+before this stand-alone release was published. It completed all five generated
+`vllm serve` profiles and produced the following repeated evidence:
 
 | Format | Profile | Host | Strict backend TPS | `c1_2000` backend TPS | `c1_10000` backend TPS | Status |
 | --- | --- | --- | ---: | ---: | ---: | --- |
@@ -701,8 +681,8 @@ the split parts again. Symlinked GGUF files are materialized as regular files
 because the Docker wrapper mounts only `HOST_MODEL_ROOT` at `/opt/local-models`;
 absolute host symlinks outside that tree are not portable release inputs.
 
-Before publishing, run the public GGUF asset gate against the final release tag
-and a clean local model root:
+Run the public GGUF asset gate against this release tag and a clean local model
+root:
 
 ```sh
 cd qwen36-gfx906
@@ -716,9 +696,9 @@ staged Dense and MoE GGUF assets satisfy the profile contracts for
 GitHub Release asset URLs before the GGUF results can be described as public
 reproduction claims.
 
-If this release uses a conversion-based GGUF path instead of hosted files, the
-release must replace the release-asset download commands with the exact public
-conversion commands and expected output hashes before publication.
+This release uses hosted split GGUF files. A future conversion-based release
+would need to replace the release-asset download commands with exact public
+conversion commands and expected output hashes.
 
 After staging, a user should be able to verify the public inputs without
 knowing any LocalAIServers host path:
@@ -1019,13 +999,11 @@ recommendation.
 
 ## Validation Status
 
-The passed checks below are release-candidate evidence, not a publication
-complete signal. Final publication still requires the public GGUF asset gate to
-pass against the final GitHub Release asset URLs and a qualifying full-BAR/P2P
-host run to reproduce the serving benchmark ladder from those public inputs.
-The `Links` section below currently uses `main` URLs for draft owner review;
-before publishing, replace those links with the final vNext release tag or a
-pinned release commit and verify that every linked page resolves.
+The passed checks below are supporting validation evidence. Public reproduction
+still requires the public GGUF asset gate to pass against the
+`vnext-gfx906-rocm72-gguf-hf-repro` GitHub Release asset URLs and a qualifying
+full-BAR/P2P host run to reproduce the serving benchmark ladder from those
+public inputs.
 
 The vNext path has passed:
 
@@ -1094,16 +1072,16 @@ services.
 ## Links
 
 - vNext profile docs:
-  [qwen36-gfx906/profiles/vnext/README.md](https://github.com/joe2gaan/localaiservers/blob/main/qwen36-gfx906/profiles/vnext/README.md)
+  [qwen36-gfx906/profiles/vnext/README.md](https://github.com/joe2gaan/localaiservers/blob/vnext-gfx906-rocm72-gguf-hf-repro/qwen36-gfx906/profiles/vnext/README.md)
 - GGUF experiment log:
-  [docs/gguf-gfx906-experiment-log-20260625.md](https://github.com/joe2gaan/localaiservers/blob/main/docs/gguf-gfx906-experiment-log-20260625.md)
+  [docs/gguf-gfx906-experiment-log-20260625.md](https://github.com/joe2gaan/localaiservers/blob/vnext-gfx906-rocm72-gguf-hf-repro/docs/gguf-gfx906-experiment-log-20260625.md)
 - GGUF key learnings:
-  [docs/gguf-gfx906-key-learnings-20260625.md](https://github.com/joe2gaan/localaiservers/blob/main/docs/gguf-gfx906-key-learnings-20260625.md)
+  [docs/gguf-gfx906-key-learnings-20260625.md](https://github.com/joe2gaan/localaiservers/blob/vnext-gfx906-rocm72-gguf-hf-repro/docs/gguf-gfx906-key-learnings-20260625.md)
 - GGUF source/kernel inventory:
-  [docs/gguf-gfx906-source-kernel-inventory-20260625.md](https://github.com/joe2gaan/localaiservers/blob/main/docs/gguf-gfx906-source-kernel-inventory-20260625.md)
+  [docs/gguf-gfx906-source-kernel-inventory-20260625.md](https://github.com/joe2gaan/localaiservers/blob/vnext-gfx906-rocm72-gguf-hf-repro/docs/gguf-gfx906-source-kernel-inventory-20260625.md)
 - Canonical Qwen/GFX906 deployment package:
-  [qwen36-gfx906/README.md](https://github.com/joe2gaan/localaiservers/blob/main/qwen36-gfx906/README.md)
+  [qwen36-gfx906/README.md](https://github.com/joe2gaan/localaiservers/blob/vnext-gfx906-rocm72-gguf-hf-repro/qwen36-gfx906/README.md)
 - Host platform prerequisites:
-  [docs/gfx906-host-platform-prereqs-v02.md](https://github.com/joe2gaan/localaiservers/blob/main/docs/gfx906-host-platform-prereqs-v02.md)
+  [docs/gfx906-host-platform-prereqs-v02.md](https://github.com/joe2gaan/localaiservers/blob/vnext-gfx906-rocm72-gguf-hf-repro/docs/gfx906-host-platform-prereqs-v02.md)
 - Current GitHub Releases:
   [https://github.com/joe2gaan/localaiservers/releases](https://github.com/joe2gaan/localaiservers/releases)
