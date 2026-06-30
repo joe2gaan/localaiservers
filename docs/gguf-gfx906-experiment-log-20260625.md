@@ -19062,3 +19062,54 @@ clean-checkout serving replay has already validated launch behavior with a
 maintainer-only asset mirror, but final public reproduction remains blocked
 until the stand-alone vNext release assets are published and the URL gate passes
 without `ALLOW_LOCAL_ASSET_PREFLIGHT=1`.
+
+## GGUF-360 - Local vNext Release-Asset Bundle Integrity Recheck
+
+### Setup
+
+- Date: 2026-06-30 UTC.
+- Scope: verify that the maintainer-local vNext upload bundle itself is coherent
+  before any public GitHub Release asset upload.
+- Command path:
+  - `./verify_vnext_release_asset_bundle.sh <local-vnext-asset-bundle>`;
+  - `./list_vnext_release_asset_uploads.sh <local-vnext-asset-bundle>`.
+- Remote mutation: none. No tag, release, branch, or asset was created or
+  modified.
+
+### Result
+
+The local bundle verifier passed:
+
+```text
+asset-text-config-ok: Qwen3.6-27B-text-config-eosfix.tar.gz sha=9a85f0a18a012ed37f0eb4c42549569234af880c5f6e3ce908e0e45cca835719
+asset-parts-ok: Qwen3.6-27B-F16.gguf parts=28 final_sha=b2347376b9bb7d12cf5f1d31c53ac4c60dd3d4b95068a09351187b328b5e9d89
+asset-parts-ok: Qwen3.6-35B-A3B-F16.gguf parts=36 final_sha=1f2443bb0ff958943d091410c61120c181a0579b3bc85192029aa51d821d141c
+vNext release asset bundle verified: files=69 dense_parts=28 moe_parts=36
+```
+
+The upload-list helper reported `69` release assets in stable order.
+
+### Promote / Reject
+
+Promote:
+
+- the maintainer-local vNext asset bundle as structurally complete;
+- the split-part manifests and final streamed GGUF hashes as matching the
+  release-note locks;
+- the upload list as producing the expected `69` public release assets.
+
+Reject:
+
+- treating local bundle integrity as public release reproduction;
+- skipping the public URL gate after upload;
+- running another expensive serving replay before the final tag and public
+  release assets exist.
+
+### Reason
+
+The remaining blocker is not local asset-bundle integrity. The bundle that would
+back the public release contains the expected file count, manifests, parts, and
+final hashes. The remaining work is publication state: the stand-alone vNext tag
+and GitHub Release assets must exist, `verify_vnext_release_asset_urls.sh` must
+pass without a local override, and then the full readiness replay must run with
+`RUN_SERVING_BENCHMARKS=1` from a clean checkout.
