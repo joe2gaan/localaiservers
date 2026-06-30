@@ -1,7 +1,7 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/bin/sh
+set -eu
 
-# Read-only host preflight for the v0.2 ROCm7.2 GFX906 profiles.
+# Read-only host preflight for ROCm7.2 GFX906 full-BAR/P2P profiles.
 # This script does not patch amdgpu, flash VBIOS, change kernel settings, or
 # start workloads. It checks the visible host state needed before comparing
 # local measurements with the published release numbers.
@@ -47,7 +47,7 @@ human_gib() {
 }
 
 largest_bar_bytes() {
-  local resource_file="$1"
+  resource_file="$1"
   python3 - "${resource_file}" <<'PY'
 import sys
 
@@ -66,14 +66,14 @@ print(max_size)
 PY
 }
 
-echo "GFX906 v0.2 host platform preflight"
+echo "GFX906 ROCm7.2 host platform preflight"
 echo "profile=${PROFILE}"
 echo "required_gpu_count=${REQUIRED_GPU_COUNT}"
 echo "min_gpu_bar_gib=${MIN_GPU_BAR_GIB}"
 echo "expected_gpu_vbios=${EXPECTED_GPU_VBIOS}"
 echo
 
-if [[ -d /sys/module/amdgpu ]]; then
+if [ -d /sys/module/amdgpu ]; then
   pass "amdgpu kernel module is loaded"
 else
   fail "amdgpu kernel module is not loaded"
@@ -81,7 +81,7 @@ fi
 
 if command -v modinfo >/dev/null 2>&1; then
   amdgpu_version="$(modinfo -F version amdgpu 2>/dev/null || true)"
-  if [[ -n "${amdgpu_version}" ]]; then
+  if [ -n "${amdgpu_version}" ]; then
     echo "amdgpu module version: ${amdgpu_version}"
   else
     warn "could not read amdgpu module version"
@@ -92,7 +92,7 @@ fi
 
 if command -v rocminfo >/dev/null 2>&1; then
   gfx906_count="$(rocminfo 2>/dev/null | awk '/Name:[[:space:]]+gfx906/ {count++} END {print count + 0}')"
-  if [[ "${gfx906_count}" -ge "${REQUIRED_GPU_COUNT}" ]]; then
+  if [ "${gfx906_count}" -ge "${REQUIRED_GPU_COUNT}" ]; then
     pass "rocminfo reports ${gfx906_count} gfx906 agents"
   else
     warn "rocminfo reports ${gfx906_count} gfx906 agents; expected at least ${REQUIRED_GPU_COUNT}"
@@ -101,31 +101,37 @@ else
   warn "rocminfo is unavailable; gfx906 agent count not checked"
 fi
 
-declare -a gfx906_devices=()
+gfx906_devices=
+gfx906_device_count=0
 for dev in /sys/bus/pci/devices/*; do
-  [[ -r "${dev}/vendor" && -r "${dev}/device" && -r "${dev}/class" ]] || continue
-  vendor="$(<"${dev}/vendor")"
-  device="$(<"${dev}/device")"
-  class="$(<"${dev}/class")"
-  [[ "${vendor}" == "0x1002" ]] || continue
-  [[ "${class}" == 0x03* ]] || continue
+  [ -r "${dev}/vendor" ] && [ -r "${dev}/device" ] && [ -r "${dev}/class" ] || continue
+  vendor="$(cat "${dev}/vendor")"
+  device="$(cat "${dev}/device")"
+  class="$(cat "${dev}/class")"
+  [ "${vendor}" = "0x1002" ] || continue
+  case "${class}" in
+    0x03*) ;;
+    *) continue ;;
+  esac
   case "${device}" in
     0x66a0|0x66a1|0x66a3|0x66a7|0x66af)
-      gfx906_devices+=("$(basename "${dev}")")
+      bdf="$(basename "${dev}")"
+      gfx906_devices="${gfx906_devices} ${bdf}"
+      gfx906_device_count=$((gfx906_device_count + 1))
       ;;
   esac
 done
 
-if [[ "${#gfx906_devices[@]}" -ge "${REQUIRED_GPU_COUNT}" ]]; then
-  pass "found ${#gfx906_devices[@]} likely gfx906 PCI display/controller devices"
+if [ "${gfx906_device_count}" -ge "${REQUIRED_GPU_COUNT}" ]; then
+  pass "found ${gfx906_device_count} likely gfx906 PCI display/controller devices"
 else
-  fail "found ${#gfx906_devices[@]} likely gfx906 PCI devices; expected at least ${REQUIRED_GPU_COUNT}"
+  fail "found ${gfx906_device_count} likely gfx906 PCI devices; expected at least ${REQUIRED_GPU_COUNT}"
 fi
 
 full_bar_count=0
-for bdf in "${gfx906_devices[@]}"; do
+for bdf in ${gfx906_devices}; do
   resource_file="/sys/bus/pci/devices/${bdf}/resource"
-  if [[ ! -r "${resource_file}" ]]; then
+  if [ ! -r "${resource_file}" ]; then
     warn "${bdf}: resource file unavailable"
     continue
   fi
@@ -137,16 +143,16 @@ for bdf in "${gfx906_devices[@]}"; do
   fi
 done
 
-if [[ "${full_bar_count}" -ge "${REQUIRED_GPU_COUNT}" ]]; then
+if [ "${full_bar_count}" -ge "${REQUIRED_GPU_COUNT}" ]; then
   pass "${full_bar_count} likely gfx906 GPUs have largest BAR >= ${MIN_GPU_BAR_GIB} GiB"
 else
   fail "${full_bar_count} likely gfx906 GPUs have largest BAR >= ${MIN_GPU_BAR_GIB} GiB; expected at least ${REQUIRED_GPU_COUNT}"
 fi
 
-if [[ -d /sys/class/kfd/kfd/topology/nodes ]]; then
+if [ -d /sys/class/kfd/kfd/topology/nodes ]; then
   kfd_gpu_nodes="$(find /sys/class/kfd/kfd/topology/nodes -maxdepth 1 -mindepth 1 -type d 2>/dev/null | wc -l | awk '{print $1}')"
   io_link_count="$(find /sys/class/kfd/kfd/topology/nodes -path '*/io_links/*/properties' -type f 2>/dev/null | wc -l | awk '{print $1}')"
-  if [[ "${kfd_gpu_nodes}" -gt 0 ]]; then
+  if [ "${kfd_gpu_nodes}" -gt 0 ]; then
     pass "KFD topology is visible (${kfd_gpu_nodes} nodes, ${io_link_count} io-link property files)"
   else
     warn "KFD topology directory exists but no nodes were found"
@@ -158,7 +164,7 @@ fi
 if command -v rocm-smi >/dev/null 2>&1; then
   if rocm-smi --showvbios >/tmp/gfx906-host-platform-rocm-smi-vbios.$$ 2>/tmp/gfx906-host-platform-rocm-smi-vbios.err.$$; then
     vbios_match_count="$(grep -F "${EXPECTED_GPU_VBIOS}" /tmp/gfx906-host-platform-rocm-smi-vbios.$$ | wc -l | awk '{print $1}')"
-    if [[ "${vbios_match_count}" -ge "${REQUIRED_GPU_COUNT}" ]]; then
+    if [ "${vbios_match_count}" -ge "${REQUIRED_GPU_COUNT}" ]; then
       pass "rocm-smi reports ${vbios_match_count} GPUs with VBIOS ${EXPECTED_GPU_VBIOS}"
     else
       warn "rocm-smi reports ${vbios_match_count} GPUs with VBIOS ${EXPECTED_GPU_VBIOS}; expected at least ${REQUIRED_GPU_COUNT}"
@@ -182,23 +188,23 @@ fi
 
 echo
 echo "Host amdgpu source-state status:"
-echo "- The v0.2.1 public repo does not bundle a host amdgpu module package."
+echo "- The public reproduction packages do not bundle a host amdgpu module package."
 echo "- The recovered source state is pinned in docs to ROCm/ROCK-Kernel-Driver rocm-7.2.1."
 echo "- This preflight cannot build, install, or prove the exact host module state."
-echo "- Treat a failing full-BAR/P2P preflight as not comparable with the published v0.2 numbers."
+echo "- Treat a failing full-BAR/P2P preflight as not comparable with the published full-BAR/P2P release numbers."
 echo "- Expected standardized GPU VBIOS revision: ${EXPECTED_GPU_VBIOS}."
 
-if [[ "${warnings}" -gt 0 ]]; then
+if [ "${warnings}" -gt 0 ]; then
   echo
   echo "warnings=${warnings}"
 fi
 
-if [[ "${failures}" -gt 0 ]]; then
+if [ "${failures}" -gt 0 ]; then
   echo "failures=${failures}"
   exit 1
 fi
 
-if [[ "${STRICT_PLATFORM_PREREQS}" == "1" && "${warnings}" -gt 0 ]]; then
+if [ "${STRICT_PLATFORM_PREREQS}" = "1" ] && [ "${warnings}" -gt 0 ]; then
   echo "STRICT_PLATFORM_PREREQS=1 and warnings were emitted"
   exit 1
 fi
