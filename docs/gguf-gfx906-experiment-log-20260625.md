@@ -19113,3 +19113,55 @@ final hashes. The remaining work is publication state: the stand-alone vNext tag
 and GitHub Release assets must exist, `verify_vnext_release_asset_urls.sh` must
 pass without a local override, and then the full readiness replay must run with
 `RUN_SERVING_BENCHMARKS=1` from a clean checkout.
+
+## GGUF-361 - Guarded vNext Upload Helper Dry-Run Recheck
+
+### Setup
+
+- Date: 2026-06-30 UTC.
+- Scope: exercise the documented release-asset upload helper in its default
+  dry-run mode against the verified local vNext asset bundle.
+- Command shape:
+  - `./upload_vnext_release_assets.sh <dry-run-tag> <local-vnext-asset-bundle>`.
+- Remote mutation: none. `UPLOAD_VNEXT_RELEASE_ASSETS` was not set, so the
+  helper did not call `gh release upload`.
+
+### Result
+
+The upload helper completed successfully in dry-run mode:
+
+```text
+dry-run: vNext release asset bundle verified for tag: vnext-local-upload-final-recheck
+dry-run: upload file count: 69
+dry-run: to upload to your own GitHub Release after creating the tag/release in your repo, run:
+  GH_RELEASE_REPO=owner/repo UPLOAD_VNEXT_RELEASE_ASSETS=1 ./upload_vnext_release_assets.sh vnext-local-upload-final-recheck <local-vnext-asset-bundle>
+dry-run: LocalAIServers publication is maintainer-only and requires GH_RELEASE_REPO=joe2gaan/localaiservers plus ALLOW_LOCALAISERVERS_RELEASE_UPLOAD=1.
+```
+
+The helper also printed the stable upload list for all `69` release assets.
+
+### Promote / Reject
+
+Promote:
+
+- `upload_vnext_release_assets.sh` as a safe, dry-run-by-default maintainer
+  publication helper;
+- the explicit guard that prevents accidental LocalAIServers release uploads
+  unless maintainer-only approval variables are set;
+- the dry-run upload plan as matching the expected `69` asset files.
+
+Reject:
+
+- treating dry-run upload success as public reproduction;
+- uploading assets before the stand-alone vNext tag and release object are
+  intentionally created;
+- bypassing the post-upload public URL gate and full serving replay.
+
+### Reason
+
+The release-note publication tooling is coherent up to the point where remote
+mutation would begin. The helper verifies the bundle, counts the upload plan,
+stays dry-run by default, and keeps LocalAIServers uploads guarded. Final public
+proof still requires an approved tag/release publication step, public asset URL
+verification, and a clean-checkout `RUN_SERVING_BENCHMARKS=1` replay without
+local asset overrides.
