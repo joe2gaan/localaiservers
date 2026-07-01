@@ -19,6 +19,7 @@
 **/*.docker.tar.sha256
 **/*.image.tar
 **/publish-dockerhub.sh
+tools/model-format-probe/model-format-probe
 
 # Videos and large proof artifacts
 **/videos/
@@ -43,6 +44,7 @@ ops/private/
 ops/private/localaiservers-v0.2.0-reddit-announcement.md
 ops/localaiservers-v0.2.0-reddit-announcement-final.md
 ops/out/
+GPU_repaste_20262306.md
 *.private.csv
 participants*.csv
 payments*.csv

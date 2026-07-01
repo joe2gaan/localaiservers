@@ -50,7 +50,7 @@ part of this release package:
 The public preflight script checks for this revision through `rocm-smi
 --showvbios` when ROCm-SMI can initialize on the host:
 
-```bash
+```sh
 EXPECTED_GPU_VBIOS=113-D1631700-111 ./check_host_platform_prereqs.sh
 ```
 
@@ -90,7 +90,7 @@ whether the relevant hunks are already present.
 
 Run the host platform preflight before deploying:
 
-```bash
+```sh
 git clone https://github.com/joe2gaan/localaiservers.git
 cd localaiservers/qwen36-gfx906
 
@@ -105,14 +105,14 @@ when you need the helper in the checkout.
 
 For MoE TP4:
 
-```bash
+```sh
 export QWEN36_PROFILE=moe35b_tp4_fullbar_p2pon
 ./check_host_platform_prereqs.sh
 ```
 
 For MoE TP8:
 
-```bash
+```sh
 export QWEN36_PROFILE=moe35b_tp8_fullbar_p2pon
 ./check_host_platform_prereqs.sh
 ```

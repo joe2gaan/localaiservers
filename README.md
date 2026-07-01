@@ -23,22 +23,56 @@ and educational documentation.
 
 GitHub Releases are canonical for published release claim boundaries. Docker Hub
 remains an evergreen artifact distribution channel and should not be treated as
-the latest benchmark announcement. The canonical deployment and reproducibility
-package is [qwen36-gfx906/README.md](qwen36-gfx906/README.md).
+the latest benchmark announcement. The root deployment package is
+[qwen36-gfx906/README.md](qwen36-gfx906/README.md); the latest vNext
+profile-specific reproduction package is
+[qwen36-gfx906/profiles/vnext/README.md](qwen36-gfx906/profiles/vnext/README.md).
 
-### v0.1.0 Historical Published Artifact
+### vNext Stand-Alone GGUF/HF Reproduction Release
 
-`v0.1.0-gfx906-qwen36-mi50` is the Qwen3.6 / GFX906 / MI50 TP4 reproducibility
-artifact. It remains the historical 90+ TPS sustained 10K backend decode
-publication baseline, not the latest ROCm7.2 Dense/MoE result.
+`vnext-gfx906-rocm72-gguf-hf-repro` is the current stand-alone release for the
+ROCm7.2 GFX906 GGUF/HF reproduction path. It is not a patch, addendum, or
+silent replacement for v0.2.0/v0.2.1. It has its own release tag, public GGUF
+release assets, HF public-input gates, launcher profiles, validation tables, and
+claim boundary.
 
-Canonical reproduction package:
-[qwen36-gfx906/README.md](qwen36-gfx906/README.md).
+Use vNext when you want the latest public reproduction package:
+
+```bash
+git clone --depth 1 --branch vnext-gfx906-rocm72-gguf-hf-repro https://github.com/joe2gaan/localaiservers.git
+cd localaiservers
+```
+
+vNext covers five generated `vllm serve` profiles. The release-note
+clean-checkout replay evidence includes:
+
+| Release | Format | Profile | Strict backend TPS | `c1_2000` backend TPS | `c1_10000` backend TPS | Status |
+| --- | --- | --- | ---: | ---: | ---: | --- |
+| vNext | GGUF F16 | Dense 27B TP8 full-BAR/P2P-on | 70.097 | 71.081 | 66.543 | strict-valid; ai-info 10K gate cleared |
+| vNext | GGUF F16 | Qwen3.6 35B-A3B MoE TP4 full-BAR/P2P-on | 118.948 | 120.961 | 113.684 | strict-valid |
+| vNext | HF FP16 | Dense 27B TP8 full-BAR/P2P-on | 70.306 | 71.254 | 66.796 | strict-valid; ai-info 10K gate cleared |
+| vNext | HF FP16 | Qwen3.6 35B-A3B MoE TP4 full-BAR/P2P-on | 114.557 | 113.436 | 108.044 | strict-valid |
+| vNext | HF FP16 | Qwen3.6 35B-A3B MoE TP8 full-BAR/P2P-on | 115.509 | 116.704 | 109.754 | strict-valid |
+
+All vNext profiles preserve `MAX_MODEL_LEN=131072`, `dtype=half`, and
+full-BAR/P2P-on requirements. The same ROCm7.2 runtime image and digest are
+used:
+
+```text
+joe2gaan/localaiservers:qwen36-gfx906-rocm72-dense-moe-runtime-archive-0a2dbd6b7f0b
+sha256:8c380e9ca48943d8617de5a2e2eaf32a26dcc2c341e4b4f4f8c45294a72b8f1e
+```
+
+Full vNext release notes:
+[releases/draft-vnext-gfx906-rocm72-gguf-hf-repro.md](releases/draft-vnext-gfx906-rocm72-gguf-hf-repro.md).
+
+Published vNext GitHub Release:
+[https://github.com/joe2gaan/localaiservers/releases/tag/vnext-gfx906-rocm72-gguf-hf-repro](https://github.com/joe2gaan/localaiservers/releases/tag/vnext-gfx906-rocm72-gguf-hf-repro).
 
 ### v0.2.1 Reproduction Package
 
 `v0.2.1-gfx906-rocm72-dense-moe-repro` is the easiest checkout for reproducing
-the published ROCm7.2 Dense/MoE measurements. It does not change the Docker
+the historical v0.2 ROCm7.2 Dense/MoE measurements. It does not change the Docker
 image, model package, runtime artifact, benchmark values, or v0.2.0 release
 boundary. It packages the corrected public reproduction docs, the v0.2 scorer,
 the bundled begin-think proxy, and the 2026-06-22 reproduction report.
@@ -54,17 +88,19 @@ cd localaiservers/qwen36-gfx906
 
 `v0.2.0-gfx906-rocm72-dense-moe` is the ROCm7.2 Dense/MoE GFX906
 active-contract benchmark release. Use the v0.2.1 reproduction-package tag
-above when you want the simplest source checkout for reproducing the results.
+above when you want the simplest source checkout for reproducing the historical
+v0.2 results. Use vNext for the latest stand-alone GGUF/HF reproduction path.
 
 | Release | Profile | Strict backend TPS | `c1_2000` backend TPS | `c1_10000` backend TPS | Status |
 | --- | --- | ---: | ---: | ---: | --- |
 | v0.2.0 | Dense 27B TP8 full-BAR/P2P-on | 69.514 | 70.347 | 66.069 | strict-valid; ai-info 10K gate cleared |
-| v0.2.0 | Qwen3.6 35B-A3B MoE TP8 full-BAR/P2P-on | 94.907 | 97.028 | 91.290 | strict-valid MoE publication bar |
-| v0.2.0 | Qwen3.6 35B-A3B MoE TP4 full-BAR/P2P-on | initial caveat corrected below | 116.146 | 109.283 | release-time fixed-token result; post-v0.2 strict repeatability passed |
+| v0.2.0 | Qwen3.6 35B-A3B MoE TP8 full-BAR/P2P-on | 94.907 | 97.028 | 91.290 | MoE publication bar |
+| v0.2.0 | Qwen3.6 35B-A3B MoE TP4 full-BAR/P2P-on | initial caveat corrected below | 116.146 | 109.283 | release-time fixed-token result; post-v0.2 repeatability passed |
 
-`91.290` is the MoE TP8 `c1_10000` backend TPS; the MoE TP8 strict backend
-TPS is `94.907`. MoE TP4 `109.283` is a capped fixed-token `c1_10000` result,
-not a strict TPS value.
+`91.290` is the MoE TP8 `c1_10000` backend TPS.
+The MoE TP8 strict backend TPS is `94.907`.
+MoE TP4 `109.283` is a capped fixed-token `c1_10000` result.
+It is not a strict TPS value.
 
 2026-06-22 public deploy reproduction note: the current public deploy path
 reproduced the Dense TP8 10K gate clear, reproduced the corrected MoE TP4
@@ -98,6 +134,15 @@ Canonical technical deployment package:
 Stable benchmark artifact:
 [benchmarks/qwen36-gfx906-mi50-tp4/](benchmarks/qwen36-gfx906-mi50-tp4/)
 
+### v0.1.0 Historical Published Artifact
+
+`v0.1.0-gfx906-qwen36-mi50` is the Qwen3.6 / GFX906 / MI50 TP4 reproducibility
+artifact. It remains the historical 90+ TPS sustained 10K backend decode
+publication baseline, not the latest ROCm7.2 Dense/MoE or vNext GGUF/HF result.
+
+Canonical reproduction package:
+[qwen36-gfx906/README.md](qwen36-gfx906/README.md).
+
 ## Controlled Air-Gapped Compute Model
 
 The LocalAIServers GFX906 cluster is controlled research and verification
@@ -123,6 +168,9 @@ Current source-level proof documents:
 - [Technical progress summary](docs/gfx906-technical-progress-summary.md)
 - [Experimental methodology](docs/gfx906-experimental-methodology.md)
 - [Current research roadmap](docs/gfx906-current-research-roadmap.md)
+- [GGUF GFX906 experiment log](docs/gguf-gfx906-experiment-log-20260625.md)
+- [GGUF GFX906 key learnings](docs/gguf-gfx906-key-learnings-20260625.md)
+- [GGUF GFX906 source/kernel inventory](docs/gguf-gfx906-source-kernel-inventory-20260625.md)
 
 ## Public Outputs
 
@@ -161,6 +209,10 @@ preservation work, experimental methodology, QC methods, and the public-output m
 
 ## Public Proof Links
 
+- Latest vNext stand-alone release notes:
+  [releases/draft-vnext-gfx906-rocm72-gguf-hf-repro.md](releases/draft-vnext-gfx906-rocm72-gguf-hf-repro.md).
+- vNext profile reproduction package:
+  [qwen36-gfx906/profiles/vnext/README.md](qwen36-gfx906/profiles/vnext/README.md).
 - Canonical technical deployment package:
   [qwen36-gfx906/README.md](qwen36-gfx906/README.md).
 - Published GitHub Releases:
@@ -189,15 +241,123 @@ See [CITATION.cff](CITATION.cff).
 Code is licensed under [Apache-2.0](LICENSE). Documentation licensing has a public
 notice at [docs/LICENSE-DOCS.md](docs/LICENSE-DOCS.md).
 
-## Reproduce v0.2 Results
+## Reproduce Latest vNext Release
 
-Use current `main` for the latest v0.2 ROCm7.2 Dense/MoE deployment
-instructions, host preflight helper, and prerequisite disclosures. The existing
+Use the vNext tag for the current stand-alone ROCm7.2 GGUF/HF release. This path
+is designed to run from public inputs: a tagged repository checkout, the pinned
+public Docker image, public GitHub Release assets for GGUF profiles, public Qwen
+HF repositories for HF profiles, local SSD/NVMe storage selected by the user,
+and a qualifying GFX906 host that satisfies the documented full-BAR/P2P-on
+preflight.
+
+Host tool prerequisites:
+
+- POSIX-compatible `/bin/sh`
+- `git`
+- `docker`
+- `make`
+- a C compiler for `tools/model-format-probe/`
+- `python3`
+- `curl`
+- `sha256sum`
+- `tar`
+- `split`
+- `cat`
+- standard POSIX/core userland utilities
+- `hf` from `huggingface_hub` when reproducing HF profiles
+
+Clone the release checkout:
+
+```bash
+git clone --depth 1 --branch vnext-gfx906-rocm72-gguf-hf-repro https://github.com/joe2gaan/localaiservers.git
+cd localaiservers
+```
+
+Choose large local SSD/NVMe-backed storage. Do not use a small root partition
+for model weights, Hugging Face cache, or runtime compile/cache directories.
+
+```bash
+export LOCAL_MODEL_ROOT=/mnt/nvme/local-models
+export LOCAL_HF_CACHE=/mnt/nvme/hf-cache
+export LOCAL_RUNTIME_ROOT=/mnt/nvme/vnext-runtime
+
+mkdir -p "$LOCAL_MODEL_ROOT" "$LOCAL_HF_CACHE" "$LOCAL_RUNTIME_ROOT"
+```
+
+Inspect the published profiles without starting containers:
+
+```bash
+cd qwen36-gfx906
+./vnext_profile_inspect.sh list
+./vnext_profile_inspect.sh show gguf-dense27b-tp8
+```
+
+Confirm the public release asset URLs are present:
+
+```bash
+RELEASE_TAG=vnext-gfx906-rocm72-gguf-hf-repro
+./verify_vnext_release_asset_urls.sh "$RELEASE_TAG"
+```
+
+Run the full release-readiness path, including serving benchmarks:
+
+```bash
+STAGE_HF_PUBLIC_INPUTS=1 \
+RUN_SERVING_BENCHMARKS=1 \
+./verify_vnext_release_readiness.sh \
+  --release-tag "$RELEASE_TAG" \
+  --model-root "$LOCAL_MODEL_ROOT" \
+  --hf-cache "$LOCAL_HF_CACHE" \
+  --runtime-root "$LOCAL_RUNTIME_ROOT"
+```
+
+That command sequences serviceability checks, contract matrix validation,
+public GGUF asset staging, public HF input staging/validation, launch artifact
+generation, vLLM argument-schema validation, host platform preflight, and the
+normal serving benchmark ladder:
+
+```text
+8 warmups -> c1_128 uncapped strict -> c1_2000 -> c1_10000
+```
+
+It prints `vNext full release reproduction path completed` only after the
+serving benchmark ladder runs. If `RUN_SERVING_BENCHMARKS=1` is omitted, the
+script intentionally refuses to report full release reproduction success.
+
+To run a generated profile as a normal `vllm serve` endpoint after staging
+inputs, generate a launch artifact for the profile you want to serve. Start one
+profile at a time because the published profiles default to port `8001`:
+
+```bash
+LOCAL_MODEL_ROOT="$LOCAL_MODEL_ROOT" \
+./vnext_repro_launcher.sh \
+  --profile gguf-dense27b-tp8 \
+  --out "$LOCAL_RUNTIME_ROOT/vnext-launch-runs/gguf-dense27b-tp8"
+```
+
+```bash
+HOST_MODEL_ROOT="$LOCAL_MODEL_ROOT" \
+HOST_HF_CACHE="$LOCAL_HF_CACHE" \
+HOST_RUNTIME_ROOT="$LOCAL_RUNTIME_ROOT/gguf-dense27b-tp8" \
+VNEXT_CONTAINER_NAME=vnext_repro_current \
+"$LOCAL_RUNTIME_ROOT/vnext-launch-runs/gguf-dense27b-tp8/docker_run.sh"
+```
+
+The generated wrapper starts a normal OpenAI-compatible vLLM endpoint. The
+begin-think proxy is part of the Qwen benchmark validation harness only and is
+not required for ordinary inference.
+
+Full reproduction details:
+[qwen36-gfx906/profiles/vnext/README.md](qwen36-gfx906/profiles/vnext/README.md).
+
+## Reproduce Historical v0.2 Results
+
+Use v0.2.1 for the historical v0.2 ROCm7.2 Dense/MoE deployment instructions,
+host preflight helper, and prerequisite disclosures. The
 `v0.2.1-gfx906-rocm72-dense-moe-repro` tag remains the named reproduction
-package for the 2026-06-22 script/report state; the host preflight helper was
-added after that tag. The `deploy.sh` script needs the bundled files under
-`qwen36-gfx906/files/`; downloading only `deploy.sh` is not enough for the
-v0.2 runtime.
+package for the 2026-06-22 script/report state. The `deploy.sh` script needs
+the bundled files under `qwen36-gfx906/files/`; downloading only `deploy.sh` is
+not enough for the v0.2 runtime.
 
 ```bash
 git clone https://github.com/joe2gaan/localaiservers.git
@@ -272,8 +432,8 @@ fixed-token checks, but it is not the v0.2 release scorer.
 
 The canonical deployment package is [qwen36-gfx906/README.md](qwen36-gfx906/README.md).
 These commands preserve the published v0.1.0 TP4 runtime reproduction path. The
-latest published v0.2.0 Dense/MoE TPS values are summarized in Published Releases
-above and in the
+latest vNext GGUF/HF release and the historical v0.2.0 Dense/MoE TPS values are
+summarized in Published Releases above. v0.2 details remain in the
 [ROCm7.2 active-contract notes](docs/rocm72-dense-moe-active-contracts-20260620.md).
 This v0.1 section is retained for historical reproducibility and should not be
 read as the latest TPS summary.
@@ -350,7 +510,7 @@ matches that SHA-256. The live `main` deploy script defaults to
 byte-for-byte target only when `EXPECTED_REPRO_DOCKER_ARCHIVE_SHA256` is set. Set
 `EXPECTED_REPRO_DOCKER_ARCHIVE_SHA256=aa34cb675f83ff6cade31cbbb357b1c31d793bee18da491f501d7c39fda3612a`
 for strict v0.1.0 source reproduction. Set `BYTE_FOR_BYTE_VALIDATION_MODE=0` only for
-non-canonical local deploys where no release-reproduction claim is being made. The
+non-canonical local deploys where no release-reproduction claim is made. The
 prebuilt image path is validated separately by Docker Hub manifest digest:
 `sha256:f5e69ee127b766960e386e0e4eda8e26c399bd02f57c494847cb9a92ce04d8ac`, and the
 registry config digest matches the tested local image ID:
@@ -371,8 +531,8 @@ c1_10000: 90+ TPS sustained backend decode publication baseline
 
 Earlier interim TP4 validation numbers are superseded in the root README by the
 published release table above. Use GitHub Releases for published claim boundaries
-and the Published Releases section above for the latest v0.2.0 Dense/MoE TPS
-summary.
+and the Published Releases section above for the latest vNext and historical
+v0.2.0 Dense/MoE TPS summaries.
 
 See [qwen36-gfx906/README.md](qwen36-gfx906/README.md) for the full deployment and
 reproduction notes, including build pins, Docker archive hashes, runtime defaults, disk
