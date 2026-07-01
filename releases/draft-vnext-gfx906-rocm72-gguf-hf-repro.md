@@ -608,6 +608,16 @@ Host tool prerequisites:
   `dirname`, `basename`, and `tail`
 - `hf` from `huggingface_hub` when using HF profiles
 
+`hf` is the Hugging Face Hub CLI. Install it with the official Hugging Face CLI
+installer or from the public `huggingface_hub` Python package in a virtual
+environment, then verify that the `download` command is available:
+
+```sh
+curl -LsSf https://hf.co/cli/install.sh | bash
+command -v hf
+hf download --help >/dev/null
+```
+
 The GGUF split-release-asset path does not require the Hugging Face CLI for the
 model weights. It downloads the published GGUF parts with `curl` and verifies
 them with `sha256sum`. GGUF tokenizer resolution still uses public Hugging

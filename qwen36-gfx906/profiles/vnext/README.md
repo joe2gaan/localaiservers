@@ -36,6 +36,16 @@ uses the public Qwen repos pinned by each profile's `TOKENIZER_REVISION`.
 Recent `huggingface_hub` releases deprecate the older `huggingface-cli`
 command; use `hf download --revision ...` for HF staging.
 
+`hf` is the Hugging Face Hub CLI. Install it with the official Hugging Face CLI
+installer or from the public `huggingface_hub` Python package in a virtual
+environment, then verify that the `download` command is available:
+
+```sh
+curl -LsSf https://hf.co/cli/install.sh | bash
+command -v hf
+hf download --help >/dev/null
+```
+
 List or inspect the available profile contracts without starting a container:
 
 ```sh

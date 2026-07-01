@@ -266,6 +266,16 @@ Host tool prerequisites:
 - standard POSIX/core userland utilities
 - `hf` from `huggingface_hub` when reproducing HF profiles
 
+`hf` is the Hugging Face Hub CLI. Install it with the official Hugging Face CLI
+installer or from the public `huggingface_hub` Python package in a virtual
+environment, then verify that the `download` command is available:
+
+```bash
+curl -LsSf https://hf.co/cli/install.sh | bash
+command -v hf
+hf download --help >/dev/null
+```
+
 Clone the release checkout:
 
 ```bash
