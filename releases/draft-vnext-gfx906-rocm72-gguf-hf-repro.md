@@ -36,6 +36,30 @@ Docker Hub manifest digest:
 sha256:8c380e9ca48943d8617de5a2e2eaf32a26dcc2c341e4b4f4f8c45294a72b8f1e
 ```
 
+## Runtime Packaging Model
+
+vNext does not publish a separate Docker image with the GGUF/HF release bits
+baked into the image. The runtime dependency is the pinned public ROCm7.2 image
+shown above.
+
+The reproducible vNext runtime is assembled from these public inputs:
+
+- the pinned Docker image and digest;
+- the tagged vNext repository checkout;
+- the vNext profile contracts, overlays, patch bundles, launcher scripts, and
+  validation scripts from that checkout;
+- the GitHub Release GGUF split assets and hashes for GGUF profiles; and
+- the pinned public Hugging Face model revisions for HF profiles.
+
+`vnext_repro_launcher.sh` generates a profile-specific Docker launch artifact
+that mounts the selected model inputs and applies the selected overlay/patch
+bundle at launch time. The generated wrapper starts a normal `vllm serve`
+process inside the pinned runtime image.
+
+In short, users get the vNext GGUF/HF bits by cloning the vNext release tag and
+staging the public release assets, not by pulling a second vNext-specific Docker
+image.
+
 GitHub Releases remain canonical for published release claim boundaries. Docker
 Hub remains an evergreen artifact distribution channel and should not be
 treated as the latest benchmark announcement.
