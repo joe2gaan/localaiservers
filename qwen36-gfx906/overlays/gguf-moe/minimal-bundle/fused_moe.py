@@ -811,7 +811,7 @@ def fused_moe_kernel(
                     b_mant = (b & 0x07).to(tl.uint16) << 7
                     b_bits = b_sign | (b_exp << 10) | b_mant
                     b = b_bits.to(tl.float16, bitcast=True)
-                
+
                 b_scale = tl.load(b_scale_ptrs + offs_ks * stride_bsk)
 
                 accumulator += tl.dot(a, b) * a_scale[:, None] * b_scale[None, :] if not on_gfx906 else tl.dot(a, b) * b_scale[None, :]
@@ -1432,7 +1432,7 @@ def get_moe_wna16_block_config(
             while block_size_k > size_k or size_k % block_size_k != 0:
                 block_size_k //= 2
         return {"BLOCK_SIZE_N": block_size_n, "BLOCK_SIZE_K": block_size_k}
-            
+
     else:
         # cuda moe wna16 kernel
         # set default block_size 128, and increase them when num_blocks
@@ -1491,7 +1491,7 @@ def should_moe_wna16_use_cuda(
     num_valid_tokens: int, group_size: int, num_experts: int, bit: int
 ):
     return (
-        current_platform.is_cuda_alike() 
+        current_platform.is_cuda_alike()
         and bit == 4
         and group_size in [32, 64, 128]
         and num_valid_tokens / num_experts <= 6
