@@ -18,6 +18,13 @@ that tag, retarget that release, or depend on that checkout for its claim. The
 vNext claim must be reproducible from the vNext release tag and its own public
 inputs.
 
+Post-publication note: this live GitHub Release body may include documentation
+clarifications made after the tag was cut. The tag checkout remains the
+reproducible executable package; use this live release body, the vNext tag
+checkout, and the published release assets for the current public reproduction
+flow. These wording updates do not retarget the tag and do not change the
+Docker image, model assets, or runtime artifacts.
+
 The goal is to package the next reproduction path: model-format detection,
 profile-driven overlay selection, format-specific patch isolation, generated
 launch artifacts, and the normal benchmark ladder for both HF and GGUF model
@@ -180,10 +187,9 @@ are available through one of these public paths:
 - a locked public conversion recipe that names the upstream model revision,
   converter source revision, conversion command, output filename, and SHA256.
 
-The preferred public path for this package is to attach the validated GGUF
-files as split GitHub Release assets. Each part must stay below the GitHub
-Release per-asset limit, and each model must include a part manifest plus final
-assembled-file hash.
+This package publishes the validated GGUF files as split GitHub Release assets.
+Each part stays below the GitHub Release per-asset limit, and each model
+includes a part manifest plus final assembled-file hash.
 
 | Required artifact | Public source for final release | Final SHA256 |
 | --- | --- | --- |
@@ -216,7 +222,7 @@ Public GGUF repositories that provide BF16 or quantized variants are useful for
 source comparison, but they are not interchangeable with the F16 GGUF artifacts
 listed above for this benchmark claim.
 
-Publisher asset checklist before release:
+Published asset inventory and maintainer upload controls:
 
 ```sh
 split_gguf_for_release() {
@@ -232,14 +238,15 @@ split_gguf_for_release Qwen3.6-27B-F16.gguf
 split_gguf_for_release Qwen3.6-35B-A3B-F16.gguf
 ```
 
-Attach every `*.part-*`, `*.parts.sha256`, and `*.sha256` file to the GitHub
-Release. The part manifests must list only basename files matching
-`<model>.part-*`; do not include paths, `..`, whitespace in part filenames, or
-stale split outputs. Also attach `Qwen3.6-27B-text-config-eosfix.tar.gz`.
-Reassemble from the published assets in a clean directory and confirm the final
-SHA256 values above before publishing the release.
+The published release attaches every `*.part-*`, `*.parts.sha256`, and
+`*.sha256` file to the GitHub Release. The part manifests list only basename
+files matching `<model>.part-*`; they must not include paths, `..`, whitespace
+in part filenames, or stale split outputs. The release also attaches
+`Qwen3.6-27B-text-config-eosfix.tar.gz`. Reassemble from the published assets
+in a clean directory and confirm the final SHA256 values above before treating
+a run as a public reproduction attempt.
 
-Expected upload inventory for the hosted-asset path:
+Published hosted-asset inventory:
 
 - Dense GGUF part files: `28`
 - MoE GGUF part files: `36`
@@ -250,11 +257,13 @@ Expected upload inventory for the hosted-asset path:
 
 A maintainer-side simulated asset bundle with that inventory has been verified
 locally by part manifest checks and by streaming the split parts in manifest
-order to reproduce the final GGUF hashes above. This remains upload-preparation
-evidence only until the same files are attached to the final stand-alone GitHub
-Release and replayed from public release URLs.
+order to reproduce the final GGUF hashes above. That was pre-publication
+evidence for the asset layout. The live release now exposes the same expected
+public asset inventory, and public reproduction should verify the GitHub
+Release URLs before replay.
 
-Before uploading release assets, verify the complete upload directory:
+For maintainers preparing equivalent release asset bundles, verify the complete
+upload directory:
 
 ```sh
 cd qwen36-gfx906
@@ -281,8 +290,8 @@ their own tag and GitHub Release. Uploading assets to
 `ALLOW_LOCALAISERVERS_RELEASE_UPLOAD=1`. The helper does not create tags,
 create releases, edit release notes, delete assets, or use `--clobber`.
 
-After uploading the release assets, verify that the public GitHub Release URLs
-exist before running the expensive full download/replay. For a user-owned
+Verify that the public GitHub Release URLs exist before running the expensive
+full download/replay. For a user-owned
 repository, set `RELEASE_ASSET_BASE` to that repository's release download URL:
 
 ```sh
@@ -292,7 +301,7 @@ RELEASE_ASSET_BASE="https://github.com/owner/repo/releases/download/<release-tag
 cd ..
 ```
 
-For the final LocalAIServers-maintained release, maintainers use the default
+For this LocalAIServers-maintained release, use the default
 `https://github.com/joe2gaan/localaiservers/releases/download/<release-tag>`
 base. This URL verifier checks the exact expected asset names for the tag
 without downloading the full multi-GB GGUF parts. The full reproduction claim
@@ -301,11 +310,11 @@ still requires `verify_vnext_release_readiness.sh` with
 
 ## Final Public Replay Proof Checklist
 
-vNext is complete only when the final stand-alone release can be reproduced
-from public inputs without relying on v0.2.0, v0.2.1, validation-host storage,
-or maintainer-only `file://` asset mirrors.
+vNext public replay is complete only when the stand-alone release can be
+reproduced from public inputs without relying on v0.2.0, v0.2.1,
+validation-host storage, or maintainer-only `file://` asset mirrors.
 
-Before publication, confirm:
+For a full public replay, confirm:
 
 - the final stand-alone vNext tag exists;
 - a clean checkout of that tag contains this release note, the vNext profile
@@ -333,8 +342,8 @@ Before publication, confirm:
   only after sanitizing local paths and host details; and
 - no v0.2.0 or v0.2.1 release claim is updated by the vNext replay.
 
-If any checklist item fails, keep this document in draft state and treat the
-run as release-candidate evidence only.
+If any checklist item fails, treat the run as incomplete reproduction evidence,
+not full public replay success.
 
 Minimum tree-content check from a fresh checkout:
 
@@ -403,9 +412,9 @@ normal benchmark ladder. The MoE GGUF profile used the public
 The final repeat used the vNext POSIX-shell benchmark runner directly rather
 than delegating to the older Bash-only v0.2 helper.
 
-This audit exercised the intended release shape, but it is not a completed
-public reproduction because the assets were not fetched from a final published
-vNext GitHub Release.
+This audit exercised the intended release shape before the final assets were
+published. It remains historical pre-publication evidence; public reproduction
+should use the GitHub Release asset URLs.
 
 | Format | Profile | Host | Strict backend TPS | `c1_2000` backend TPS | `c1_10000` backend TPS | Status |
 | --- | --- | --- | ---: | ---: | ---: | --- |
@@ -438,12 +447,10 @@ benchmark ladder were then run from the clean checkout.
 
 This is positive maintainer evidence that the profile-driven GGUF flow can
 reproduce the expected Dense and MoE bands without depending on a
-LocalAIServers validation-host model path or retained cache. It is still not a
-public reproduction claim. Final publication requires attaching the split GGUF
-assets, part manifests, final SHA256 files, and Dense text-config archive to
-the GitHub Release, or replacing the text-config archive with a deterministic
-public generation recipe, then validating the same flow against those public
-URLs.
+LocalAIServers validation-host model path or retained cache. At the time, it
+was not a public reproduction claim because it used simulated release assets.
+The live release now provides the split GGUF assets, part manifests, final
+SHA256 files, and Dense text-config archive through GitHub Release URLs.
 
 ### Stand-Alone GGUF Release-Package Audit
 
@@ -454,12 +461,10 @@ artifacts, validated the runtime image/digest and vLLM argument schema, then
 ran the normal benchmark ladder:
 `8` warmups -> `c1_128` uncapped strict -> `c1_2000` -> `c1_10000`.
 
-This audit still used `RELEASE_ASSET_BASE=file://...` as a maintainer-side
-simulation of future GitHub Release assets. That is not a public dependency
-and is not acceptable for the published release. The stand-alone publication
-gate remains: attach the exact split GGUF assets, manifests, final SHA256
-files, and Dense text-config archive to the GitHub Release, then rerun this
-same flow against public release-asset URLs.
+This audit used `RELEASE_ASSET_BASE=file://...` as a maintainer-side simulation
+before the GitHub Release assets were published. That is not a public
+dependency and is not acceptable for public reproduction. Public replay should
+use the published release-asset URLs.
 
 | Format | Profile | Host | Strict backend TPS | `c1_2000` backend TPS | `c1_10000` backend TPS | Status |
 | --- | --- | --- | ---: | ---: | ---: | --- |
@@ -499,10 +504,10 @@ checks, public GGUF asset staging, public HF input validation, launch-artifact
 generation, runtime vLLM argument-schema validation, host preflight, and the
 serving benchmark ladder for all five profiles.
 
-This replay still used a maintainer-only local mirror for future release
-assets. It validates the package path, but it is not a completed public
-reproduction until the same command is rerun from the final vNext tag and
-public GitHub Release asset URLs.
+This replay used a maintainer-only local mirror before the release assets were
+published. It validates the package path as historical pre-publication
+evidence. Public replay should use the final vNext tag and public GitHub
+Release asset URLs.
 
 | Format | Profile | Host | Strict backend TPS | `c1_2000` backend TPS | `c1_10000` backend TPS | Status |
 | --- | --- | --- | ---: | ---: | ---: | --- |
@@ -516,9 +521,8 @@ A follow-up `.30` full release-readiness replay used the same release-note
 readiness flow with `RUN_SERVING_BENCHMARKS=1`, verified local simulated
 release assets, and already-staged public-input model packages from a fresh
 temporary copy of the current vNext package. It provides second-lane
-release-candidate evidence, but it is still not completed public reproduction
-until the final stand-alone vNext tag and public GitHub Release asset URLs are
-used.
+pre-publication evidence. Public replay should use the final stand-alone vNext
+tag and public GitHub Release asset URLs.
 
 | Format | Profile | Host | Strict backend TPS | `c1_2000` backend TPS | `c1_10000` backend TPS | Status |
 | --- | --- | --- | ---: | ---: | ---: | --- |
@@ -547,8 +551,8 @@ The readiness wrapper ended with:
 vNext full release reproduction path completed
 ```
 
-These values are stand-alone vNext release-candidate evidence. They do not
-revise v0.2.0 or v0.2.1.
+These values are stand-alone vNext validation evidence. They do not revise
+v0.2.0 or v0.2.1.
 
 All vNext profiles preserve:
 
@@ -585,7 +589,7 @@ inside HF launches or dense-only targets inside MoE launches.
 Clone the release checkout:
 
 ```sh
-git clone --depth 1 --branch <release-tag> https://github.com/joe2gaan/localaiservers.git
+git clone --depth 1 --branch vnext-gfx906-rocm72-gguf-hf-repro https://github.com/joe2gaan/localaiservers.git
 cd localaiservers
 ```
 
@@ -653,7 +657,7 @@ Recommended full release-readiness command:
 
 ```sh
 cd qwen36-gfx906
-RELEASE_TAG=<release-tag>
+RELEASE_TAG=vnext-gfx906-rocm72-gguf-hf-repro
 STAGE_HF_PUBLIC_INPUTS=1 \
 RUN_SERVING_BENCHMARKS=1 \
 ./verify_vnext_release_readiness.sh \
@@ -743,7 +747,7 @@ benchmark claims unless a separate result is published for that file.
 For the default split-release-asset path:
 
 ```sh
-RELEASE_TAG=<release-tag>
+RELEASE_TAG=vnext-gfx906-rocm72-gguf-hf-repro
 cd qwen36-gfx906
 ./stage_vnext_gguf_assets.sh "$RELEASE_TAG" "$LOCAL_MODEL_ROOT"
 cd ..
@@ -1107,7 +1111,8 @@ The vNext path has passed:
   reject unsafe GGUF part manifests before download;
 - split-asset staging checks that verify release-manifest assembly, final
   hashes, and generated GGUF launch artifacts under fixture or maintainer-local
-  asset inputs; the same public GGUF asset gate must still pass against the final GitHub Release asset URLs before publication;
+  asset inputs; public reproduction uses the same GGUF asset gate against the
+  published GitHub Release asset URLs;
 - a real local split-asset replay using the recovered Dense text-config
   archive, Dense GGUF, and MoE GGUF locks; this passed the public GGUF asset
   gate after the tar ownership portability fix;
