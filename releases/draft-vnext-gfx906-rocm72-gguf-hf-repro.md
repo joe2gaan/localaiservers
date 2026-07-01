@@ -64,6 +64,54 @@ GitHub Releases remain canonical for published release claim boundaries. Docker
 Hub remains an evergreen artifact distribution channel and should not be
 treated as the latest benchmark announcement.
 
+## Reference Hardware Used For vNext Validation
+
+The vNext validation evidence was recorded on the following local validation
+lanes. Host labels are sanitized evidence labels only; they are not public
+access endpoints and are not required reproduction targets.
+
+| Field | `.20` validation lane | `.30` validation lane |
+| --- | --- | --- |
+| System vendor/model | GIGABYTE `G292-Z20-00` | GIGABYTE `G292-Z20-00` |
+| System firmware | `R23`, firmware date `2021-09-06` | `R23`, firmware date `2021-09-06` |
+| CPU | 1x AMD EPYC 7F32 8-Core Processor | 1x AMD EPYC 7F32 8-Core Processor |
+| CPU topology | 8 cores / 16 threads, SMT on, 1 socket | 8 cores / 16 threads, SMT on, 1 socket |
+| CPU clocks reported | min `2500 MHz`, max `3700 MHz`, boost enabled | min `2500 MHz`, max `3700 MHz`, boost enabled |
+| L3 cache | `128 MiB` | `128 MiB` |
+| System memory | `125 GiB` visible | `125 GiB` visible |
+| OS | Ubuntu `24.04.2 LTS` | Ubuntu `24.04.2 LTS` |
+| Kernel | `6.8.0-52-generic` | `6.8.0-52-generic` |
+| ROCm-SMI driver version | `6.8.5` | `6.8.5` |
+| Root disk | `447.1G` Crucial `CT480BX500SSD1` SATA SSD | `447.1G` Crucial `CT480BX500SSD1` SATA SSD |
+| Local model/runtime NVMe | `1.7T` KIOXIA `KCD6XLUL1T92`; validation-local mount path omitted | `1.7T` KIOXIA `KCD6XLUL1T92`; validation-local mount path omitted |
+| GPU count | 8x AMD GFX906 / Vega 20 | 8x AMD GFX906 / Vega 20 |
+| GPU PCI device | `1002:66a1`, rev `02` | `1002:66a1`, rev `02` |
+| GPU SKU/subsystem | SKU `D1631700`, subsystem `0x0834` | SKU `D1631700`, subsystem `0x0834` |
+| GPU VBIOS | `113-D1631700-111` on all 8 GPUs | `113-D1631700-111` on all 8 GPUs |
+| GPU VRAM visible | `34342961152` bytes per GPU, all 8 GPUs | `34342961152` bytes per GPU, all 8 GPUs |
+| GPU BAR0 visible | `34359738368` bytes per GPU, all 8 GPUs | `34359738368` bytes per GPU, all 8 GPUs |
+| GPU BAR2 visible | `2097152` bytes per GPU, all 8 GPUs | `2097152` bytes per GPU, all 8 GPUs |
+| GPU PCI bus IDs | `06:00.0`, `09:00.0`, `45:00.0`, `48:00.0`, `89:00.0`, `8c:00.0`, `c5:00.0`, `c8:00.0` | `06:00.0`, `09:00.0`, `45:00.0`, `48:00.0`, `89:00.0`, `8c:00.0`, `c5:00.0`, `c8:00.0` |
+| NUMA reporting | GPU NUMA node reports `-1`; local CPU list `0-15` | GPU NUMA node reports `-1`; local CPU list `0-15` |
+| BMC/display adapter | ASPEED VGA controller present | ASPEED VGA controller present |
+| Fabric/network observed | Mellanox InfiniBand present; additional Mellanox Ethernet present | Mellanox InfiniBand present; additional Mellanox Ethernet present |
+
+Notes:
+
+- The release profiles require full-BAR/P2P-on platform state. The live
+  validation query confirmed full 32 GiB BAR0 visibility on all 8 GPUs on both
+  validation lanes.
+- ROCm-SMI product-name strings may label some devices inconsistently, but the
+  memory-total query and sysfs VRAM totals showed `34342961152` bytes visible
+  per GPU on all 8 GPUs.
+- The InfiniBand/Ethernet devices are validation-site infrastructure and are
+  not public reproduction requirements.
+- Users should choose their own local SSD/NVMe-backed `LOCAL_MODEL_ROOT`,
+  `LOCAL_HF_CACHE`, and `LOCAL_RUNTIME_ROOT` values for reproduction.
+- Do not publish per-card unique IDs, GUIDs, MAC addresses, hostnames, private
+  addresses, validation-local mount paths, or management endpoints in release
+  notes.
+
 ## Public Reproducibility Requirement
 
 This release must be reproducible on a user's own qualifying GFX906 host. It
