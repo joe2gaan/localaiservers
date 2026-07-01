@@ -856,7 +856,7 @@ Run the read-only host platform preflight before starting any benchmark server.
 This checks the visible full-BAR/P2P host boundary without patching amdgpu,
 flashing firmware, changing kernel settings, starting containers, or running
 model workloads. Do not compare a run with the published vNext table if this
-preflight fails for the profile family being tested:
+preflight fails for the selected profile family:
 
 ```sh
 for profile in \
