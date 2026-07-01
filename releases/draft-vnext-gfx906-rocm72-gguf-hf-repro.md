@@ -586,14 +586,14 @@ inside HF launches or dense-only targets inside MoE launches.
 
 ## Reproduction Flow
 
-Clone the release checkout:
+### Step 1 - Clone the release checkout
 
 ```sh
 git clone --depth 1 --branch vnext-gfx906-rocm72-gguf-hf-repro https://github.com/joe2gaan/localaiservers.git
 cd localaiservers
 ```
 
-Host tool prerequisites:
+### Step 2 - Confirm host tool prerequisites
 
 - POSIX-compatible `/bin/sh`
 - `git`
@@ -639,6 +639,8 @@ override is a test hook, not a public dependency. A `file://`
 `RELEASE_ASSET_BASE` requires `ALLOW_LOCAL_ASSET_PREFLIGHT=1` and must never be
 used as a published reproduction input.
 
+### Step 3 - Choose local SSD/NVMe storage
+
 Choose local SSD/NVMe-backed storage. Replace `/mnt/nvme` with the large local
 storage path on your own host:
 
@@ -653,7 +655,10 @@ mkdir -p "$LOCAL_MODEL_ROOT" "$LOCAL_HF_CACHE" "$LOCAL_RUNTIME_ROOT"
 Do not use a small root partition for model weights, Hugging Face cache, or
 runtime compile/cache directories.
 
-Recommended full release-readiness command:
+### Step 4 - Run the full release-readiness path
+
+This is the recommended one-command public reproduction path for the full
+profile matrix:
 
 ```sh
 cd qwen36-gfx906
@@ -689,6 +694,8 @@ maintainer dry-run mode for non-serving gates.
 Each readiness invocation writes generated launch artifacts under a unique
 timestamped directory below `LOCAL_RUNTIME_ROOT/vnext-launch-runs/` so repeated
 runs do not need to remove container-owned files from a previous attempt.
+
+### Step 5 - Stage HF inputs when running HF profiles
 
 Stage the public HF model packages only when using HF profiles:
 
@@ -740,6 +747,8 @@ block and reproduce only the GGUF profiles from release assets. Recent
 `huggingface_hub` releases deprecate the older `huggingface-cli` command; use
 `hf download` for the portable reproduction flow.
 
+### Step 6 - Stage GGUF release assets when running GGUF profiles
+
 Stage GGUF model packages only from the public source named in the release
 artifact table. Do not substitute a BF16 or quantized GGUF for these F16
 benchmark claims unless a separate result is published for that file.
@@ -786,6 +795,8 @@ This release uses hosted split GGUF files. A future conversion-based release
 would need to replace the release-asset download commands with exact public
 conversion commands and expected output hashes.
 
+### Step 7 - Verify staged model inputs
+
 After staging, a user should be able to verify the public inputs without
 knowing any LocalAIServers host path:
 
@@ -800,6 +811,8 @@ sha256sum "$LOCAL_MODEL_ROOT/qwen36-35b-a3b-f16-gguf/Qwen3.6-35B-A3B-F16.gguf"
 
 The printed hashes must match the artifact table above before any benchmark
 run is considered a reproduction attempt.
+
+### Step 8 - Build, inspect, and run serviceability checks
 
 Build the model-format probe:
 
@@ -827,6 +840,18 @@ For a slower image-path check, opt in to Docker verification:
 ```sh
 CHECK_RUNTIME_IMAGE=1 CHECK_RUNTIME_PATHS=1 ./verify_vnext_serviceability.sh
 ```
+
+### Step 9 - Generate profile launch artifacts
+
+`vnext_repro_launcher.sh` is a preflight and launch-artifact generator by
+default. Running it without `--profile` prints usage and exits. Running it with
+`--profile ... --out ...` verifies the selected model/profile/overlay and
+writes a launch directory.
+
+For public Docker reproduction, start the generated `docker_run.sh` wrapper
+with `HOST_MODEL_ROOT`, `HOST_HF_CACHE`, and `HOST_RUNTIME_ROOT` set as shown
+below. Do not use `--run` for the normal public Docker reproduction path;
+`--run` execs `vllm serve` directly in the current environment.
 
 Generate a launch artifact from a selected contract profile. The profile
 selects the runtime model path, tensor-parallel degree, overlay, patch bundle,
@@ -892,6 +917,8 @@ PATCH_BUNDLE_PATH="$(pwd)/overlays/hf/minimal-bundle" \
   --out ./vnext-launch-runs/hf-moe35b-tp4
 ```
 
+### Step 10 - Validate generated launch artifacts and runtime argv
+
 Verify every generated launch artifact:
 
 ```sh
@@ -938,6 +965,8 @@ do
 done
 ```
 
+### Step 11 - Run host platform preflight
+
 Run the read-only host platform preflight before starting any benchmark server.
 This checks the visible full-BAR/P2P host boundary without patching amdgpu,
 flashing firmware, changing kernel settings, starting containers, or running
@@ -953,6 +982,8 @@ do
   QWEN36_PROFILE="$profile" ./check_host_platform_prereqs.sh
 done
 ```
+
+### Step 12 - Start one generated Docker wrapper
 
 Start one generated Docker wrapper at a time after reviewing
 `vllm_command.sh`. The published profiles default to port `8001`, so do not
@@ -986,6 +1017,8 @@ curl -fsS http://127.0.0.1:8001/v1/chat/completions \
     "temperature": 0.2
   }'
 ```
+
+### Step 13 - Run the benchmark ladder
 
 Run the normal benchmark ladder:
 
@@ -1026,6 +1059,8 @@ do
   docker rm vnext_repro_current >/dev/null 2>&1 || true
 done
 ```
+
+### Step 14 - Clean up a failed profile run before retrying
 
 If a profile run fails, stop the reusable container before retrying:
 
